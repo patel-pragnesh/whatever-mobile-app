@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+	<string name="login">Login</string>
+	<string name="test">Jackson is Cool</string>
+	<string name="verify_text">Your mobile phone number is used to \n find friends and help them find you. \n Text Magnet to verify your phone.</string>
+	<string name="invalid_user_empty">Please Enter a Username.</string>
+	<string name="invalid_user_size">Username is not long enough.</string>
+	<string name="invalid_user_error">Not a valid Username.</string>
+	<string name="invalid_first_empty">Please enter a first name.</string>
+	<string name="invalid_first_error">Not a valid first name.</string>
+	<string name="invalid_last_empty">Please enter a last name.</string>
+	<string name="invalid_last_error">Not a valid last name.</string>
+	<string name="invalid_pass_empty">Please enter a password.</string>
+	<string name="invalid_pass_size">Password is not long enough.</string>
+	<string name="invalid_pass_check">Passwords do not match.</string>
+	<string name="invalid_pass_error">Not a valid password.</string>
+	
+	<string name="input_hint_first">First Name</string>
+	<string name="input_hint_last">Last Name</string>
+	<string name="input_hint_username">Username</string>
+	<string name="input_hint_pass">Password</string>
+	<string name="input_hint_pass_check">Password Check</string>
+	
+	<string name="btn_login">LOGIN</string>
+	<string name="btn_signup">SIGNUP</string>
+
+</resources>
