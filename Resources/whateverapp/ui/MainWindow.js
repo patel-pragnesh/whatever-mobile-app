@@ -28,8 +28,7 @@ function MainWindow(args, callback)
 	 * The main window
 	 */
 	var win = Ti.UI.createWindow({
-		backgroundColor: '#222222',
-		height: '100%',
+		backgroundColor: 'blue',
 		width: '100%',
 		fullscreen: false,
 		orientationModes: [Ti.UI.PORTRAIT]
@@ -39,12 +38,17 @@ function MainWindow(args, callback)
 		{
 		win.navBarHidden = true;
 		win.exitOnClose = true;
+		win.height = '100%';
 		}
 	else
 		{
-		win.borderRadius = 5;
+		if(config.major >= 7)
+			{
+			win.top = 20;
+			win.bottom = 0;
+			}
 		}
-
+		
 	//Add a toolbox to the window
 	var toolbox = require('whateverapp/ui/common/ToolboxView').create();
 	toolbox.zIndex = 1;
@@ -54,7 +58,7 @@ function MainWindow(args, callback)
 	feedView.left = 0;
 	currentView = feedView;
 	
-	// Create this here so it can be reference in the main window as a variable
+	// Create this here so it can be referenced in the main window as a variable
 	var notificationView = require('whateverapp/ui/common/NotificationView').create(); // zIndex = 10
 	
 	/*

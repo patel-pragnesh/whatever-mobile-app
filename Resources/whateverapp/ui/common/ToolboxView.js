@@ -1,4 +1,3 @@
-
 /**
  * Toolbox window that has underlying options for the app
  * Opened to the side through a swipe gesture or open button
@@ -183,7 +182,7 @@ exports.create = function (args, callback)
 			animation.removeEventListener('complete', animationHandler);
 			view.state = viewStates.CLOSED;
 			callback();
-			}
+			};
 		
 		animation.addEventListener('complete', animationHandler);
 		

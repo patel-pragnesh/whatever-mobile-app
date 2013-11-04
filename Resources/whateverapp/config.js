@@ -27,17 +27,23 @@ if(mode === 'development')
 	{
 	if(Ti.Platform.osname === 'android')
 		{
-		exports.services_base_url = 'http://10.0.2.2:8888'; // The android test 'localhost' url
+		exports.services_base_url = 'http://10.0.2.2:8080'; // The android test 'localhost' url
 		}
 	else
 		{
-		exports.services_base_url = 'http://localhost:8888';
+		exports.services_base_url = 'http://localhost:8080';
 		}
 	}
 else
 	{
 	exports.services_base_url = 'http://api.whateverapp.com';
 	}
+
+// Set the version for the platform
+// Currently used to set the top of a window for iOS 7
+// http://docs.appcelerator.com/titanium/latest/#!/guide/iOS_7_Migration_Guide
+var version = Titanium.Platform.version.split(".");
+exports.major = parseInt(version[0],10);
 	
 exports.mode = mode;
 

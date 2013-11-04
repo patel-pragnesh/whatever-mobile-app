@@ -14,33 +14,19 @@ exports.create = function AccountView(toolbox, args, callback)
 		height: '100%',
 		width: '100%',
 		left: config.viewOffset,
+		layout: 'vertical',
 		zIndex: 2
 		});
 		
-	/*
-	 * ToolBtn will open/close the Toolbox when pressed depending if it 
-	 * is open or closed
-	 */
-	var toolBtn = Ti.UI.createButton({
-		borderStyle: Ti.UI.INPUT_BORDERSTYLE_LINE,
-		color: 'black',
-		backgroundColor: 'gray',
-		left: 5, top: 5,
-		width: 40, height: 40,
-		title: '',
-		style: Ti.UI.iPhone.SystemButtonStyle.PLAIN,
-		borderRadius: 0,
-		borderColor: 'white'
-		});
+	var navigationView = require('whateverapp/ui/common/NavigationView').create();
 	
-	toolBtn.addEventListener('click', function(e)
+	navigationView.toolButton.addEventListener('click', function(e)
 		{
 		toolbox.openClose(view, function() {/* OPENED! */}, function() { /* CLOSED! */});
 		});
-	
-	
-	
-	
+		
+	view.add(navigationView);
+		
 	/*
 	 * 
 	 * The view for the profile image view to be contained in
@@ -307,7 +293,6 @@ exports.create = function AccountView(toolbox, args, callback)
 	
 	view.add(profileImageView);
 	view.add(scrollView);
-	view.add(toolBtn);
 
 	/*
 	 * If the user swipes to the right when the toolbox is closed, it will open

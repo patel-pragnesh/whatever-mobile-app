@@ -64,7 +64,7 @@ exports.launch = function()
 		
 	if(config.platform !== 'android')
 		{
-		Ti.UI.backgroundColor = '#000000';
+		Ti.UI.backgroundColor = 'purple';
 		}
 	
 	if(Ti.App.Properties.getBool('showintro'))

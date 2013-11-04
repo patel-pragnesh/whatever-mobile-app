@@ -14,33 +14,18 @@ exports.create = function FriendsView(toolbox, args, callback)
 		height: '100%',
 		width: '100%',
 		left: config.viewOffset,
+		layout: 'vertical',
 		zIndex: 2
 		});
 		
-	/*
-	 * ToolBtn will open/close the Toolbox when pressed depending if it 
-	 * is open or closed
-	 */
-	var toolBtn = Ti.UI.createButton({
-		borderStyle: Ti.UI.INPUT_BORDERSTYLE_LINE,
-		color: 'black',
-		backgroundColor: 'gray',
-		left: 5, top: 5,
-		width: 40, height: 40,
-		title: '',
-		style: Ti.UI.iPhone.SystemButtonStyle.PLAIN,
-		borderRadius: 0,
-		borderColor: 'white'
-		});
+	var navigationView = require('whateverapp/ui/common/NavigationView').create();
 	
-	toolBtn.addEventListener('click', function(e)
+	navigationView.toolButton.addEventListener('click', function(e)
 		{
 		toolbox.openClose(view, function() {/* OPENED! */}, function() { /* CLOSED! */});
 		});
-	
-	view.add(toolBtn);
-	
-	
+		
+	view.add(navigationView);
 	
 	var scrollView = Ti.UI.createScrollView({
 		backgroundColor: 'black',
@@ -90,26 +75,19 @@ exports.create = function FriendsView(toolbox, args, callback)
 			height: '200%'
 			});
 		}
-	
-	
-	
 			
 	scrollView.add(imageView);	
 	view.add(scrollView);
 	
-	
-	scrollView.addEventListener('scroll', function(e) {
+	scrollView.addEventListener('scroll', function(e)
+		{
 		Ti.API.info("Scroll Position: " + e.x + ", " + e.y);
 		var toast = Titanium.UI.createNotification({
 		    duration: 100,
 		    message: "Scroll Position: " + e.x + ", " + e.y
-		});
+			});
 		toast.show();
-	});
-	
-	
-	
-	
+		});
 
 	/*
 	 * If the user swipes to the right when the toolbox is closed, it will open

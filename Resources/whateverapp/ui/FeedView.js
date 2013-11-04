@@ -12,7 +12,7 @@ exports.create = function FeedView(toolbox, args, callback)
 	//A main view, so we can have a bottom bar overlapping the conversations.
 	var mainView = Ti.UI.createView({
 		backgroundColor: 'green',
-		height: '100%',
+		bottom: 0,
 		width: '100%',
 		left: config.viewOffset,
 		zIndex: 2,
@@ -26,39 +26,43 @@ exports.create = function FeedView(toolbox, args, callback)
 		zIndex: 2,
 		layout:'vertical'
 		});
+		
+	var navigationView = require('whateverapp/ui/common/NavigationView').create();
 	
-	/*
-	 * ToolBtn will open/close the Toolbox when pressed depending if it 
-	 * is open or closed
-	 */
-	var toolBtn = Ti.UI.createButton({
-		borderStyle: Ti.UI.INPUT_BORDERSTYLE_LINE,
-		color: 'black',
-		backgroundColor: 'gray',
-		left: 5, top: 5,
-		width: 40, height: 40,
-		title: '',
-		style: Ti.UI.iPhone.SystemButtonStyle.PLAIN,
-		borderRadius: 0,
-		borderColor: 'white'
-		});
-	
-	toolBtn.addEventListener('click', function(e)
+	navigationView.toolButton.addEventListener('click', function(e)
 		{
 		toolbox.openClose(mainView, function() {/* OPENED! */}, function() { /* CLOSED! */});
 		});
+		
+	view.add(navigationView);
 	
-	view.add(toolBtn);
-	
+	var currentTime = new Date();
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
 	
 	//The bar to set if you are available or not and to see upcoming conversations.
-	var availabilityBar = Ti.UI.createView({
-			backgroundColor: '#FF0000',
-			width: '100%',
+	var availabilityBarView = Ti.UI.createView({
+		backgroundColor: 'gray',
+		width: '100%',
+		height: 60,
+		layout: 'horizontal'
+		});
+	
+	for(var i = 0; i < 24; i++)
+		{
+		var hourView = Ti.UI.createView({
+			backgroundColor: 'transparent',
+			borderColor: 'black',
+			width: 60,
 			height: 60
 			});
-	view.add(availabilityBar);
-
+		
+		Ti.API.info(i);
+		
+		availabilityBarView.add(hourView);
+		}
+	
+	view.add(availabilityBarView);
 	
 	/**
 	 * This stuff is just filler stuff to demonstrate the vertical scrolling of conversations.
@@ -96,8 +100,6 @@ exports.create = function FeedView(toolbox, args, callback)
 			scrollType:'vertical',
 			});
 			
-
-			
 	conversation1.add(stuff1);
 	conversation1.add(stuff2);
 			
@@ -109,11 +111,10 @@ exports.create = function FeedView(toolbox, args, callback)
 			layout:'vertical',
 			scrollType:'vertical',
 			});
+			
 	conversation2.add(stuff3);
 	conversation2.add(stuff4);
 
-
-	
 	//Holds all of the conversations for scrolling left and right.
 	var conversationView = Ti.UI.createScrollableView({
 		views:[conversation1, conversation2],
@@ -123,28 +124,22 @@ exports.create = function FeedView(toolbox, args, callback)
 		});
 		
 	view.add(conversationView);
-
-
 	
 	//Bottom bar to hold useful navigation buttons
 	var bottomBar = Ti.UI.createView({
-			backgroundColor: '#AA00AA',
-			width: '100%',
-			height: 60,
-			opacity:0.5,
-			zIndex: 3,
-			bottom: '0%'
-			});
-	
+		backgroundColor: '#AA00AA',
+		width: '100%',
+		height: 60,
+		opacity:0.5,
+		zIndex: 3,
+		bottom: '0%'
+		});
 	
 	//Add the view with the toolbar, availability slider and the conversations.
 	mainView.add(view);
+	
 	//Then add the bottom bar overtop that.
 	mainView.add(bottomBar);
 
 	return mainView;
 	};
-	
-	
-
-
