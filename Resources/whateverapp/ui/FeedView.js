@@ -39,30 +39,107 @@ exports.create = function FeedView(toolbox, args, callback)
 	var currentTime = new Date();
     var hours = currentTime.getHours();
     var minutes = currentTime.getMinutes();
-	
+    
+    var defaultSliderSize = 120;
+    var dayViewOffSet = (((60 * hours) + minutes) - defaultSliderSize) * -1;
+    	
 	//The bar to set if you are available or not and to see upcoming conversations.
 	var availabilityBarView = Ti.UI.createView({
 		backgroundColor: 'gray',
-		width: '100%',
+		width: 60*24,
 		height: 60,
 		layout: 'horizontal'
 		});
+		
+	var hourLabelText;
 	
 	for(var i = 0; i < 24; i++)
 		{
+		var hourLeft = 0;
+		var halfHourLeft = 29;
+		
+		if(i > 0)
+			{
+			hourLeft = 29;
+			halfHourLeft = 59;
+			}
+			
+		if(i == 0)
+			{
+			hourLabelText = '12 AM';
+			}
+		else if(i > 0 && i < 12)
+			{
+			hourLabelText = new String(i) + ' AM';
+			}
+		else if(i == 12)
+			{
+			hourLabelText = '12 PM';
+			}
+		else
+			{
+			hourLabelText = new String(i - 12) + ' PM';
+			}
+			
+		availabilityBarView.add(createHourView(hourLabelText));
+		}
+		
+	view.add(availabilityBarView);
+	
+	function createHourView(hour)
+		{
 		var hourView = Ti.UI.createView({
-			backgroundColor: 'transparent',
-			borderColor: 'black',
+			backgroundColor: 'red',
 			width: 60,
-			height: 60
+			height: 60,
+			top: 0,
+			left: 0
+			});
+			
+		var hourIndicatorView = Ti.UI.createView({
+			backgroundColor: 'black',
+			width: 1,
+			height: 60,
+			top: 0,
+			left: 0
+			});
+			
+		hourView.add(hourIndicatorView);
+			
+		var hourLabelView = Ti.UI.createView({
+			top: 0,
+			width: 29,
+			height: 60,
+			left: 1
+			});
+			
+		var hourLabel = Ti.UI.createLabel({
+			top: 2,
+			left:2,
+			color: 'black',
+			font:
+				{
+				fontSize: 8
+				},
+			text: hour,
+			textAlign: Ti.UI.TEXT_ALIGNMENT_LEFT
 			});
 		
-		Ti.API.info(i);
+		hourLabelView.add(hourLabel);
+		hourView.add(hourLabelView);
 		
-		availabilityBarView.add(hourView);
-		}
-	
-	view.add(availabilityBarView);
+		var halfHourView = Ti.UI.createView({
+			backgroundColor: 'black',
+			width: 1,
+			height: 30,
+			top: 0,
+			left: 29
+			});
+			
+		hourView.add(halfHourView);
+		
+		return hourView;
+		};
 	
 	/**
 	 * This stuff is just filler stuff to demonstrate the vertical scrolling of conversations.
