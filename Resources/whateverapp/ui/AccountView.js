@@ -189,15 +189,13 @@ exports.create = function AccountView(toolbox, args, callback)
 	nameAndNumberHeader.add(nameLabel);
 	nameAndNumberHeader.add(numberLabel);
 	
-	
 	var profileItemsView = Ti.UI.createView({
 		top: 0,
 		width: '100%',
 		height: Ti.UI.SIZE,
 		backgroundColor: 'gray',
 		layout: 'vertical'
-	})
-	
+		});
 	
 	var emailButton = Ti.UI.createButton({
 		borderStyle: Ti.UI.INPUT_BORDERSTYLE_LINE,

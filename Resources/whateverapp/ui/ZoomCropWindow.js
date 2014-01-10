@@ -166,13 +166,13 @@ function ZoomCropWindow(image, callback)
 	
 	if(1==1)
 		{
-		doneButton.addEventListener('click', sendImageBack)
+		doneButton.addEventListener('click', sendImageBack);
 		
 		function sendImageBack()
 			{
 		
 				
-			doneButton.removeEventListener('click', sendImageBack)
+			doneButton.removeEventListener('click', sendImageBack);
 
 			var currentImageWidth = image.width * scale;
 			var currentImageHeight = image.height * scale;
@@ -243,10 +243,9 @@ function ZoomCropWindow(image, callback)
 						
 						
 						callBackImage = 
-						{
+							{
 							image:imageBlob
-						}
-						
+							};
 							
 						callback(true, callBackImage);								
 						notifications.hideIndicator();

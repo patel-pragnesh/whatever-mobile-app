@@ -227,7 +227,7 @@ function SignupWindow(args, callback)
 		var validData = {
 			doesPass : true,
 			responseInfo : "Not valid input"
-			}
+			};
 		
 		var userName = stringUtil.trim(username.value);
 		
