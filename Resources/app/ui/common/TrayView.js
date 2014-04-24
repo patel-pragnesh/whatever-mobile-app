@@ -103,60 +103,6 @@ exports.create = function(args)
 		
 		return separatorView;
 		}
-		
-	var searchView = Ti.UI.createView({
-		height: Ti.UI.SIZE,
-		top: 10,
-		left: 10,
-		right: 10
-		});
-		
-	var searchTextField = Ti.UI.createTextField({
-		borderStyle: Ti.UI.INPUT_BORDERSTYLE_NONE,
-		backgroundColor: '#f1f1f1',
-		font:
-			{
-			fontSize: 14,
-			fontFamily: config.opensans_light
-			},
-		color: '#3e3e3e',
-		width: '100%',
-		returnKey: Ti.UI.RETURNKEY_SEARCH,
-		paddingLeft: 5,
-		paddingRight: 28,
-		autocorrect: false,
-		hintText: L('search_kind_kudos')
-		});
-		
-	if(config.platform === config.platform_iphone)
-		{
-		searchTextField.height = 28;
-		}
-		
-	searchTextField.addEventListener('return', function()
-		{
-		// TODO Implement Search
-		Ti.API.info('Searching');
-		});
-		
-	searchView.add(searchTextField);
-	
-	var searchImage = Ti.UI.createImageView({
-  		image: '/images/tray-search-icon.png',
-  		right: 4,
-  		width: 20,
-  		height: 20
-		});
-	
-	searchView.add(searchImage);
-	
-	view.add(searchView);
-	
-	view.reset = function()
-		{
-		searchTextField.blur();
-		searchTextField.value = '';
-		};
 	
 	return view;
 	};
