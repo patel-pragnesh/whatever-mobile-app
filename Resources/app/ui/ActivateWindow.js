@@ -218,6 +218,25 @@ function ActivateWindow()
 			
 			Ti.API.info(JSON.stringify(envelope));
 			
+			//FAUX FUNCTIONALITY ADDED, BREAKING OUT OF FUNCTION SO NO SERVER REQUEST IS MADE
+			var activationCodeWindow = new ActivationCodeWindow(phoneNumber);
+							
+			function activationCodeWindowFocusEvent()
+				{
+				activationCodeWindow.removeEventListener('focus', activationCodeWindowFocusEvent);
+				activationCodeWindow.setActionsTimer(20000);
+				win.close();
+				};
+					
+			activationCodeWindow.addEventListener('focus', activationCodeWindowFocusEvent);
+			
+			notificationView.hideIndicator();
+			
+			activationCodeWindow.open();
+			return;
+			//END FAUX FUNCTIONALITY
+			//TODO: Post to server to send user text message with verification code
+			/*
 			httpClient.doPost(config.auth_endpoint, envelope, function(success, response)
 				{
 				Ti.API.info(response);
@@ -278,7 +297,7 @@ function ActivateWindow()
 						
 					continueButton.addEventListener('click', continueButtonHandler);
 					}
-				});
+				});*/
 			}
 		}
 		

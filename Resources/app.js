@@ -31,7 +31,10 @@
 		}
 	else
 		{
-		var mainWindow = whatever.launch();
+		//var mainWindow = whatever.launch();
+		//ALWAYS PROMPT FOR NEW USER WITH ACTIVATION WINDOW // ONLY FOR TESTING PURPOSES
+		//TODO: Have returning users go straight to MainWindow
+		var activateWindow = whatever.activate();
 		
 		}
 		

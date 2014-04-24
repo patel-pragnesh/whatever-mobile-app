@@ -164,6 +164,30 @@ function AccountWindow(verificationCode, phoneNumber)
 			var account = Ti.App.Properties.getObject("account");
 			var endPoint = config.users + '/' + account.user_id;
 			
+			//BEGIN FAUX CODE
+			// Update the account object
+			
+					account.first_name = firstNameTextField.value.trim();
+					account.last_name = lastNameTextField.value.trim();
+			
+					Ti.App.Properties.setObject("account", account);
+					
+					var mainWindow = new MainWindow();
+						
+					function mainWindowFocusEvent()
+						{
+						mainWindow.removeEventListener('focus', mainWindowFocusEvent);
+						win.close();
+						};
+							
+					mainWindow.addEventListener('focus', mainWindowFocusEvent);
+					
+					notificationView.hideIndicator();
+					
+					mainWindow.open();
+			//END FAUX CODE
+			//TODO: Update Account Object with server
+			/*
 			httpClient.doPatch(endPoint, envelope, function(success, response)
 				{
 				if(success)
@@ -199,7 +223,7 @@ function AccountWindow(verificationCode, phoneNumber)
 						
 					continueButton.addEventListener('click', continueButtonHandler);
 					}
-				});
+				});*/
 			}
 		else
 			{

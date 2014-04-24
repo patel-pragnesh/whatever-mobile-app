@@ -490,6 +490,53 @@ function ActivationCodeWindow(phoneNumber)
 		
 		Ti.API.info(JSON.stringify(envelope));
 		
+		//BEGIN FAUX CODE
+		codesView.removeEventListener('click', codesViewClickEventHandler);
+		clearTimeout(animateActions);
+		codeTextField.blur();
+		codeTextField.setEditable(false);
+		
+		hideActionsView(function(hidden)
+			{
+			if(hidden)
+				{
+				activationViewContainer.remove(actionsView);
+				}
+			});
+		
+		for(var i = 0; i < codeLabels.length; i++)
+			{
+			codeLabels[i].color = '#049900';
+			}
+		
+		var account = {};
+		account.user_id = '666';
+		account.phone_number = phoneNumber;
+		
+		//Ti.App.Properties.setString("session_token", response.session.token);
+
+		// Set the incomplete account
+		Ti.App.Properties.setObject("account", account);
+		
+		var accountWindow = new AccountWindow(phoneNumber);
+		
+		function accountWindowFocusEvent()
+			{
+			accountWindow.removeEventListener('focus', accountWindowFocusEvent);
+			win.close();
+			};
+				
+		accountWindow.addEventListener('focus', accountWindowFocusEvent);
+		
+		notificationView.hideIndicator();
+		
+		accountWindow.open();
+			
+		return;
+		//END FAUX CODE
+		
+		//TODO: Ask server to verify Activation Code
+		/*
 		httpClient.doPost(config.auth_verify_endpoint, envelope, function(success, response)
 			{
 			notificationView.showIndicator();
@@ -608,7 +655,7 @@ function ActivationCodeWindow(phoneNumber)
 					}).show();
 					}
 				}
-			});
+			});*/
 		}
 	
 	/*
