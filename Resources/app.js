@@ -4,21 +4,11 @@
  */
 (function()
 	{
-	// Imports
-	// New Relic is the application performance monitoring module
-	var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
-	var whatever = require('whateverapp/whatever');
-	var config = require('whateverapp/config');
+	var config = require('app/config');
+	var _ = require('lib/underscore');
 	
-	if(Ti.App.Properties.getString('appstate') === null)
-		{
-		Ti.App.Properties.setString('appstate', 'launching');
-		}
-		
-	if(Ti.App.Properties.getBool('showintro') === null)
-		{
-		Ti.App.Properties.setBool('showintro', true);
-		}
+	var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
+	var whatever = require('app/whatever');
 	
 	Ti.UI.backgroundColor = 'white';
 	
@@ -32,15 +22,24 @@
 		});
 	
 	/**
-	 * Launch the whatever app
+	 * Launch the app
 	 */
-	whatever.launch(); // TODO - add network availability check
+	if(_.isNull(Ti.App.Properties.getObject('account')))
+		{
+		var activateWindow = whatever.activate();
 		
-	if(config.platform !== 'android')
+		}
+	else
+		{
+		var mainWindow = whatever.launch();
+		
+		}
+		
+	if(config.platform === config.platform_iphone)
 		{
 		Ti.App.addEventListener('paused', function()
 			{
-			// Scaffolded for a pause event need
+			
 			});
 			
 		Ti.App.addEventListener('resume', function()
@@ -48,8 +47,7 @@
 			// Set a pause so that we get all the network listener information
 			var pause = setTimeout(function()
 				{
-				// Scaffolded for a pause event need
-				// Maintain the timeout pause so that iOS can 'hear' the network
+				
 				}, 500);
 			});
 		}

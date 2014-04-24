@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ti:module xmlns:ti="http://ti.appcelerator.org" xmlns:android="http://schemas.android.com/apk/res/android">
+	<android xmlns:android="http://schemas.android.com/apk/res/android">
+		<manifest android:versionCode="1" android:versionName="1.0">
+			<uses-permission android:name="android.permission.INTERNET"/>
+			<uses-permission android:name="android.permission.GET_ACCOUNTS" />
+	    	<uses-permission android:name="android.permission.WAKE_LOCK" />
+			<uses-permission android:name="android.permission.VIBRATE"/>
+			<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+            <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+            <uses-permission android:name="android.permission.USE_CREDENTIALS"/>
+	    	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+	    	
+	    	<permission android:name="${tiapp.properties['id']}.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+            <uses-permission android:name="${tiapp.properties['id']}.permission.C2D_MESSAGE"/>
+            
+	    	<!-- In the SDK obtain the version; google-play-services_lib>res>values>version.xml -->
+	    	<application>
+	    		<meta-data android:name="com.google.android.gms.version" android:value="4323000" />
+	    		<receiver android:name="ti.gcm.GcmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND" >
+					<intent-filter>
+						<action android:name="com.google.android.c2dm.intent.RECEIVE" />
+						<category android:name="${tiapp.properties['id']}" />
+					</intent-filter>
+				</receiver>
+				<service android:name="ti.gcm.GcmIntentService" />
+	    	</application>
+	    </manifest>
+	</android>
+</ti:module>

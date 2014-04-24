@@ -35,10 +35,7 @@
     <modules>
         <module platform="commonjs">ti.cloud</module>
         <module platform="iphone">ti.newrelic</module>
-        <module platform="iphone" version="1.8.2">bencoding.sms</module>
         <module platform="android">ti.newrelic</module>
-        <!-- <module platform="android" version="0.1">com.mywebrank.photoview</module> -->
-        <!-- <module platform="android" version="0.5">com.activate.gcm</module> -->
     </modules>
     <deployment-targets>
         <target device="android">true</target>
@@ -48,5 +45,5 @@
         <target device="mobileweb">false</target>
         <target device="tizen">false</target>
     </deployment-targets>
-    <sdk-version>3.2.0.GA</sdk-version>
+    <sdk-version>3.2.2.GA</sdk-version>
 </ti:app>

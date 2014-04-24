@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<countries>
+	<country name="United States" type="primary">1</country>
+	<country name="Brazil" type="primary">55</country>
+	<country name="Germany" type="primary">49</country>
+	<country name="Italy" type="primary">39</country>
+	<country name="Russia" type="primary">7</country>
+	<country name="Spain" type="primary">34</country>
+	<country name="United Kingdom" type="primary">44</country>
+	<country name="Afghanistan" type="secondary">93</country>
+	<country name="Albania" type="secondary">355</country>
+	<country name="Algeria" type="secondary">213</country>
+	<country name="Andorra" type="secondary">376</country>
+	<country name="Angola" type="secondary">244</country>
+	<country name="Anguilla" type="secondary">1264</country>
+	<country name="Antigua &amp; Barbuda" type="secondary">1268</country>
+	<country name="Argentina" type="secondary">54</country>
+</countries>

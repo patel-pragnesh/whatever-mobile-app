@@ -1,27 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-	<string name="login">Login</string>
-	<string name="test">Jackson is Cool</string>
-	<string name="verify_text">Your mobile phone number is used to \n find friends and help them find you. \n Text Magnet to verify your phone.</string>
-	<string name="invalid_user_empty">Please Enter a Username.</string>
-	<string name="invalid_user_size">Username is not long enough.</string>
-	<string name="invalid_user_error">Not a valid Username.</string>
-	<string name="invalid_first_empty">Please enter a first name.</string>
-	<string name="invalid_first_error">Not a valid first name.</string>
-	<string name="invalid_last_empty">Please enter a last name.</string>
-	<string name="invalid_last_error">Not a valid last name.</string>
-	<string name="invalid_pass_empty">Please enter a password.</string>
-	<string name="invalid_pass_size">Password is not long enough.</string>
-	<string name="invalid_pass_check">Passwords do not match.</string>
-	<string name="invalid_pass_error">Not a valid password.</string>
-	
-	<string name="input_hint_first">First Name</string>
-	<string name="input_hint_last">Last Name</string>
-	<string name="input_hint_username">Username</string>
-	<string name="input_hint_pass">Password</string>
-	<string name="input_hint_pass_check">Password Check</string>
-	
-	<string name="btn_login">LOGIN</string>
-	<string name="btn_signup">SIGNUP</string>
-
+	<string name="phone_number_label">Phone Number</string>
+	<string name="continue_button">Continue</string>
+	<string name="verification_code_message">Your Whatever activation code is: </string>
+	<string name="didnt_receive_code">Didn't receive code?</string>
+	<string name="call_me">Call Me</string>
+	<string name="resend_code">Resend</string>
+	<string name="yes">Yes</string>
+	<string name="change">Change</string>
+	<string name="confirm_phone_number">One more step! Please confirm %1$s is your phone number.</string>
+	<string name="invalid_phone_number">We're sorry! Your phone number %1$s does not seem valid.</string>
+	<string name="okay">Okay</string>
+	<string name="general_server_error">Oops! Something went wrong. Please try your request again.</string>
+	<string name="verification_code_voice_message">Your Whatever activation code is, </string>
+	<string name="first_name">First Name</string>
+	<string name="last_name">Last Name</string>
+	<string name="create_account">Create Your Account</string>
+	<string name="first_name_required">Please enter your first name.</string>
+	<string name="last_name_required">Please enter your last name.</string>
 </resources>
