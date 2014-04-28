@@ -74,7 +74,7 @@ function MainWindow()
 			{
 			// Google Cloud Messaging API
 			var Gcm = require('ti.gcm');
-			Gcm.init(null); // Need API Key
+			Gcm.init('823842470448');
 			
 			Gcm.registerDevice({
 				success: registerDeviceSuccess,

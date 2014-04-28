@@ -204,46 +204,23 @@ function ActivateWindow()
 			{
 			notificationView.showIndicator();
 			
+			// Cleanse the phone number
 			var phoneNumber = deviceCountryCode + phoneNumberField.value.replace(/[^\d.]/g, "");
 			
 			var request = {};
-			request.type = "sms",
-			request.app_id = config.app_key;
-			request.locale = Ti.Locale.getCurrentLocale();
+			request.language = Ti.Locale.getCurrentLanguage();
+			request.country = Ti.Locale.getCurrentCountry();
 			request.phone_number = phoneNumber;
-			request.message = L('verification_code_message');
 			
-			var envelope = {};
-			envelope.nexmo = request;
+			Ti.API.info(JSON.stringify(request));
 			
-			Ti.API.info(JSON.stringify(envelope));
-			
-			//FAUX FUNCTIONALITY ADDED, BREAKING OUT OF FUNCTION SO NO SERVER REQUEST IS MADE
-			var activationCodeWindow = new ActivationCodeWindow(phoneNumber);
-							
-			function activationCodeWindowFocusEvent()
-				{
-				activationCodeWindow.removeEventListener('focus', activationCodeWindowFocusEvent);
-				activationCodeWindow.setActionsTimer(20000);
-				win.close();
-				};
-					
-			activationCodeWindow.addEventListener('focus', activationCodeWindowFocusEvent);
-			
-			notificationView.hideIndicator();
-			
-			activationCodeWindow.open();
-			return;
-			//END FAUX FUNCTIONALITY
-			//TODO: Post to server to send user text message with verification code
-			/*
-			httpClient.doPost(config.auth_endpoint, envelope, function(success, response)
+			httpClient.doPost('/v1/activate', request, function(success, response)
 				{
 				Ti.API.info(response);
 				
 				if(success)
 					{
-					var activationCodeWindow = new ActivationCodeWindow(phoneNumber);
+					var activationCodeWindow = new ActivationCodeWindow(phoneNumber, response.session);
 							
 					function activationCodeWindowFocusEvent()
 						{
@@ -263,41 +240,36 @@ function ActivateWindow()
 					notificationView.hideIndicator();
 					
 					var invalidNumber = false; // server side validation
-					var unroutable = false; // number could not be reached by the service
+					var serviceError = false; // number could not be reached by the service
 					
-					for(var i = 0; i < response.errors.length; i++)
+					if(response.error)
 						{
-						if(response.errors[i].name == 'invalid_auth.phone_number')
+						if(response.error == 'invalid_phone_number')
 							{
-							invalidNumber = true;
-							break;
-							}
-							
-						if(response.errors[i].name == 'phone_number_unroutable')
-							{
-							unroutable = true;
-							break;
-							}
-						}
-					
-					if(invalidNumber || unroutable)
-						{
-						var dialog = Ti.UI.createAlertDialog({
+							var dialog = Ti.UI.createAlertDialog({
 							message: String.format(L('invalid_phone_number'), phoneNumber),
 							ok: L('okay')
 							}).show();
-						}
-					else
-						{
-						var dialog = Ti.UI.createAlertDialog({
+							}
+						else if(response.error == 'service_error')
+							{
+							var dialog = Ti.UI.createAlertDialog({
+							message: String.format(L('activation_service_error'), phoneNumber),
+							ok: L('okay')
+							}).show();
+							}
+						else
+							{
+							var dialog = Ti.UI.createAlertDialog({
 							message: String.format(L('general_server_error'), phoneNumber),
 							ok: L('okay')
 							}).show();
+							}
 						}
 						
 					continueButton.addEventListener('click', continueButtonHandler);
 					}
-				});*/
+				});
 			}
 		}
 		

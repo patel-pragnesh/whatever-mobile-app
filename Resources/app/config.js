@@ -39,16 +39,16 @@ if(mode === mode_development)
 	{
 	if(Ti.Platform.osname === platform_android)
 		{
-		exports.services_base_url = 'https://kindkudos-rest.appspot.com';
+		exports.services_base_url = 'http://10.0.2.2:8080';
 		}
 	else
 		{
-		exports.services_base_url = 'https://kindkudos-rest.appspot.com';
+		exports.services_base_url = 'http://localhost:8080';
 		}
 	}
 else
 	{
-	exports.services_base_url = 'https://kindkudos-rest.appspot.com';
+	exports.services_base_url = 'https://whatever-api.appspot.com';
 	}
 	
 // Export the font names
@@ -64,10 +64,3 @@ exports.capita_light = 'Capita-Light';
 // http://docs.appcelerator.com/titanium/latest/#!/guide/iOS_7_Migration_Guide
 var version = Titanium.Platform.version.split(".");
 exports.major = parseInt(version[0],10);
-
-// Set the endpoints
-exports.authentication_header = 'X-Kind-Kudos-Token';
-exports.auth_endpoint = '/auth'; // The endpoint to authenticate a request to get into the app
-exports.auth_verify_endpoint = '/auth_verify'; // The endpoint to verify and create an account
-exports.users = '/users'; // The endpoint to modify a user
-exports.push_auths = '/push_auths'; // The push authorization

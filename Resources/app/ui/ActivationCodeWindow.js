@@ -1,4 +1,4 @@
-function ActivationCodeWindow(phoneNumber)
+function ActivationCodeWindow(phoneNumber, sessionId)
 	{
 	var config = require('app/config');
 	var _ = require('lib/underscore');
@@ -277,6 +277,45 @@ function ActivationCodeWindow(phoneNumber)
 				}
 			});
 		}
+		
+	function resendActivationCode()
+		{
+		notificationView.showIndicator();
+		
+		var request = {};
+		request.language = Ti.Locale.getCurrentLanguage();
+		request.country = Ti.Locale.getCurrentCountry();
+		request.phone_number = phoneNumber;
+		
+		Ti.API.info(JSON.stringify(request));
+		
+		httpClient.doPost('/v1/activate', request, function(success, response)
+			{
+			Ti.API.info(response);
+			
+			notificationView.hideIndicator();
+			
+			if(success)
+				{
+				// Set the new session id
+				sessionId = response.session;
+				}
+			else
+				{
+				var dialog = Ti.UI.createAlertDialog({
+					message: String.format(L('general_server_error'), phoneNumber),
+					ok: L('okay')
+					});
+					
+				dialog.addEventListener('click', function(e)
+					{
+					win.setActionsTimer(3000);
+					});
+					
+				dialog.show();
+				}
+			});
+		}
 	
 	/*
 	 * Event handler for when the resend button is clicked
@@ -295,41 +334,7 @@ function ActivationCodeWindow(phoneNumber)
 					{
 					if(index == 1)
 						{
-						notificationView.showIndicator();
-						
-						var request = {};
-						request.type = "sms",
-						request.app_id = config.app_key;
-						request.locale = Ti.Locale.getCurrentLocale();
-						request.phone_number = phoneNumber;
-						request.message = L('verification_code_message');
-						
-						var envelope = {};
-						envelope.nexmo = request;
-						
-						httpClient.doPost(config.auth_endpoint, envelope, function(success, response)
-							{
-							if(success)
-								{
-								notificationView.hideIndicator();
-								}
-							else
-								{
-								notificationView.hideIndicator();
-								
-								var dialog = Ti.UI.createAlertDialog({
-									message: String.format(L('general_server_error'), phoneNumber),
-									ok: L('okay')
-									});
-									
-								dialog.addEventListener('click', function(e)
-									{
-									win.setActionsTimer(3000);
-									});
-									
-								dialog.show();
-								}
-							});
+						resendActivationCode();
 						}
 					else
 						{
@@ -480,67 +485,19 @@ function ActivationCodeWindow(phoneNumber)
 	function verifyCode(currentValue)
 		{
 		var request = {};
-		request.app_id = config.app_key;
-		request.locale = Ti.Locale.getCurrentLocale();
+		request.language = Ti.Locale.getCurrentLanguage();
+		request.country = Ti.Locale.getCurrentCountry();
 		request.phone_number = phoneNumber;
-		request.verification_code = codeTextField.value;
+		request.activation_code = codeTextField.value;
 		
-		var envelope = {};
-		envelope.nexmo = request;
+		Ti.API.info(JSON.stringify(request));
 		
-		Ti.API.info(JSON.stringify(envelope));
+		var endpoint = '/v1/validatecode;jsessionid=' + sessionId;
 		
-		//BEGIN FAUX CODE
-		codesView.removeEventListener('click', codesViewClickEventHandler);
-		clearTimeout(animateActions);
-		codeTextField.blur();
-		codeTextField.setEditable(false);
-		
-		hideActionsView(function(hidden)
-			{
-			if(hidden)
-				{
-				activationViewContainer.remove(actionsView);
-				}
-			});
-		
-		for(var i = 0; i < codeLabels.length; i++)
-			{
-			codeLabels[i].color = '#049900';
-			}
-		
-		var account = {};
-		account.user_id = '666';
-		account.phone_number = phoneNumber;
-		
-		//Ti.App.Properties.setString("session_token", response.session.token);
-
-		// Set the incomplete account
-		Ti.App.Properties.setObject("account", account);
-		
-		var accountWindow = new AccountWindow(phoneNumber);
-		
-		function accountWindowFocusEvent()
-			{
-			accountWindow.removeEventListener('focus', accountWindowFocusEvent);
-			win.close();
-			};
-				
-		accountWindow.addEventListener('focus', accountWindowFocusEvent);
-		
-		notificationView.hideIndicator();
-		
-		accountWindow.open();
-			
-		return;
-		//END FAUX CODE
-		
-		//TODO: Ask server to verify Activation Code
-		/*
-		httpClient.doPost(config.auth_verify_endpoint, envelope, function(success, response)
+		httpClient.doPost(endpoint, request, function(success, response)
 			{
 			notificationView.showIndicator();
-			
+
 			Ti.API.info(response);
 			
 			if(success)
@@ -564,24 +521,9 @@ function ActivationCodeWindow(phoneNumber)
 					}
 				
 				var account = {};
-				account.user_id = response.session.user_id;
-				account.phone_number = response.session.phone_number;
+				account.id = response.id;
 				
-				Ti.App.Properties.setString("session_token", response.session.token);
-				
-				var newUser = response.session.new_user;
-				
-				if(_.isEmpty(response.user.last_name.trim()))
-					{
-					newUser = true;
-					}
-					
-				if(_.isEmpty(response.user.first_name.trim()))
-					{
-					newUser = true;
-					}
-				
-				if(newUser == true)
+				if(response.new_user)
 					{
 					// Set the incomplete account
 					Ti.App.Properties.setObject("account", account);
@@ -602,8 +544,8 @@ function ActivationCodeWindow(phoneNumber)
 					}
 				else
 					{
-					account.first_name = response.user.first_name;
-					account.last_name = response.user.last_name;
+					account.first_name = response.first_name;
+					account.last_name = response.last_name;
 					
 					Ti.App.Properties.setObject("account", account);
 					
@@ -626,18 +568,21 @@ function ActivationCodeWindow(phoneNumber)
 				{
 				notificationView.hideIndicator();
 				
-				var codeMatchError = false; // does the code match?
-					
-				for(var i = 0; i < response.errors.length; i++)
+				if(response.error == 'invalid_session')
 					{
-					if(response.errors[i].name == 'auth_verify_nexmo_request_not_matching')
+					var dialog = Ti.UI.createAlertDialog({
+						message: String.format(L('invalid_session'), phoneNumber),
+						ok: L('okay')
+						});
+						
+					dialog.addEventListener('click', function(e)
 						{
-						codeMatchError = true;
-						break;
-						}
+						resendActivationCode();
+						});
+						
+					dialog.show();
 					}
-					
-				if(codeMatchError)
+				else if(response.error == 'invalid_code')
 					{
 					for(var i = 0; i < codeLabels.length; i++)
 						{
@@ -655,7 +600,7 @@ function ActivationCodeWindow(phoneNumber)
 					}).show();
 					}
 				}
-			});*/
+			});
 		}
 	
 	/*
