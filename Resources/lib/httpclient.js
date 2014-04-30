@@ -12,7 +12,14 @@ exports.doPost = function(endpoint, request, callback)
             },
         onerror: function(e)
             {
-			callback(false, JSON.parse(this.responseText));
+			if(this.responseText)
+            	{
+            	callback(false, JSON.parse(this.responseText));
+            	}
+            else
+            	{
+            	callback(false, JSON.parse(getHttpClientErrorResponse()));
+            	}
             },
             
         timeout: 29000
@@ -38,7 +45,14 @@ exports.doGet = function(endpoint, callback)
             },
         onerror: function(e)
             {
-			callback(false, JSON.parse(this.responseText));
+			if(this.responseText)
+            	{
+            	callback(false, JSON.parse(this.responseText));
+            	}
+            else
+            	{
+            	callback(false, JSON.parse(getHttpClientErrorResponse()));
+            	}
             },
             
         timeout: 29000
@@ -47,3 +61,21 @@ exports.doGet = function(endpoint, callback)
     xhr.open('GET', url);
 	xhr.send();
 	};
+
+/**
+ * Get an http client error response onerror
+ */
+function getHttpClientErrorResponse()
+	{
+	var response = {};
+	
+	var errors = [];
+	var error = {};
+	error.name = 'http_client_error';
+	
+	errors.push(error);
+	
+	response.errors = errors;
+	
+	return response;
+	}
