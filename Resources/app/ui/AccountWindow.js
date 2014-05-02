@@ -150,48 +150,27 @@ function AccountWindow(verificationCode, phoneNumber)
 			{
 			notificationView.showIndicator();
 			
+			var account = Ti.App.Properties.getObject("account");
+			
+			Ti.API.info(JSON.stringify(account));
+			
 			var request = {};
-			request.app_id = config.app_key;
+			request.language = Ti.Locale.getCurrentLanguage();
+			request.country = Ti.Locale.getCurrentCountry();
+			request.id = account.id;
 			request.first_name = firstNameTextField.value;
 			request.last_name = lastNameTextField.value;
-			request.locale = Ti.Locale.getCurrentLanguage() + '_' + Ti.Locale.getCurrentCountry();
 			
-			var envelope = {};
-			envelope.user = request;
+			Ti.API.info(JSON.stringify(request));
 			
-			Ti.API.info(envelope);
-			
-			var account = Ti.App.Properties.getObject("account");
-			var endPoint = config.users + '/' + account.user_id;
-			
-			//BEGIN FAUX CODE
-			// Update the account object
-			
-					account.first_name = firstNameTextField.value.trim();
-					account.last_name = lastNameTextField.value.trim();
-			
-					Ti.App.Properties.setObject("account", account);
-					
-					var mainWindow = new MainWindow();
-						
-					function mainWindowFocusEvent()
-						{
-						mainWindow.removeEventListener('focus', mainWindowFocusEvent);
-						win.close();
-						};
-							
-					mainWindow.addEventListener('focus', mainWindowFocusEvent);
-					
-					notificationView.hideIndicator();
-					
-					mainWindow.open();
-			//END FAUX CODE
-			//TODO: Update Account Object with server
-			/*
-			httpClient.doPatch(endPoint, envelope, function(success, response)
+			httpClient.doPost('/v1/createaccount', request, function(success, response)
 				{
 				if(success)
 					{
+					notificationView.hideIndicator();
+					
+					Ti.API.info(JSON.stringify(response));
+					
 					// Update the account object
 					account.first_name = firstNameTextField.value.trim();
 					account.last_name = lastNameTextField.value.trim();
@@ -207,23 +186,38 @@ function AccountWindow(verificationCode, phoneNumber)
 						};
 							
 					mainWindow.addEventListener('focus', mainWindowFocusEvent);
-					
-					notificationView.hideIndicator();
-					
 					mainWindow.open();
 					}
 				else
 					{
 					notificationView.hideIndicator();
 					
-					var dialog = Ti.UI.createAlertDialog({
-						message: String.format(L('general_server_error'), phoneNumber),
-						ok: L('okay')
-						}).show();
+					if(response.error)
+						{
+						if(response.error == 'invalid_request')
+							{
+							var dialog = Ti.UI.createAlertDialog({
+							message: String.format(L('invalid_phone_number'), phoneNumber),
+							ok: L('okay')
+							}).show();
+							}
+						else if(response.error == 'missing_account')
+							{
+							// TODO If we have a missing account we need to wipe out the account and make them start over
+							// Not sure if this is the proper contingency
+							}
+						else
+							{
+							var dialog = Ti.UI.createAlertDialog({
+							message: String.format(L('general_server_error'), phoneNumber),
+							ok: L('okay')
+							}).show();
+							}
+						}
 						
 					continueButton.addEventListener('click', continueButtonHandler);
 					}
-				});*/
+				});
 			}
 		else
 			{

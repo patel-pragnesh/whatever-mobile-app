@@ -521,7 +521,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 					}
 				
 				var account = {};
-				account.id = response.id;
+				account.id = response.user.id;
 				
 				if(response.new_user)
 					{
