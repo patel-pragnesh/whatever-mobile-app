@@ -4,7 +4,7 @@
  * @param {Object} args
  * @param {Object} callback
  */
-exports.create = function(args, trayView, parent)
+exports.create = function(args, parent)
 	{
 	var config = require('app/config');
 	
@@ -46,64 +46,30 @@ exports.create = function(args, trayView, parent)
 		});
 	
 	navigationView.add(titleLabel);
-		
-	var trayButtonView = Ti.UI.createView({
+	
+	var backButtonView = Ti.UI.createView({
 		left: 10,
 		height: 50,
-		width: 50,
-		closed: true
+		width: 50
 		});
 		
-	var trayButtonImage = Ti.UI.createImageView({
-  		image: '/images/list.png',
+	var backButtonImage = Ti.UI.createImageView({
+  		image: '/images/back-arrow.png',
   		left: 0,
-  		width: 28,
+  		width: 11,
   		height: 22
 		});
 		
-	trayButtonView.add(trayButtonImage);
-		
-	var animateDuration = 400;
+	backButtonView.add(backButtonImage);
 	
-	// Set the animation speed - it is slower on Android for some reason
-	if(config.platform === 'android')
+	function closeParentWindow()
 		{
-		animateDuration = 200;
-		}
-		
-	function closeTray()
-		{
-		trayView.reset();
-		parent.removeEventListener('touchmove', parentTouchListener);
-		parent.animate({left: 0, duration: animateDuration});
-		trayButtonView.closed = true;
+		parent.close();
 		}
 	
-	// Listen for the touch on the parent
-	function parentTouchListener()
-		{
-		closeTray();
-		}
+	backButtonView.addEventListener('click', closeParentWindow);
 		
-	navigationView.toggleTray = function()
-		{
-		if(trayButtonView.closed)
-			{
-			parent.animate({left: '85%', duration: 400}, function()
-				{
-				parent.addEventListener('touchmove', parentTouchListener);
-				trayButtonView.closed = false;
-				});
-			}
-		else
-			{
-			closeTray();
-			}
-		};
-		
-	trayButtonView.addEventListener('click', navigationView.toggleTray);
-		
-	navigationView.add(trayButtonView);
+	navigationView.add(backButtonView);
 	
 	view.add(navigationView);
 	
