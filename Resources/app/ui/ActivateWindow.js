@@ -156,9 +156,9 @@ function ActivateWindow()
 	activationViewContainer.add(phoneNumberView);
 	
 	var continueButton = Ti.UI.createButton({
-		backgroundColor: '#F2AE30',
-		borderColor: '#F2AE30',
-		borderWidth: 1,
+		backgroundImage: '/images/continue-button-gradient.png',
+		backgroundSelectedImage: '/images/continue-button-gradient-selected.png',
+		borderWidth: 0,
 		color: 'white',
 		font:
 			{
@@ -172,11 +172,6 @@ function ActivateWindow()
 		right: 15,
 		error: false
 		});
-		
-	if(config.platform === config.platform_android)
-		{
-		continueButton.backgroundSelectedColor = '#d9971d';
-		}
 		
 	phoneNumberField.addEventListener('focus', function(e)
 		{
