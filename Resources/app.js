@@ -7,7 +7,7 @@
 	var config = require('app/config');
 	var _ = require('lib/underscore');
 	
-	var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
+	//var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
 	var whatever = require('app/whatever');
 	
 	Ti.UI.backgroundColor = 'white';
@@ -48,5 +48,9 @@
 				
 				}, 500);
 			});
+		}
+	else
+		{
+		
 		}
 	})();

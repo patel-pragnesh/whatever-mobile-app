@@ -2,12 +2,12 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.0
+version: 1.2
 apiversion: 2
-description: My module
+description: Google Cloud Messaging Module
 author: Tim Christensen
-license: Specify your license
-copyright: Copyright (c) 2014 by Your Company
+license: See License.txt
+copyright: Copyright (c) 2014 by Tim Christensen
 
 
 # these should not be edited
@@ -15,4 +15,4 @@ name: gcm
 moduleid: ti.gcm
 guid: 7bf910d6-6e1e-4130-8c55-cb6ba0967934
 platform: android
-minsdk: 3.2.2.GA
+minsdk: 3.2.3.GA

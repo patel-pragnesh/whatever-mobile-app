@@ -11,6 +11,11 @@ function MainWindow()
 	var win = require('app/ui/common/Window').create();
 	win.backgroundColor = mainBackgroundColor;
 	
+	if(config.platform === config.platform_android)
+		{
+		win.exitOnClose = true;
+		}
+	
 	var windowOpenCallback = function(e)
 		{
 		win.removeEventListener('open', windowOpenCallback);
@@ -108,7 +113,7 @@ function MainWindow()
 	 */
 	function registerDevice()
 		{
-		if(config.platform === 'iphone')
+		if(config.platform === config.platform_iphone)
 			{
 			Ti.Network.registerForPushNotifications({
 				types: [
@@ -125,35 +130,101 @@ function MainWindow()
 				{
 				Ti.API.info('Received push: ' + JSON.stringify(e));
 				
-				//alert(e.data.event);
+				if(e.inBackground)
+					{
+					
+					}
+					
+				alert(JSON.stringify(e));
 				}
 				
 			function deviceTokenSuccess(e)
 				{
 				//postDeviceId(e.deviceToken, 'ios');
+				
+				Ti.API.info(e.deviceToken);
 				}
 			
 			function deviceTokenError(e)
 				{
 				// TODO Message here
-				//alert('Failed to register for push notifications! ' + e.error);
+				alert('Failed to register for push notifications! ' + e.error);
 				}
 			}
 		else
 			{
 			// Google Cloud Messaging API
 			var Gcm = require('ti.gcm');
-			Gcm.init('823842470448');
+			Gcm.init({
+				senderId: '823842470448', // Google API Key
+				groupedMessageTitle: 'Conversation' // The title used in a notification if there is more than one
+				});
+			
+			// Receives messages or payloads while the app is focused and not in the background
+			Gcm.addEventListener('receiveMessage', function(e)
+				{
+				Ti.API.info("receiveMessage");
+				Ti.API.info(JSON.stringify(e));
+				alert(e.event);
+				});
+			
+			// The most recent queued message - typically from an app launch from pause event
+			Gcm.addEventListener('queuedMessage', function(e)
+				{
+				Ti.API.info("receiveQueuedMessage");
+				Ti.API.info(JSON.stringify(e));
+				
+				if(e.payloads)
+					{
+					for(var i = 0; i < e.payloads.length; i++)
+						{
+						Ti.API.info(JSON.stringify(e.payloads[i]));
+						}
+					}
+					
+				//alert(e.event);
+				});
+			
+			// Messages that only contain a payload sans title and message
+			Gcm.addEventListener('silentQueue', function(e)
+				{
+				Ti.API.info("silentQueue");
+				
+				if(e.payloads)
+					{
+					for(var i = 0; i < e.payloads.length; i++)
+						{
+						Ti.API.info(JSON.stringify(e.payloads[i]));
+						}
+					}
+
+				});
+			
+			// The entire list of queued notifications when 1 or more notifications have occurred when the app is in the background
+			Gcm.addEventListener('queuedNotifications', function(e)
+				{
+				Ti.API.info("queuedNotifications");
+				
+				if(e.payloads)
+					{
+					for(var i = 0; i < e.payloads.length; i++)
+						{
+						Ti.API.info(JSON.stringify(e.payloads[i]));
+						}
+					}
+				
+				});
 			
 			Gcm.registerDevice({
 				success: registerDeviceSuccess,
-				error: registerDeviceError,
-				receive: receiveMessage
+				error: registerDeviceError
 				});
 			
 			function registerDeviceSuccess(e)
 				{
 				//postDeviceId(e.deviceToken, 'android');
+				
+				Ti.API.info(e.deviceToken);
 				}
 				
 			function registerDeviceError(e)
@@ -184,12 +255,6 @@ function MainWindow()
 						
 					Ti.API.error(e.message);
 					}
-				}
-				
-			function receiveMessage(e)
-				{
-				Ti.API.info(JSON.stringify(e));
-				alert(e.event);
 				}
 			}
 		};

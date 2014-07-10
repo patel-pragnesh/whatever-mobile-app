@@ -17,7 +17,6 @@ exports.create = function(args)
 	if(config.platform === config.platform_android)
 		{
 		win.navBarHidden = true;
-		win.exitOnClose = true;
 		win.height = '100%';
 		}
 		

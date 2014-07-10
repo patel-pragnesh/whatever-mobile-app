@@ -9,7 +9,7 @@
     <copyright>2014 by WoodBlock Creations LLC</copyright>
     <icon>appicon.png</icon>
     <fullscreen>false</fullscreen>
-    <navbar-hidden>false</navbar-hidden>
+    <navbar-hidden>true</navbar-hidden>
     <analytics>false</analytics>
     <guid>8083ea6e-a696-44ab-adb5-fb844a290500</guid>
     <property name="ti.ui.defaultunit" type="string">dp</property>
@@ -34,13 +34,25 @@
     <android xmlns:android="http://schemas.android.com/apk/res/android">
         <abi>all</abi>
         <manifest android:versionCode="1" android:versionName="1.0">
-            <!-- Add Custom Theme -->
-            <application android:theme="@style/Theme.Extended"/>
             <uses-permission android:name="android.permission.INTERNET"/>
             <uses-permission android:name="android.permission.CAMERA"/>
             <uses-permission android:name="android.permission.READ_CONTACTS"/>
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
             <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE"/>
+            
+            <!-- Add Custom Theme -->
+            <application android:theme="@style/Theme.Extended">
+            	<!--
+				<activity android:configChanges="keyboardHidden|orientation" android:label="Whatever" android:name=".WhateverActivity" android:launchMode="singleTask">
+					<intent-filter>
+						<action android:name="android.intent.action.VIEW"/>
+						<category android:name="android.intent.category.DEFAULT"/>
+						<category android:name="android.intent.category.BROWSABLE"/>
+						<data android:scheme="http" android:host="www.whateverapp.com"/>
+					</intent-filter>
+				</activity>
+				-->
+            </application>
         </manifest>
     </android>
     <modules>
