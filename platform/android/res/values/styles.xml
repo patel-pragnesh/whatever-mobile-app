@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<style name="Theme.Extended" parent="@android:style/Theme.Holo.Light">
+	<style name="Theme.Extended" parent="Theme.AppCompat.Light">
 		<item name="android:editTextStyle">@style/editText</item>
 	</style>
-	<style name="editText" parent="@android:style/Widget.Holo.Light.EditText">
+	<style name="editText" parent="@android:style/Widget.EditText">
 		<item name="android:textCursorDrawable">@null</item>
 		<item name="android:textColorHint">@color/cursor</item>
 	</style>

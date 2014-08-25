@@ -42,10 +42,15 @@
 			
 		Ti.App.addEventListener('resume', function()
 			{
+			Ti.UI.iPhone.appBadge = 0;
+			
 			// Set a pause so that we get all the network listener information
 			var pause = setTimeout(function()
 				{
-				
+				if(Ti.App.Properties.getObject("account") != null)
+					{
+					whatever.register();
+					}
 				}, 500);
 			});
 		}

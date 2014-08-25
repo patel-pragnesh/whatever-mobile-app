@@ -43,7 +43,8 @@ if(mode === mode_development)
 		}
 	else
 		{
-		exports.services_base_url = 'http://localhost:8080';
+		//exports.services_base_url = 'http://localhost:8080';
+		exports.services_base_url = 'https://whatever-api.appspot.com';
 		}
 	}
 else

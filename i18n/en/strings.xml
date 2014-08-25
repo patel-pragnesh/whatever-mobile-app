@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+	<string name="google_play_unavailable">Google Play Services are not available.</string>
+	<string name="gcm_no_services">To receive notifications please add a Google account to your device.</string>
 	<string name="phone_number_label">Phone Number</string>
 	<string name="continue_button">Continue</string>
 	<string name="didnt_receive_code">Didn't receive code?</string>
