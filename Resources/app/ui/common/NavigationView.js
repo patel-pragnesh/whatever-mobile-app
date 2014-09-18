@@ -9,7 +9,6 @@ exports.create = function(args, parent)
 	var config = require('app/config');
 	
 	var view = Ti.UI.createView({
-		height: Ti.UI.SIZE,
 		width: '100%',
 		top: 0,
 		layout: 'vertical'
@@ -74,7 +73,7 @@ exports.create = function(args, parent)
 	view.add(navigationView);
 	
 	var decoratorView = Ti.UI.createView({
-		backgroundColor: '#c8c8c8',
+		backgroundColor: '#221233',
 		height: 1,
 		width: '100%'
 		});

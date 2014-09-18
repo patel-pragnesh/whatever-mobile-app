@@ -7,59 +7,45 @@ function MainWindow()
 	
 	var whatever = require('app/whatever');
 	
-	var mainBackgroundColor = '#dbdbdb';
-	
 	// Create the main window
 	var win = require('app/ui/common/Window').create();
-	win.backgroundColor = mainBackgroundColor;
 	
 	if(config.platform === config.platform_android)
 		{
 		win.exitOnClose = true;
 		}
-		
-	var windowFocusCallback = function(e)
-		{
-		win.removeEventListener('focus', windowFocusCallback);
-		
-		// Register the device for push
-		whatever.register();
-		};
-		
-	win.addEventListener('focus', windowFocusCallback);
 	
 	// The menu view when the tray opens
 	var trayView = require('app/ui/common/TrayView').create({backgroundColor: '#6d6d6d'});
 	win.add(trayView);
 	
-	var navigationContainer = Ti.UI.createView({
-		height: Ti.UI.SIZE,
-		width: '100%',
-		top: 0,
-		layout: 'vertical'
-		});
-		
 	// The notification view has a zIndex that blocks the UI and provides an indicator
 	var notificationView = require('app/ui/common/NotificationView').create();
-		
-	var navigationGradient = '/images/nav-background-gradient-50.png';
-	var navigationHeight = 50;
+	
+	var navigationHeight = 0;
 	
 	// Compensate for the iPhone status bar
 	if(config.platform === 'iphone' && config.major >= 7)
 		{
-		navigationHeight = 70;
-		navigationGradient = '/images/nav-background-gradient-70.png';
-		}
+		navigationHeight = 20;
 		
-	var navigationView = Ti.UI.createView({
-		backgroundImage: navigationGradient,
-		height: navigationHeight,
-		width: '100%'
-		});
-	
-	navigationContainer.add(navigationView);
-	win.add(navigationContainer);
+		var navigationView = Ti.UI.createView({
+			backgroundImage: '/images/nav-background-gradient-20.png',
+			top: 0,
+			height: 20,
+			width: '100%'
+			});
+		
+		var decoratorView = Ti.UI.createView({
+			backgroundColor: '#221233',
+			height: 1,
+			bottom: 0,
+			width: '100%'
+			});
+			
+		navigationView.add(decoratorView);
+		win.add(navigationView);
+		}
 	
 	var mainContainerView = Ti.UI.createView({
 		width: '100%',
@@ -76,11 +62,11 @@ function MainWindow()
     var defaultSliderSize = 120;
     var dayViewOffSet = (((60 * hours) + minutes) - defaultSliderSize) * -1;
     
-    var availabilityBarView = require('app/ui/fragment/DayView').create();
-	mainContainerView.add(availabilityBarView);
+    var availabilityView = require('app/ui/fragment/AvailabilityView').create();
+	mainContainerView.add(availabilityView);
 		
 	var sliderSeparatorView = Ti.UI.createView({
-		backgroundColor: '#a4a4a4',
+		backgroundColor: '#221233',
 		top: 0,
 		height: 1,
 		width: '100%'
@@ -89,20 +75,51 @@ function MainWindow()
 	mainContainerView.add(sliderSeparatorView);
 	
 	var scrollableView = Ti.UI.createScrollableView({
-		backgroundColor: mainBackgroundColor,
+		backgroundColor: "#efefef",
 		top: 0,
 		bottom: 0,
 		width: '100%'
 		});
+		
+	var scrollViewArgs = {
+		showVerticalScrollIndicator: true,
+		showHorizontalScrollIndicator: false,
+		top: 0,
+		bottom: 0,
+		width: '100%',
+		layout: 'vertical'
+		};
+		
+	if(config.platform !== 'android')
+		{
+		scrollViewArgs.disableBounce = true;
+		}
 	
+	// Create the conversations
 	for(var i = 0; i < 10; i++)
 		{
-		var conversation = Ti.UI.createView({
-			top: 0,
-			height: '100%',
-			width: '100%'
+		var fakeTime = moment().add(i, "hour");
+		var conversation = Ti.UI.createScrollView(scrollViewArgs);
+		
+		var conversationView = Ti.UI.createView({
+			backgroundColor: 'white',
+			borderWidth: 1,
+			borderColor: '#dfdfdf',
+			borderRadius: 3,
+			top: 10,
+			left: 10,
+			right: 10,
+			bottom: 10
 			});
 			
+		conversation.add(conversationView);
+			
+		var bottomShim = Ti.UI.createView({
+			height: 10,
+			width: '100%'
+			});
+		
+		conversation.add(bottomShim);
 		scrollableView.addView(conversation);
 		}
 		
@@ -110,6 +127,31 @@ function MainWindow()
 	
 	win.add(mainContainerView);
 	win.add(notificationView);
+	
+	function updateViews()
+		{
+		availabilityView.updateView();
+		}
+		
+	Ti.App.addEventListener("update_views", updateViews);
+	
+	var windowPostLayoutCallback = function(e)
+		{
+		win.removeEventListener('postlayout', windowPostLayoutCallback);
+		updateViews();
+		};
+	
+	win.addEventListener('postlayout', windowPostLayoutCallback);
+	
+	var windowFocusCallback = function(e)
+		{
+		win.removeEventListener('focus', windowFocusCallback);
+		
+		// Register the device for push
+		whatever.register();
+		};
+		
+	win.addEventListener('focus', windowFocusCallback);
 
 	return win;
 	};

@@ -12,8 +12,6 @@ exports.doPost = function(endpoint, request, callback)
             },
         onerror: function(e)
             {
-            Ti.API.info(this.responseText);
-            
 			if(this.responseText)
             	{
             	var errorResponse;
@@ -26,12 +24,12 @@ exports.doPost = function(endpoint, request, callback)
             	catch(e) 
             		{
             		Ti.API.error(this.responseText);
-            		callback(false, JSON.parse(getHttpClientErrorResponse()));
+            		callback(false, getHttpClientErrorResponse());
             		}
             	}
             else
             	{
-            	callback(false, JSON.parse(getHttpClientErrorResponse()));
+            	callback(false, getHttpClientErrorResponse());
             	}
             },
             
@@ -60,11 +58,22 @@ exports.doGet = function(endpoint, callback)
             {
 			if(this.responseText)
             	{
-            	callback(false, JSON.parse(this.responseText));
+            	var errorResponse;
+            	
+            	try
+            		{
+            		var errorResponse = JSON.parse(this.responseText);
+            		callback(false, errorResponse);
+            		}
+            	catch(e) 
+            		{
+            		Ti.API.error(this.responseText);
+            		callback(false, getHttpClientErrorResponse());
+            		}
             	}
             else
             	{
-            	callback(false, JSON.parse(getHttpClientErrorResponse()));
+            	callback(false, getHttpClientErrorResponse());
             	}
             },
             

@@ -3,16 +3,17 @@
  * 
  * @param {Object} args
  */
-exports.create = function(args)
+exports.create = function(day)
 	{
 	var config = require('app/config');
 	
 	//The bar to set if you are available or not and to see upcoming conversations.
 	var view = Ti.UI.createView({
-		backgroundColor: 'gray',
+		backgroundColor: '#dfdfdf',
 		width: 60 * 24,
 		height: 60,
 		top: 0,
+		left: 0,
 		layout: 'horizontal'
 		});
 		
@@ -51,10 +52,10 @@ exports.create = function(args)
 			hourLabelText = i - 12;
 			}
 			
-		view.add(createHourView(hourLabelText, periodText));
+		view.add(createHourView(i, hourLabelText, periodText));
 		}
 		
-	function createHourView(hour, period)
+	function createHourView(index, hour, period)
 		{
 		var hourView = Ti.UI.createView({
 			backgroundColor: '#e0e0e0',
@@ -64,15 +65,30 @@ exports.create = function(args)
 			left: 0
 			});
 			
-		var hourIndicatorView = Ti.UI.createView({
-			backgroundColor: '#a4a4a4',
-			width: 2,
-			height: 60,
-			top: 0,
-			left: 0
-			});
+		if(i > 0 && i < 24)
+			{
+			var hourIndicatorView = Ti.UI.createView({
+				backgroundColor: '#a4a4a4',
+				width: 2,
+				height: 50,
+				top: 0,
+				left: 0
+				});
 			
-		hourView.add(hourIndicatorView);
+			hourView.add(hourIndicatorView);
+			}
+		else if(day > 1)
+			{
+			var dayIndicatorView = Ti.UI.createView({
+				backgroundColor: '#a4a4a4',
+				width: 2,
+				height: 60,
+				top: 0,
+				left: 0
+				});
+			
+			hourView.add(dayIndicatorView);
+			}
 			
 		var hourLabelView = Ti.UI.createView({
 			top: 0,

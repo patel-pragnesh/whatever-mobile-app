@@ -40,17 +40,30 @@
 			
 			});
 			
-		Ti.App.addEventListener('resume', function()
+		Ti.App.addEventListener('resumed', function()
 			{
 			Ti.UI.iPhone.appBadge = 0;
-			
-			// Set a pause so that we get all the network listener information
+				
 			var pause = setTimeout(function()
 				{
-				if(Ti.App.Properties.getObject("account") != null)
+				if(!_.isNull(Ti.App.Properties.getString('device_token')))
 					{
-					whatever.register();
+					whatever.registerDevice(Ti.App.Properties.getString('device_token'), 'IOS');
 					}
+				else
+					{
+					if(!_.isNull(Ti.App.Properties.getObject("account")))
+						{
+						whatever.register();
+						}
+					}
+				
+				// Make sure there is an account associated with the app
+				if(!_.isNull(Ti.App.Properties.getObject("account")))
+					{
+					Ti.App.fireEvent('update_views');
+					}
+					
 				}, 500);
 			});
 		}
