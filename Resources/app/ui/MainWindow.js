@@ -1,23 +1,20 @@
 function MainWindow()
 	{
 	var config = require('app/config');
+	var whatever = require('app/whatever');
+	
 	var moment = require('lib/moment');
 	var _ = require('lib/underscore');
 	var httpClient = require('lib/httpclient');
 	
-	var whatever = require('app/whatever');
-	
 	// Create the main window
 	var win = require('app/ui/common/Window').create();
+	win.opacity = 0;
 	
 	if(config.platform === config.platform_android)
 		{
 		win.exitOnClose = true;
 		}
-	
-	// The menu view when the tray opens
-	var trayView = require('app/ui/common/TrayView').create({backgroundColor: '#6d6d6d'});
-	win.add(trayView);
 	
 	// The notification view has a zIndex that blocks the UI and provides an indicator
 	var notificationView = require('app/ui/common/NotificationView').create();
@@ -30,20 +27,12 @@ function MainWindow()
 		navigationHeight = 20;
 		
 		var navigationView = Ti.UI.createView({
-			backgroundImage: '/images/nav-background-gradient-20.png',
+			backgroundColor: '#7945AD',
 			top: 0,
 			height: 20,
 			width: '100%'
 			});
-		
-		var decoratorView = Ti.UI.createView({
-			backgroundColor: '#221233',
-			height: 1,
-			bottom: 0,
-			width: '100%'
-			});
 			
-		navigationView.add(decoratorView);
 		win.add(navigationView);
 		}
 	
@@ -51,8 +40,7 @@ function MainWindow()
 		width: '100%',
 		top: navigationHeight,
 		bottom: 0,
-		layout: 'vertical',
-		zIndex: 1
+		layout: 'vertical'
 		});
 	
 	var currentTime = new Date();
@@ -62,83 +50,294 @@ function MainWindow()
     var defaultSliderSize = 120;
     var dayViewOffSet = (((60 * hours) + minutes) - defaultSliderSize) * -1;
     
-    var availabilityView = require('app/ui/fragment/AvailabilityView').create();
+    /**
+     * Create the availability view
+     */
+    var currentDay = 1;
+	var days = 3;
+	var viewBuffer = 0;
+	
+    var availabilityView = Ti.UI.createView({
+		width: '100%',
+		height: 60,
+		top: 0
+		});
+	
+	var availabilityScrollView = Ti.UI.createScrollView({
+		backgroundColor: '#F2F2F2',
+		contentWidth: 'auto',
+		showVerticalScrollIndicator: false,
+		showHorizontalScrollIndicator: false,
+		top: 0,
+		width: '100%',
+		height: 60,
+		layout: 'horizontal'
+		});
+		
+	var leftDayViewBuffer = Ti.UI.createView({
+		backgroundColor: '#F2F2F2',
+		left: 0,
+		width: viewBuffer,
+		height: 60
+		});
+		
+	availabilityScrollView.add(leftDayViewBuffer);
+		
+	for(var i = 0; i < days; i++)
+		{
+		var dayView = require('app/ui/fragment/DayView').create(i + 1);
+		availabilityScrollView.add(dayView);
+		}
+		
+	var rightDayViewBuffer = Ti.UI.createView({
+		backgroundColor: '#F2F2F2',
+		left: 0,
+		width: viewBuffer,
+		height: 60
+		});
+		
+	availabilityScrollView.add(rightDayViewBuffer);
+		
+	function updateDateView(date)
+		{
+		Ti.API.info('new day ' + moment().weekday(date.day()) + '  ' + date.format('D'));
+		}
+	
+	function availabilityScrollEvent(e)
+		{
+		//Ti.API.info(JSON.stringify(e));
+		
+		Ti.API.info(e.x);
+		Ti.API.info(days * 24 * 60);
+		
+		if(e.x > 0 && e.x < days * 24 * 60)
+			{
+			var viewDay = Math.floor(e.x / (24 * 60));
+			
+			Ti.API.info(viewDay);
+			}
+		
+		
+		
+		// var viewHour = ((e.x + viewBuffer) / 24) / (viewDay + 1);
+// 		
+		// Ti.API.info(moment().hour());
+// 		
+		// Ti.API.info(viewHour);
+		
+		if(viewDay >= 0 && currentDay !== viewDay)
+			{
+			updateDateView(moment().add(viewDay));
+			currentDay = viewDay;
+			}
+		}
+		
+	// Add the scroll listener
+	availabilityScrollView.addEventListener('scroll', availabilityScrollEvent);
+	
+	availabilityView.add(availabilityScrollView);
+		
+	var centerIndicatorView = Ti.UI.createView({
+		width: Ti.UI.SIZE,
+		height: '100%',
+		touchEnabled: false
+		});
+		
+	var centerHighlightView = Ti.UI.createView({
+		backgroundColor: '#FF264A',
+		height: '100%',
+		width: 1
+		});
+		
+	centerIndicatorView.add(centerHighlightView);
+	
+	var topIndicatorImage = Ti.UI.createImageView({
+		image: '/images/availability-time-down-arrow.png',
+		top: 0,
+		width: 18,
+		height: 8
+		});
+		
+	centerIndicatorView.add(topIndicatorImage);
+	availabilityView.add(centerIndicatorView);
+    
 	mainContainerView.add(availabilityView);
 		
 	var sliderSeparatorView = Ti.UI.createView({
-		backgroundColor: '#221233',
+		backgroundColor: '#7945AD',
 		top: 0,
-		height: 1,
+		height: 2,
 		width: '100%'
 		});
 		
 	mainContainerView.add(sliderSeparatorView);
 	
 	var scrollableView = Ti.UI.createScrollableView({
-		backgroundColor: "#efefef",
+		backgroundColor: '#CBCACC',
 		top: 0,
 		bottom: 0,
 		width: '100%'
 		});
-		
-	var scrollViewArgs = {
-		showVerticalScrollIndicator: true,
-		showHorizontalScrollIndicator: false,
-		top: 0,
-		bottom: 0,
-		width: '100%',
-		layout: 'vertical'
-		};
-		
-	if(config.platform !== 'android')
-		{
-		scrollViewArgs.disableBounce = true;
-		}
 	
 	// Create the conversations
 	for(var i = 0; i < 10; i++)
 		{
 		var fakeTime = moment().add(i, "hour");
-		var conversation = Ti.UI.createScrollView(scrollViewArgs);
 		
-		var conversationView = Ti.UI.createView({
-			backgroundColor: 'white',
-			borderWidth: 1,
-			borderColor: '#dfdfdf',
-			borderRadius: 3,
-			top: 10,
+		var conversation = Ti.UI.createView({
+			top: 0,
+			bottom: 0,
 			left: 10,
 			right: 10,
-			bottom: 10
+			layout: 'vertical'
+			});
+		
+		var timeIndicatorImageView = Ti.UI.createImageView({
+			image: '/images/time-indicator-up-arrow.png',
+			top: 5,
+			width: 30,
+			height: 15
 			});
 			
-		conversation.add(conversationView);
+		conversation.add(timeIndicatorImageView);
+		
+		var conversationHeaderView = Ti.UI.createView({
+			backgroundColor: 'white',
+			top: 0,
+			height: 40
+			});
 			
+		conversation.add(conversationHeaderView);
+		
+		var conversationHeaderSeparatorView = Ti.UI.createView({
+			backgroundColor: '#B3B3B3',
+			top: 0,
+			height: 1
+			});
+			
+		conversation.add(conversationHeaderSeparatorView);
+		
+		var conversationScrollableView = Ti.UI.createScrollView({
+			backgroundColor: 'transparent',
+			showVerticalScrollIndicator: true,
+			showHorizontalScrollIndicator: false,
+			width: '100%',
+			top: 0,
+			bottom: 0,
+			layout: 'vertical'
+			});
+			
+		if(config.platform === 'iphone')
+			{
+			conversationScrollableView.disableBounce = true;
+			}
+		
+		var conversationProfileView = Ti.UI.createView({
+			backgroundColor: 'white',
+			width: '100%',
+			top: 0,
+			height: 500
+			});
+			
+		conversationScrollableView.add(conversationProfileView);
+		
 		var bottomShim = Ti.UI.createView({
 			height: 10,
 			width: '100%'
 			});
 		
-		conversation.add(bottomShim);
+		conversationScrollableView.add(bottomShim);
+		
+		conversation.add(conversationScrollableView);
 		scrollableView.addView(conversation);
 		}
+		
+	scrollableView.addEventListener('scrollend', function(e)
+		{
+		Ti.API.info(JSON.stringify(e));
+		});
 		
 	mainContainerView.add(scrollableView);
 	
 	win.add(mainContainerView);
 	win.add(notificationView);
 	
-	function updateViews()
-		{
-		availabilityView.updateView();
-		}
+	var menuBarContainer = Ti.UI.createView({
+		width: '100%',
+		bottom: 0,
+		height: 50
+		});
+	
+	var menuBarView = Ti.UI.createView({
+		backgroundColor: '#F6F5F1',
+		width: '100%',
+		top: 0,
+		height: 50,
+		opacity: .65
+		});
 		
-	Ti.App.addEventListener("update_views", updateViews);
+	menuBarContainer.add(menuBarView);
+	
+	var menuBarActionView = Ti.UI.createView({
+		width: '100%',
+		top: 0,
+		height: 50
+		});
+		
+	var actionViews = [];
+		
+	var timelineActionView = Ti.UI.createView({
+		width: '33%',
+		top: 0,
+		height: 50,
+		active: true
+		});
+		
+	actionViews.push(timelineActionView);
+		
+	var timelineActionIcon = Ti.UI.createImageView({
+		image: '/images/action-timeline-active',
+		width: 27,
+		height: 24,
+		bottom: 18
+		});
+		
+	timelineActionView.add(timelineActionIcon);
+		
+	var timelineActionLabel = Ti.UI.createLabel({
+		color: '#6B20B7',
+		bottom: 4,
+		font:
+			{
+			fontSize: 10,
+			fontFamily: config.opensans_regular
+			},
+		text: L('timeline')
+		});
+	
+	timelineActionView.add(timelineActionLabel);
+	menuBarActionView.add(timelineActionView);
+	menuBarContainer.add(menuBarActionView);
+	
+	win.add(menuBarContainer);
+	
+	function scrollAvailabilityViewTo(hour, minute)
+		{
+		availabilityScrollView.removeEventListener('scroll', availabilityScrollEvent);
+		availabilityScrollView.scrollTo((hour * 60) + minute, 0);
+		availabilityScrollView.addEventListener('scroll', availabilityScrollEvent);
+		}
 	
 	var windowPostLayoutCallback = function(e)
 		{
 		win.removeEventListener('postlayout', windowPostLayoutCallback);
-		updateViews();
+		
+		// Set the right and left buffers for the availability view
+		viewBuffer = availabilityScrollView.rect.width / 2;
+		rightDayViewBuffer.width = viewBuffer;
+		leftDayViewBuffer.width = viewBuffer;
+		
+		// TODO - Scroll to the conversation equal to or next after
 		};
 	
 	win.addEventListener('postlayout', windowPostLayoutCallback);
@@ -146,6 +345,8 @@ function MainWindow()
 	var windowFocusCallback = function(e)
 		{
 		win.removeEventListener('focus', windowFocusCallback);
+		
+		win.animate({opacity: 1, duration: 400});
 		
 		// Register the device for push
 		whatever.register();

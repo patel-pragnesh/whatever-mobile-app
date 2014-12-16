@@ -67,16 +67,31 @@ exports.register = function()
 	{
 	if(config.platform === 'iphone')
 		{
-		Ti.Network.registerForPushNotifications({
-			types: [
-			Ti.Network.NOTIFICATION_TYPE_BADGE,
-			Ti.Network.NOTIFICATION_TYPE_ALERT,
-			Ti.Network.NOTIFICATION_TYPE_SOUND
-			],
-			success: deviceTokenSuccess,
-			error: deviceTokenError,
-			callback: receivePush
-			});
+		if(config.major < 8)
+			{
+			Ti.Network.registerForPushNotifications({
+				types: [
+				Ti.Network.NOTIFICATION_TYPE_BADGE,
+				Ti.Network.NOTIFICATION_TYPE_ALERT,
+				Ti.Network.NOTIFICATION_TYPE_SOUND
+				],
+				success: deviceTokenSuccess,
+				error: deviceTokenError,
+				callback: receivePush
+				});
+			}
+		else
+			{
+			Ti.App.iOS.registerUserNotificationSettings({
+				types: [Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT, Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND, Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE]
+				});
+			
+			Ti.Network.registerForPushNotifications({
+				success: deviceTokenSuccess,
+				error: deviceTokenError,
+				callback: receivePush
+				});
+			}
 		
 		function receivePush(e)
 			{

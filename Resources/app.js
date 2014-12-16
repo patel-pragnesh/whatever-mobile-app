@@ -61,7 +61,8 @@
 				// Make sure there is an account associated with the app
 				if(!_.isNull(Ti.App.Properties.getObject("account")))
 					{
-					Ti.App.fireEvent('update_views');
+					
+					
 					}
 					
 				}, 500);

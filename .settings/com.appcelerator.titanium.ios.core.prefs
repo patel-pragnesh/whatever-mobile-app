@@ -4,5 +4,5 @@ iosLaunchConfigurationAttributes/ATTR_PROJECT_NAME=Whatever
 iosLaunchConfigurationAttributes/appid=com.whateverapp.whatever
 iosLaunchConfigurationAttributes/certificate=Joseph McMahon (XQX2PJPZ36)
 iosLaunchConfigurationAttributes/keychain=
-iosLaunchConfigurationAttributes/sdk_version=7.1
-iosLaunchConfigurationAttributes/uuid=02A8451A-82BF-4586-B098-2580922B2500
+iosLaunchConfigurationAttributes/sdk_version=8.1
+iosLaunchConfigurationAttributes/uuid=01bc245c-4c0c-4c9f-b629-1c3f39cb7cc4

@@ -2,19 +2,21 @@ function ActivateWindow()
 	{
 	var config = require('app/config');
 	var _ = require('lib/underscore');
-	var countryCodeUtil = require('app/util/countrycodeutil');
+	var countrycodeutil = require('app/util/countrycodeutil');
 	var httpClient = require('lib/httpclient');
 	
 	var ActivationCodeWindow = require('app/ui/ActivationCodeWindow');
 	
 	var windowWidth = null;
-	var deviceCountryCode = countryCodeUtil.getDeviceCode();
-	
+	var deviceCountryCode = countrycodeutil.getDeviceCode();
+		
 	var win = Ti.UI.createWindow({
 		backgroundColor: '#f5f5f5',
 		width: '100%',
+		height: '100%',
 		fullscreen: false,
-		orientationModes: [Ti.UI.PORTRAIT]
+		orientationModes: [Ti.UI.PORTRAIT],
+		opacity: 0
 		});
 
 	if(config.platform === config.platform_android)
@@ -22,21 +24,17 @@ function ActivateWindow()
 		win.navBarHidden = true;
 		win.height = '100%';
 		}
-	else
-		{
-		if(config.major >= 7)
-			{
-			win.top = 20;
-			win.bottom = 0;
-			}
-		}
 	
 	/*
 	 * Called after the UI elements are created
 	 */
+	var countryPickerHeight = 0;
+	
 	var windowPostLayoutCallback = function(e)
 		{
 		win.removeEventListener('postlayout', windowPostLayoutCallback);
+		countryPickerHeight = countryPickerContainer.rect.height;
+		countryPickerContainer.height = 0;
 		
 		if(config.platform === config.platform_android)
 			{
@@ -50,6 +48,13 @@ function ActivateWindow()
 	
 	win.addEventListener('postlayout', windowPostLayoutCallback);
 	
+	var windowOpenCallback = function(e)
+		{
+		win.animate({opacity: 1, duration: 400});
+		};
+		
+	win.addEventListener('open', windowOpenCallback);
+	
 	var notificationView = require('app/ui/common/NotificationView').create();
 	
 	var mainContainerView = Ti.UI.createView({
@@ -61,7 +66,7 @@ function ActivateWindow()
 	
 	var headerView = Ti.UI.createView({
 		backgroundColor: 'white',
-		height: 105,
+		height: 125,
 		top: 0,
 		width: '100%'
 		});
@@ -69,7 +74,7 @@ function ActivateWindow()
 	mainContainerView.add(headerView);
 	
 	var activationViewContainer = Ti.UI.createView({
-		height: 135,
+		height: Ti.UI.SIZE,
 		top: 0,
 		width: '100%',
 		layout: 'vertical'
@@ -144,16 +149,73 @@ function ActivateWindow()
 		phoneNumberField.softKeyboardOnFocus = Ti.UI.Android.SOFT_KEYBOARD_SHOW_ON_FOCUS;
 		}
 		
+	phoneNumberFieldView.add(phoneNumberField);
+	phoneNumberView.add(phoneNumberFieldView);
+	activationViewContainer.add(phoneNumberView);
+	
+	var countryPickerContainer = Ti.UI.createView({
+		height: Ti.UI.SIZE,
+		width: Ti.UI.SIZE,
+		layout: 'vertical',
+		visible: false
+		});
+		
+	phoneNumberField.addEventListener('focus', function()
+		{
+		if(countryPickerContainer.height > 0)
+			{
+			countryPickerContainer.height = 0;
+			countryPickerContainer.hide();
+			}
+		});
+		
 	countryCodeView.addEventListener('click', function(e){
 		phoneNumberField.value = '';
 		phoneNumberField.blur();
+		
+		// Show the picker
+		if(countryPickerContainer.height == 0)
+			{
+			countryPickerContainer.height = countryPickerHeight;
+			countryPickerContainer.show();
+			}
 		});
 		
-	phoneNumberFieldView.add(phoneNumberField);
+	var pickerContainerTopPadding = Ti.UI.createView({
+		height: 15,
+		width: Ti.UI.SIZE
+		});
 		
-	phoneNumberView.add(phoneNumberFieldView);
+	countryPickerContainer.add(pickerContainerTopPadding);
 	
-	activationViewContainer.add(phoneNumberView);
+	var countryPicker = Ti.UI.createPicker({
+		top: 0,
+		height: Ti.UI.SIZE,
+		backgroundColor: '#f5f5f5',
+		useSpinner: true
+		});
+		
+	var data = [];
+	
+	// Build the picker data
+	var countries = countrycodeutil.getCountries();
+	
+	for(var c = 0; c < countries.length; c++)
+		{
+		data.push(Ti.UI.createPickerRow({title: countries[c].name, phoneCode: countries[c].phoneCode, code: countries[c].code}));
+		}
+	
+	countryPicker.add(data);
+	countryPicker.selectionIndicator = true;
+	
+	countryPicker.addEventListener('change', function(e)
+		{
+		deviceCountryCode = e.row.phoneCode;
+		viewTitleLabel.text = '+' + deviceCountryCode;
+		});
+	
+	countryPickerContainer.add(countryPicker);
+	activationViewContainer.add(countryPickerContainer);
 	
 	var continueButton = Ti.UI.createButton({
 		backgroundImage: '/images/continue-button-gradient.png',

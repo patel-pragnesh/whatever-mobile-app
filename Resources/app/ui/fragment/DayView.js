@@ -9,7 +9,7 @@ exports.create = function(day)
 	
 	//The bar to set if you are available or not and to see upcoming conversations.
 	var view = Ti.UI.createView({
-		backgroundColor: '#dfdfdf',
+		backgroundColor: 'white',
 		width: 60 * 24,
 		height: 60,
 		top: 0,
@@ -58,7 +58,7 @@ exports.create = function(day)
 	function createHourView(index, hour, period)
 		{
 		var hourView = Ti.UI.createView({
-			backgroundColor: '#e0e0e0',
+			backgroundColor: 'white',
 			width: 60,
 			height: 60,
 			top: 0,
@@ -68,7 +68,7 @@ exports.create = function(day)
 		if(i > 0 && i < 24)
 			{
 			var hourIndicatorView = Ti.UI.createView({
-				backgroundColor: '#a4a4a4',
+				backgroundColor: '#D8D8D8',
 				width: 2,
 				height: 50,
 				top: 0,
@@ -80,7 +80,7 @@ exports.create = function(day)
 		else if(day > 1)
 			{
 			var dayIndicatorView = Ti.UI.createView({
-				backgroundColor: '#a4a4a4',
+				backgroundColor: '#D8D8D8',
 				width: 2,
 				height: 60,
 				top: 0,
@@ -92,25 +92,24 @@ exports.create = function(day)
 			
 		var hourLabelView = Ti.UI.createView({
 			top: 0,
-			left: 2,
-			width: 27,
-			height: Ti.UI.SIZE
+			left: 0,
+			width: 30,
+			height: 30
 			});
 			
 		var hourLabelContainer = Ti.UI.createView({
-			top: 0,
 			width: Ti.UI.SIZE,
-			height: 30,
-			layout: 'horizontal'
+			layout: 'horizontal',
+			top: 8
 			});
 			
 		var hourLabel = Ti.UI.createLabel({
-			height: Ti.UI.FILL,
+			width: Ti.UI.SIZE,
 			bottom: 0,
 			color: '#585858',
 			font:
 				{
-				fontSize: 14,
+				fontSize: 13,
 				fontFamily: config.opensans_semibold
 				},
 			text: hour,
@@ -120,13 +119,13 @@ exports.create = function(day)
 		hourLabelContainer.add(hourLabel);
 		
 		var periodLabel = Ti.UI.createLabel({
-			height: Ti.UI.FILL,
+			width: Ti.UI.SIZE,
 			left: 1,
-			top: 0,
+			bottom: 0,
 			color: '#585858',
 			font:
 				{
-				fontSize: 11,
+				fontSize: 13,
 				fontFamily: config.opensans_light
 				},
 			text: period,
@@ -134,8 +133,8 @@ exports.create = function(day)
 			});
 		
 		hourLabelContainer.add(periodLabel);
-		hourLabelView.add(hourLabelContainer);
 		
+		hourLabelView.add(hourLabelContainer);
 		hourView.add(hourLabelView);
 		
 		var halfHourView = Ti.UI.createView({
