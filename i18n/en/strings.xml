@@ -22,4 +22,8 @@
 	<string name="last_name_required">Please enter your last name.</string>
 	<string name="invalid_session">We're sorry! Your activation code expired. We are sending you a new one.</string>
 	<string name="timeline">Timeline</string>
+	<string name="notifications">Notifications</string>
+	<string name="more">More</string>
+	<string name="join">Join</string>
+	<string name="stay-tuned">Stay Tuned</string>
 </resources>

@@ -4,6 +4,7 @@
  */
 (function()
 	{
+	var launching = true;
 	var config = require('app/config');
 	var _ = require('lib/underscore');
 	
@@ -20,6 +21,32 @@
 		{
 		Ti.App.Properties.setBool('online', e.online);
 		});
+		
+	function resumed()
+		{
+		var pause = setTimeout(function()
+			{
+			if(!_.isNull(Ti.App.Properties.getString('device_token')))
+				{
+				whatever.registerDevice(Ti.App.Properties.getString('device_token'), 'IOS');
+				}
+			else
+				{
+				if(!_.isNull(Ti.App.Properties.getObject("account")))
+					{
+					whatever.register();
+					}
+				}
+			
+			// Make sure there is an account associated with the app
+			if(!_.isNull(Ti.App.Properties.getObject("account")))
+				{
+				
+				
+				}
+				
+			}, 500);
+		}
 	
 	/**
 	 * Launch the app
@@ -42,30 +69,22 @@
 			
 		Ti.App.addEventListener('resumed', function()
 			{
-			Ti.UI.iPhone.appBadge = 0;
-				
-			var pause = setTimeout(function()
+			// Not sure if this is a bug - but after initial launch resume gets called even when app is launching second time
+			if(config.major < 8)
 				{
-				if(!_.isNull(Ti.App.Properties.getString('device_token')))
+				resumed();
+				}
+			else
+				{
+				if(launching)
 					{
-					whatever.registerDevice(Ti.App.Properties.getString('device_token'), 'IOS');
+					launching = false;
 					}
 				else
 					{
-					if(!_.isNull(Ti.App.Properties.getObject("account")))
-						{
-						whatever.register();
-						}
+					resumed();
 					}
-				
-				// Make sure there is an account associated with the app
-				if(!_.isNull(Ti.App.Properties.getObject("account")))
-					{
-					
-					
-					}
-					
-				}, 500);
+				}
 			});
 		}
 	else

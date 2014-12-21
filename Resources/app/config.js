@@ -58,7 +58,7 @@ exports.opensans_extrabold = 'OpenSans-ExtraBold';
 exports.opensans_light = 'OpenSans-Light';
 exports.opensans_regular = 'OpenSans-Regular';
 exports.opensans_semibold = 'OpenSans-Semibold';
-exports.capita_light = 'Capita-Light';
+exports.ptserif_regular = 'PTSerif-Regular';
 
 // Set the version for the platform
 // Currently used to set the top of a window for iOS 7

@@ -1,4 +1,4 @@
-function MainWindow()
+function MainWindow(conversations)
 	{
 	var config = require('app/config');
 	var whatever = require('app/whatever');
@@ -178,77 +178,11 @@ function MainWindow()
 		bottom: 0,
 		width: '100%'
 		});
-	
+		
 	// Create the conversations
 	for(var i = 0; i < 10; i++)
 		{
-		var fakeTime = moment().add(i, "hour");
-		
-		var conversation = Ti.UI.createView({
-			top: 0,
-			bottom: 0,
-			left: 10,
-			right: 10,
-			layout: 'vertical'
-			});
-		
-		var timeIndicatorImageView = Ti.UI.createImageView({
-			image: '/images/time-indicator-up-arrow.png',
-			top: 5,
-			width: 30,
-			height: 15
-			});
-			
-		conversation.add(timeIndicatorImageView);
-		
-		var conversationHeaderView = Ti.UI.createView({
-			backgroundColor: 'white',
-			top: 0,
-			height: 40
-			});
-			
-		conversation.add(conversationHeaderView);
-		
-		var conversationHeaderSeparatorView = Ti.UI.createView({
-			backgroundColor: '#B3B3B3',
-			top: 0,
-			height: 1
-			});
-			
-		conversation.add(conversationHeaderSeparatorView);
-		
-		var conversationScrollableView = Ti.UI.createScrollView({
-			backgroundColor: 'transparent',
-			showVerticalScrollIndicator: true,
-			showHorizontalScrollIndicator: false,
-			width: '100%',
-			top: 0,
-			bottom: 0,
-			layout: 'vertical'
-			});
-			
-		if(config.platform === 'iphone')
-			{
-			conversationScrollableView.disableBounce = true;
-			}
-		
-		var conversationProfileView = Ti.UI.createView({
-			backgroundColor: 'white',
-			width: '100%',
-			top: 0,
-			height: 500
-			});
-			
-		conversationScrollableView.add(conversationProfileView);
-		
-		var bottomShim = Ti.UI.createView({
-			height: 10,
-			width: '100%'
-			});
-		
-		conversationScrollableView.add(bottomShim);
-		
-		conversation.add(conversationScrollableView);
+		var conversation = require('/app/ui/fragment/conversationView').create();
 		scrollableView.addView(conversation);
 		}
 		
@@ -265,15 +199,24 @@ function MainWindow()
 	var menuBarContainer = Ti.UI.createView({
 		width: '100%',
 		bottom: 0,
-		height: 50
+		height: 51,
 		});
+		
+	var menuBarSeparator = Ti.UI.createView({
+		backgroundColor: 'black',
+		top: 0,
+		width: '100%',
+		height: 1
+		});
+		
+	menuBarContainer.add(menuBarSeparator);
 	
 	var menuBarView = Ti.UI.createView({
 		backgroundColor: '#F6F5F1',
 		width: '100%',
 		top: 0,
 		height: 50,
-		opacity: .65
+		opacity: .8
 		});
 		
 	menuBarContainer.add(menuBarView);
@@ -281,42 +224,216 @@ function MainWindow()
 	var menuBarActionView = Ti.UI.createView({
 		width: '100%',
 		top: 0,
-		height: 50
+		height: 50,
+		layout: 'horizontal'
 		});
 		
-	var actionViews = [];
+	var buttonGroup = [];
+	
+	function toggleIconState(parent)
+		{
+		for(var c in parent.children)
+			{
+			if(parent.children[c].id == parent.type + '-icon')
+				{
+				if(parent.active)
+					{
+					parent.children[c].image = '/images/' + parent.type + '.png';
+					}
+				else
+					{
+					parent.children[c].image = '/images/' + parent.type + '-active.png';
+					}
+				}
+				
+			if(parent.children[c].id == parent.type + '-label')
+				{
+				if(parent.active)
+					{
+					parent.children[c].color = '#333333';
+					parent.active = false;
+					}
+				else
+					{
+					parent.children[c].color = '#6B20B7';
+					parent.active = true;
+					}
+				}
+			}
+		}
+	
+	function toggleButtonGroup(e)
+		{
+		if(!e.source.active)
+			{
+			for(var i = 0; i < buttonGroup.length; i++)
+				{
+				if(buttonGroup[i].active)
+					{
+					toggleIconState(buttonGroup[i]);
+					break;
+					}
+				}
+			
+			toggleIconState(e.source);
+			
+			if(e.source.type == 'action-timeline')
+				{
+				Ti.API.info('Show Timeline');
+				}
+				
+			if(e.source.type == 'action-notifications')
+				{
+				Ti.API.info('Show Notifications');
+				}
+				
+			if(e.source.type == 'action-more')
+				{
+				Ti.API.info('Show More');
+				}
+			}
+		}
 		
 	var timelineActionView = Ti.UI.createView({
 		width: '33%',
 		top: 0,
 		height: 50,
+		type: 'action-timeline',
 		active: true
 		});
-		
-	actionViews.push(timelineActionView);
+	
+	timelineActionView.addEventListener('click', toggleButtonGroup);
+	buttonGroup.push(timelineActionView);
 		
 	var timelineActionIcon = Ti.UI.createImageView({
-		image: '/images/action-timeline-active',
+		id: 'action-timeline-icon',
+		image: '/images/action-timeline-active.png',
 		width: 27,
 		height: 24,
-		bottom: 18
+		bottom: 19,
+		touchEnabled: false
 		});
 		
 	timelineActionView.add(timelineActionIcon);
 		
 	var timelineActionLabel = Ti.UI.createLabel({
+		id: 'action-timeline-label',
 		color: '#6B20B7',
-		bottom: 4,
+		bottom: 5,
 		font:
 			{
 			fontSize: 10,
 			fontFamily: config.opensans_regular
 			},
-		text: L('timeline')
+		text: L('timeline'),
+		touchEnabled: false
 		});
 	
 	timelineActionView.add(timelineActionLabel);
 	menuBarActionView.add(timelineActionView);
+	
+	var notificationsActionView = Ti.UI.createView({
+		width: '33%',
+		top: 0,
+		height: 50,
+		type: 'action-notifications',
+		active: false
+		});
+
+	notificationsActionView.addEventListener('click', toggleButtonGroup);	
+	buttonGroup.push(notificationsActionView);
+		
+	var notificationsActionIcon = Ti.UI.createImageView({
+		id: 'action-notifications-icon',
+		image: '/images/action-notifications.png',
+		width: 24,
+		height: 22,
+		bottom: 20,
+		touchEnabled: false
+		});
+		
+	notificationsActionView.add(notificationsActionIcon);
+	
+	var notificationCountView = Ti.UI.createView({
+		backgroundColor: '#FF264A',
+		borderColor: 'white',
+		height: 18,
+		width: 18,
+		borderRadius: 9,
+		right: 30,
+		bottom: 28,
+		touchEnabled: false
+		});
+		
+	var notificationsCountLabel = Ti.UI.createLabel({
+		color: 'white',
+		font:
+			{
+			fontSize: 10,
+			fontFamily: config.opensans_semibold
+			},
+		text: '99',
+		touchEnabled: false
+		});
+		
+	notificationCountView.add(notificationsCountLabel);
+		
+	notificationsActionView.add(notificationCountView);
+		
+	var notificationsActionLabel = Ti.UI.createLabel({
+		id: 'action-notifications-label',
+		color: '#333333',
+		bottom: 5,
+		font:
+			{
+			fontSize: 10,
+			fontFamily: config.opensans_regular
+			},
+		text: L('notifications'),
+		touchEnabled: false
+		});
+	
+	notificationsActionView.add(notificationsActionLabel);
+	menuBarActionView.add(notificationsActionView);
+	
+	var moreActionView = Ti.UI.createView({
+		width: '33%',
+		top: 0,
+		height: 50,
+		type: 'action-more',
+		active: false
+		});
+		
+	moreActionView.addEventListener('click', toggleButtonGroup);
+	buttonGroup.push(moreActionView);
+		
+	var moreActionIcon = Ti.UI.createImageView({
+		id: 'action-more-icon',
+		image: '/images/action-more.png',
+		width: 22,
+		height: 16,
+		bottom: 22,
+		touchEnabled: false
+		});
+		
+	moreActionView.add(moreActionIcon);
+		
+	var moreActionLabel = Ti.UI.createLabel({
+		id: 'action-more-label',
+		color: '#333333',
+		bottom: 5,
+		font:
+			{
+			fontSize: 10,
+			fontFamily: config.opensans_regular
+			},
+		text: L('more'),
+		touchEnabled: false
+		});
+	
+	moreActionView.add(moreActionLabel);
+	menuBarActionView.add(moreActionView);
+	
 	menuBarContainer.add(menuBarActionView);
 	
 	win.add(menuBarContainer);
