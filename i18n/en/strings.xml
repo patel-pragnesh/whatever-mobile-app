@@ -26,4 +26,6 @@
 	<string name="more">More</string>
 	<string name="join">Join</string>
 	<string name="stay-tuned">Stay Tuned</string>
+	<string name="post">Post</string>
+	<string name="post_comment">Post a comment</string>
 </resources>

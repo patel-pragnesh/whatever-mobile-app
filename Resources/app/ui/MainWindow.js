@@ -182,7 +182,7 @@ function MainWindow(conversations)
 	// Create the conversations
 	for(var i = 0; i < 10; i++)
 		{
-		var conversation = require('/app/ui/fragment/conversationView').create();
+		var conversation = require('/app/ui/fragment/ConversationView').create();
 		scrollableView.addView(conversation);
 		}
 		
@@ -470,7 +470,7 @@ function MainWindow(conversations)
 		};
 		
 	win.addEventListener('focus', windowFocusCallback);
-
+	
 	return win;
 	};
 
