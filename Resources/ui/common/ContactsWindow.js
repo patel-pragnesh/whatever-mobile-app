@@ -1,15 +1,15 @@
 function ContactsWindow(people, callback)
 	{
-	var config = require('app/config');
-	var _ = require('lib/underscore');
-	var httpClient = require('lib/httpclient');
+	var config = require('config');
+	var _ = require('lib/Underscore');
+	var httpClient = require('lib/HttpClient');
 	
 	var account = Ti.App.Properties.getObject("account");
 	
 	var userId = null;
 	
 	// Create the main window
-	var win = require('app/ui/common/Window').create();
+	var win = require('ui/common/Window').create();
 	
 	if(config.platform === config.platform_android)
 		{
@@ -38,7 +38,7 @@ function ContactsWindow(people, callback)
 		backgroundColor: '#eaebeb'
 		};
 		
-	var navigationView = require('app/ui/common/NavigationView').create(navViewArgs, win);
+	var navigationView = require('ui/common/NavigationView').create(navViewArgs, win);
 	mainContainerView.add(navigationView);
 	
 	var search;

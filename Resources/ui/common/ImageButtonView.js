@@ -1,6 +1,6 @@
 exports.create = function(args, callback)
 	{
-	var config = require('app/config');
+	var config = require('config');
 	
 	var imageButtonView = Ti.UI.createView(args.button);
 		

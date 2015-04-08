@@ -1,15 +1,15 @@
 /**
  * The app.js file is the first file to get hit when the app starts up
- * Simply cascades logic and sets initial variables and calls the .launch() function located in whatever.js
+ * Simply cascades logic and sets initial variables and calls the .launch() function located in context.js
  */
 (function()
 	{
 	var launching = true;
-	var config = require('app/config');
-	var _ = require('lib/underscore');
+	var config = require('config');
+	var _ = require('lib/Underscore');
 	
 	//var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
-	var whatever = require('app/whatever');
+	var context = require('context');
 	
 	Ti.UI.backgroundColor = 'white';
 	
@@ -28,13 +28,13 @@
 			{
 			if(!_.isNull(Ti.App.Properties.getString('device_token')))
 				{
-				whatever.registerDevice(Ti.App.Properties.getString('device_token'), 'IOS');
+				context.registerDevice(Ti.App.Properties.getString('device_token'), 'IOS');
 				}
 			else
 				{
 				if(!_.isNull(Ti.App.Properties.getObject("account")))
 					{
-					whatever.register();
+					context.register();
 					}
 				}
 			
@@ -53,11 +53,11 @@
 	 */
 	if(_.isNull(Ti.App.Properties.getObject('account')))
 		{
-		var activateWindow = whatever.activate();
+		var activateWindow = context.activate();
 		}
 	else
 		{
-		var mainWindow = whatever.launch();
+		var mainWindow = context.launch();
 		}
 		
 	if(config.platform === config.platform_iphone)

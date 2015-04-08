@@ -5,8 +5,8 @@
  */
 exports.create = function(conversation)
 	{
-	var config = require('app/config');
-	var moment = require('lib/moment');
+	var config = require('config');
+	var moment = require('lib/Moment');
 		
 	var conversation = Ti.UI.createView({
 		top: 0,
@@ -187,7 +187,7 @@ exports.create = function(conversation)
 			},
 		left: 10,
 		right: 10,
-		text: 'Getting the conversation started about doing whatever, with whatever in whatever. So we should make some conversation and figure out what we should do. I want to do whatever.'
+		text: 'Getting the conversation started about doing whatever, with whatever in context. So we should make some conversation and figure out what we should do. I want to do context.'
 		});
 		
 	conversationMessageView.add(messageLabel);
@@ -205,7 +205,7 @@ exports.create = function(conversation)
 		Ti.API.info('Joining Conversation');
 		}
 		
-	var joinButton = require('/app/ui/common/ImageButtonView').create({
+	var joinButton = require('/ui/common/ImageButtonView').create({
 		button: {
 			backgroundColor: '#E4E3E6',
 			backgroundSelectedColor: '#CAC8CE',
@@ -235,7 +235,7 @@ exports.create = function(conversation)
 		Ti.API.info('Stay Tuned');
 		}
 	
-	var stayTunedButton = require('/app/ui/common/ImageButtonView').create({
+	var stayTunedButton = require('/ui/common/ImageButtonView').create({
 		button: {
 			backgroundColor: '#E4E3E6',
 			backgroundSelectedColor: '#CAC8CE',
@@ -307,7 +307,7 @@ exports.create = function(conversation)
 		
 	for(var c = 0; c < 5; c++)
 		{
-		var commentView = require('/app/ui/fragment/CommentView').create();
+		var commentView = require('/ui/common/CommentView').create();
 		conversationCommentView.add(commentView);
 		}
 		

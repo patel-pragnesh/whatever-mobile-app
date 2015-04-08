@@ -1,6 +1,6 @@
 exports.create = function(comment)
 	{
-	var config = require('app/config');
+	var config = require('config');
 		
 	var commentContainerView = Ti.UI.createView({
 		backgroundColor: '#F6F6F6',

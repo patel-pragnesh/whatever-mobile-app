@@ -6,7 +6,7 @@
  */
 exports.create = function(args)
 	{
-	var config = require('app/config');
+	var config = require('config');
 	
 	var win = Ti.UI.createWindow({
 		width: '100%',

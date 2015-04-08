@@ -1,11 +1,10 @@
 function AccountWindow(verificationCode, phoneNumber)
 	{
-	var config = require('app/config');
-	var _ = require('lib/underscore');
+	var config = require('config');
+	var _ = require('lib/Underscore');
 	
-	var httpClient = require('lib/httpclient');
-	
-	var MainWindow = require('app/ui/MainWindow');
+	var httpClient = require('lib/HttpClient');
+	var MainWindow = require('ui/common/MainWindow');
 	
 	var windowWidth = null;
 	
@@ -50,7 +49,7 @@ function AccountWindow(verificationCode, phoneNumber)
 	win.addEventListener('postlayout', windowPostLayoutCallback);
 	
 	// The notification view has a zIndex that blocks the UI and provides an indicator
-	var notificationView = require('app/ui/common/NotificationView').create();
+	var notificationView = require('ui/common/NotificationView').create();
 	
 	var mainContainerView = Ti.UI.createView({
 		width: '100%',

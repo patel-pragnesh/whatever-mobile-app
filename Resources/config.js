@@ -52,6 +52,9 @@ else
 	exports.services_base_url = 'https://whatever-api.appspot.com';
 	}
 	
+exports.namespace_header = 'WebApplicationMode';
+exports.namespace = (Ti.App.deployType !== 'production') ? 'dev' : 'prod';
+	
 // Export the font names
 exports.opensans_bold = 'OpenSans-Bold';
 exports.opensans_extrabold = 'OpenSans-ExtraBold';

@@ -1,5 +1,5 @@
-var config = require('app/config');
-var _ = require('lib/underscore');
+var config = require('config');
+var _ = require('lib/Underscore');
 
 exports.doPost = function(endpoint, request, callback)
 	{
@@ -40,6 +40,7 @@ exports.doPost = function(endpoint, request, callback)
     
     xhr.setRequestHeader("x-key", config.app_key);
 	xhr.setRequestHeader('content-type', 'application/json; charset=utf-8');
+	xhr.setRequestHeader(config.namespace_header, config.namespace);
 	
 	// Send the payload
 	xhr.send(JSON.stringify(request));
@@ -81,6 +82,7 @@ exports.doGet = function(endpoint, callback)
         });
     
     xhr.open('GET', url);
+    xhr.setRequestHeader(config.namespace_header, config.namespace);
 	xhr.send();
 	};
 

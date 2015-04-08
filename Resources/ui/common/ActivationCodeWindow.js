@@ -1,13 +1,13 @@
 function ActivationCodeWindow(phoneNumber, sessionId)
 	{
-	var config = require('app/config');
-	var _ = require('lib/underscore');
+	var config = require('config');
+	var _ = require('lib/Underscore');
 	
-	var httpClient = require('lib/httpclient');
+	var httpClient = require('lib/HttpClient');
 	
-	var ActivateWindow = require('app/ui/ActivateWindow');
-	var AccountWindow = require('app/ui/AccountWindow');
-	var MainWindow = require('app/ui/MainWindow');
+	var ActivateWindow = require('ui/common/ActivateWindow');
+	var AccountWindow = require('ui/common/AccountWindow');
+	var MainWindow = require('ui/common/MainWindow');
 	
 	var windowWidth = null;
 	
@@ -52,7 +52,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 	win.addEventListener('postlayout', windowPostLayoutCallback);
 	
 	// The notification view has a zIndex that blocks the UI and provides an indicator
-	var notificationView = require('app/ui/common/NotificationView').create();
+	var notificationView = require('ui/common/NotificationView').create();
 	
 	var mainContainerView = Ti.UI.createView({
 		width: '100%',

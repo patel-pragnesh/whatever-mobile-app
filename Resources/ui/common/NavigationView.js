@@ -6,7 +6,7 @@
  */
 exports.create = function(args, parent)
 	{
-	var config = require('app/config');
+	var config = require('config');
 	
 	var view = Ti.UI.createView({
 		width: '100%',

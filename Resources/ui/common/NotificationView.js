@@ -10,7 +10,7 @@
  */
 exports.create = function(args, callback)
 	{
-	var config = require('app/config');
+	var config = require('config');
 	
 	var view = Ti.UI.createView({
 		height: '100%',

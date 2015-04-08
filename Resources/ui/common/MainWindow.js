@@ -1,14 +1,14 @@
 function MainWindow(conversations)
 	{
-	var config = require('app/config');
-	var whatever = require('app/whatever');
+	var config = require('config');
+	var context = require('context');
 	
-	var moment = require('lib/moment');
-	var _ = require('lib/underscore');
-	var httpClient = require('lib/httpclient');
+	var moment = require('lib/Moment');
+	var _ = require('lib/Underscore');
+	var httpClient = require('lib/HttpClient');
 	
 	// Create the main window
-	var win = require('app/ui/common/Window').create();
+	var win = require('ui/common/Window').create();
 	win.opacity = 0;
 	
 	if(config.platform === config.platform_android)
@@ -17,7 +17,7 @@ function MainWindow(conversations)
 		}
 	
 	// The notification view has a zIndex that blocks the UI and provides an indicator
-	var notificationView = require('app/ui/common/NotificationView').create();
+	var notificationView = require('ui/common/NotificationView').create();
 	
 	var navigationHeight = 0;
 	
@@ -85,7 +85,7 @@ function MainWindow(conversations)
 		
 	for(var i = 0; i < days; i++)
 		{
-		var dayView = require('app/ui/fragment/DayView').create(i + 1);
+		var dayView = require('ui/common/DayView').create(i + 1);
 		availabilityScrollView.add(dayView);
 		}
 		
@@ -182,7 +182,7 @@ function MainWindow(conversations)
 	// Create the conversations
 	for(var i = 0; i < 10; i++)
 		{
-		var conversation = require('/app/ui/fragment/ConversationView').create();
+		var conversation = require('ui/common/ConversationView').create();
 		scrollableView.addView(conversation);
 		}
 		
@@ -466,7 +466,7 @@ function MainWindow(conversations)
 		win.animate({opacity: 1, duration: 400});
 		
 		// Register the device for push
-		whatever.register();
+		context.register();
 		};
 		
 	win.addEventListener('focus', windowFocusCallback);

@@ -5,7 +5,7 @@
  */
 exports.create = function(day)
 	{
-	var config = require('app/config');
+	var config = require('config');
 	
 	//The bar to set if you are available or not and to see upcoming conversations.
 	var view = Ti.UI.createView({

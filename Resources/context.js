@@ -2,11 +2,11 @@
  * The main delegator for the app for login, startup, relaunches
  */
 // Imports
-var config = require('app/config');
-var httpClient = require('lib/httpclient');
+var config = require('config');
+var httpClient = require('lib/HttpClient');
 
-var MainWindow = require('app/ui/MainWindow');
-var ActivateWindow = require('app/ui/ActivateWindow');
+var MainWindow = require('ui/common/MainWindow');
+var ActivateWindow = require('ui/common/ActivateWindow');
 
 // Main launch function
 exports.launch = function()

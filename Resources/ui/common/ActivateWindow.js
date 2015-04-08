@@ -1,14 +1,14 @@
 function ActivateWindow()
 	{
-	var config = require('app/config');
-	var _ = require('lib/underscore');
-	var countrycodeutil = require('app/util/countrycodeutil');
-	var httpClient = require('lib/httpclient');
+	var config = require('config');
+	var _ = require('lib/Underscore');
+	var countryCodeUtil = require('app/util/CountryCodeUtil');
+	var httpClient = require('lib/HttpClient');
 	
-	var ActivationCodeWindow = require('app/ui/ActivationCodeWindow');
+	var ActivationCodeWindow = require('ui/common/ActivationCodeWindow');
 	
 	var windowWidth = null;
-	var deviceCountryCode = countrycodeutil.getDeviceCode();
+	var deviceCountryCode = countryCodeUtil.getDeviceCode();
 		
 	var win = Ti.UI.createWindow({
 		backgroundColor: '#f5f5f5',
@@ -55,7 +55,7 @@ function ActivateWindow()
 		
 	win.addEventListener('open', windowOpenCallback);
 	
-	var notificationView = require('app/ui/common/NotificationView').create();
+	var notificationView = require('ui/common/NotificationView').create();
 	
 	var mainContainerView = Ti.UI.createView({
 		width: '100%',
@@ -198,7 +198,7 @@ function ActivateWindow()
 	var data = [];
 	
 	// Build the picker data
-	var countries = countrycodeutil.getCountries();
+	var countries = countryCodeUtil.getCountries();
 	
 	for(var c = 0; c < countries.length; c++)
 		{
