@@ -2,7 +2,7 @@
  * Contains basic programmatically derived constants for the entire application
  */
 // The key the server requires so the JSON services remain secure just to the app
-exports.app_key = Ti.App.guid;
+exports.app_key = '8083ea6e-a696-44ab-adb5-fb844a290500';
 
 // The mode of the app
 var mode;
@@ -13,7 +13,7 @@ var mode_development = 'development';
  * Set the application mode - this can be used to add code that does not run in simulation
  * Also it is used to set specific runtime config variables below
  */
-if (Ti.Platform.model === 'Simulator' || Ti.Platform.model.indexOf('sdk') !== -1 )
+if (Ti.Platform.model === 'Simulator' || Ti.Platform.model.indexOf('sdk') !== -1)
 	{
 	mode = mode_development;
 	}

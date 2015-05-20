@@ -11,7 +11,7 @@
     <fullscreen>false</fullscreen>
     <navbar-hidden>true</navbar-hidden>
     <analytics>false</analytics>
-    <guid>8083ea6e-a696-44ab-adb5-fb844a290500</guid>
+    <guid>d58315b2-17ba-4d4d-9bbb-e84f671b7be8</guid>
     <property name="ti.ui.defaultunit" type="string">dp</property>
     <ios>
         <plist>
@@ -58,5 +58,6 @@
         <target device="mobileweb">false</target>
         <target device="tizen">false</target>
     </deployment-targets>
-    <sdk-version>3.5.1.GA</sdk-version>
+    <sdk-version>3.4.1.GA</sdk-version>
+    <property name="appc-app-id" type="string">55275a5c30f1dda36a4032f3</property>
 </ti:app>
