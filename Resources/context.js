@@ -127,52 +127,6 @@ exports.register = function() {
 			Ti.App.fireEvent(e.event);
 			});
 		
-		// The most recent queued message - typically from an app launch from pause event
-		Gcm.addEventListener('queuedMessage', function(e)
-			{
-			Ti.API.info("receiveQueuedMessage");
-			Ti.API.info(JSON.stringify(e));
-			
-			if(e.payloads)
-				{
-				for(var i = 0; i < e.payloads.length; i++)
-					{
-					Ti.API.info(JSON.stringify(e.payloads[i]));
-					}
-				}
-				
-			//alert(e.event);
-			});
-		
-		// Messages that only contain a payload sans title and message
-		Gcm.addEventListener('silentQueue', function(e)
-			{
-			Ti.API.info("silentQueue");
-			
-			if(e.payloads)
-				{
-				for(var i = 0; i < e.payloads.length; i++)
-					{
-					Ti.API.info(JSON.stringify(e.payloads[i]));
-					}
-				}
-
-			});
-		
-		// The entire list of queued notifications when 1 or more notifications have occurred when the app is in the background
-		Gcm.addEventListener('queuedNotifications', function(e) {
-			Ti.API.info("queuedNotifications");
-			
-			if(e.payloads)
-				{
-				for(var i = 0; i < e.payloads.length; i++)
-					{
-					Ti.API.info(JSON.stringify(e.payloads[i]));
-					}
-				}
-			
-			});
-		
 		Gcm.registerDevice({
 			success: registerDeviceSuccess,
 			error: registerDeviceError

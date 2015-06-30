@@ -13,11 +13,11 @@ function MainWindow(conversations)
 		width: '100%',
 		height: '100%',
 		orientationModes: [Ti.UI.PORTRAIT],
-		opacity: 0
+		//opacity: 0
 		});
 
 	if(config.platform === config.platform_android) {
-		win.navBarHidden = true;
+		win.theme = 'Theme.NoActionBar';
 		win.exitOnClose = true;
 		}
 	
@@ -446,10 +446,9 @@ function MainWindow(conversations)
 	
 	win.addEventListener('postlayout', windowPostLayoutCallback);
 	
-	var windowFocusCallback = function(e)
-		{
+	var windowFocusCallback = function(e) {
 		win.removeEventListener('focus', windowFocusCallback);
-		win.animate({opacity: 1, duration: 400});
+		//win.animate({opacity: 1, duration: 400});
 		
 		// Register the device for push
 		context.register();
