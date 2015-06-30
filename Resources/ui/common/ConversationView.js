@@ -249,7 +249,7 @@ exports.create = function(conversation)
 			fontSize: 14,
 			fontFamily: config.opensans_bold
 			},
-		text: L('stay-tuned'),
+		text: L('stay_tuned'),
 		color: '#666666',
 		image: {
 			image: '/images/stay-tuned-button-icon.png',

@@ -8,37 +8,25 @@ function MainWindow(conversations)
 	var httpClient = require('lib/HttpClient');
 	
 	// Create the main window
-	var win = require('ui/common/Window').create();
-	win.opacity = 0;
-	
-	if(config.platform === config.platform_android)
-		{
+	var win = Ti.UI.createWindow({
+		backgroundColor: '#f5f5f5',
+		width: '100%',
+		height: '100%',
+		orientationModes: [Ti.UI.PORTRAIT],
+		opacity: 0
+		});
+
+	if(config.platform === config.platform_android) {
+		win.navBarHidden = true;
 		win.exitOnClose = true;
 		}
 	
 	// The notification view has a zIndex that blocks the UI and provides an indicator
 	var notificationView = require('ui/common/NotificationView').create();
 	
-	var navigationHeight = 0;
-	
-	// Compensate for the iPhone status bar
-	if(config.platform === 'iphone' && config.major >= 7)
-		{
-		navigationHeight = 20;
-		
-		var navigationView = Ti.UI.createView({
-			backgroundColor: '#7945AD',
-			top: 0,
-			height: 20,
-			width: '100%'
-			});
-			
-		win.add(navigationView);
-		}
-	
 	var mainContainerView = Ti.UI.createView({
 		width: '100%',
-		top: navigationHeight,
+		top: 0,
 		bottom: 0,
 		layout: 'vertical'
 		});
@@ -445,8 +433,7 @@ function MainWindow(conversations)
 		availabilityScrollView.addEventListener('scroll', availabilityScrollEvent);
 		}
 	
-	var windowPostLayoutCallback = function(e)
-		{
+	var windowPostLayoutCallback = function(e) {
 		win.removeEventListener('postlayout', windowPostLayoutCallback);
 		
 		// Set the right and left buffers for the availability view
@@ -462,7 +449,6 @@ function MainWindow(conversations)
 	var windowFocusCallback = function(e)
 		{
 		win.removeEventListener('focus', windowFocusCallback);
-		
 		win.animate({opacity: 1, duration: 400});
 		
 		// Register the device for push

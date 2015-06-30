@@ -39,12 +39,10 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 		{
 		win.removeEventListener('postlayout', windowPostLayoutCallback);
 		
-		if(config.platform === config.platform_android)
-			{
+		if(config.platform === config.platform_android) {
 			windowWidth = windowWidth * Ti.Platform.displayCaps.dpi / 160;
 			}
-		else
-			{
+		else {
 			windowWidth = win.size.width;
 			}
 		};

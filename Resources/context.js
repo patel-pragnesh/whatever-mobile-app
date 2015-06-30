@@ -9,8 +9,7 @@ var MainWindow = require('ui/common/MainWindow');
 var ActivateWindow = require('ui/common/ActivateWindow');
 
 // Main launch function
-exports.launch = function()
-	{
+exports.launch = function() {
 	var mainWindow = new MainWindow();
 	mainWindow.open();
 		
@@ -43,8 +42,7 @@ function registerDevice(deviceId, deviceType)
 	
 	Ti.API.info(JSON.stringify(request));
 	
-	httpClient.doPost('/v1/registerDevice', request, function(success, response)
-		{
+	httpClient.doPost('/v1/registerDevice', request, function(success, response) {
 		Ti.API.info(JSON.stringify(response));
 		
 		if(!success)
@@ -63,12 +61,9 @@ exports.registerDevice = registerDevice;
  * 
  * @param {Object} pushCallback
  */
-exports.register = function()
-	{
-	if(config.platform === 'iphone')
-		{
-		if(config.major < 8)
-			{
+exports.register = function() {
+	if(config.platform === 'iphone') {
+		if(config.major < 8) {
 			Ti.Network.registerForPushNotifications({
 				types: [
 				Ti.Network.NOTIFICATION_TYPE_BADGE,
@@ -117,7 +112,7 @@ exports.register = function()
 	else
 		{
 		// Google Cloud Messaging API
-		var Gcm = require('ti.gcm');
+		var Gcm = require('ti.cloudmessaging');
 		
 		Gcm.init({
 			senderId: '823842470448', // Google API Key
@@ -125,8 +120,7 @@ exports.register = function()
 			});
 		
 		// Receives messages or payloads while the app is focused and not in the background
-		Gcm.addEventListener('receiveMessage', function(e)
-			{
+		Gcm.addEventListener('receiveMessage', function(e) {
 			Ti.API.info("receiveMessage");
 			Ti.API.info(JSON.stringify(e));
 			
@@ -166,8 +160,7 @@ exports.register = function()
 			});
 		
 		// The entire list of queued notifications when 1 or more notifications have occurred when the app is in the background
-		Gcm.addEventListener('queuedNotifications', function(e)
-			{
+		Gcm.addEventListener('queuedNotifications', function(e) {
 			Ti.API.info("queuedNotifications");
 			
 			if(e.payloads)
@@ -185,30 +178,25 @@ exports.register = function()
 			error: registerDeviceError
 			});
 		
-		function registerDeviceSuccess(e)
-			{
+		function registerDeviceSuccess(e) {
 			registerDevice(e.deviceToken, 'ANDROID');
 			}
 			
 		function registerDeviceError(e)
 			{
 			// Initialization Error
-			if(e.code == Gcm.INIT_ERROR)
-				{
+			if(e.code == Gcm.INIT_ERROR) {
 				Ti.API.error("GCM Initialization Error: " + JSON.stringify(e));
 				}
 			
 			// Google Play Services Not Ready
-			if(e.code == Gcm.GOOGLE_PLAY_NOT_READY_ERROR)
-				{
+			if(e.code == Gcm.GOOGLE_PLAY_NOT_READY_ERROR) {
 				alert(L('google_play_unavailable') + ' ' + e.message);
 				}
 			
 			// Registration Error
-			if(e.code == Gcm.GCM_REGISTRATION_FAILED)
-				{
-				if(e.message == 'SERVICE_NOT_AVAILABLE')
-					{
+			if(e.code == Gcm.GCM_REGISTRATION_FAILED) {
+				if(e.message == 'SERVICE_NOT_AVAILABLE') {
 					// TODO Message
 					alert(L('gcm_no_services'));
 					}

@@ -4,14 +4,14 @@
 	<string name="gcm_no_services">To receive notifications please add a Google account to your device.</string>
 	<string name="phone_number_label">Phone Number</string>
 	<string name="continue_button">Continue</string>
-	<string name="didnt_receive_code">Didn't receive code?</string>
+	<string name="didnt_receive_code">Didn&apos;t receive code?</string>
 	<string name="call_me">Call Me</string>
 	<string name="resend_code">Resend</string>
 	<string name="yes">Yes</string>
 	<string name="change">Change</string>
 	<string name="confirm_phone_number">One more step! Please confirm %1$s is your phone number.</string>
-	<string name="invalid_phone_number">We're sorry! Your phone number %1$s does not seem valid.</string>
-	<string name="activation_service_error">We're sorry! There was a problem sending your activation code to %1$s</string>
+	<string name="invalid_phone_number">We&apos;re sorry! Your phone number %1$s does not seem valid.</string>
+	<string name="activation_service_error">We&apos;re sorry! There was a problem sending your activation code to %1$s</string>
 	<string name="okay">Okay</string>
 	<string name="general_server_error">Oops! Something went wrong. Please try your request again.</string>
 	<string name="verification_code_voice_message">Your Whatever activation code is, </string>
@@ -20,12 +20,12 @@
 	<string name="create_account">Create Your Account</string>
 	<string name="first_name_required">Please enter your first name.</string>
 	<string name="last_name_required">Please enter your last name.</string>
-	<string name="invalid_session">We're sorry! Your activation code expired. We are sending you a new one.</string>
+	<string name="invalid_session">We&apos;re sorry! Your activation code expired. A new one will arrive shortly.</string>
 	<string name="timeline">Timeline</string>
 	<string name="notifications">Notifications</string>
 	<string name="more">More</string>
 	<string name="join">Join</string>
-	<string name="stay-tuned">Stay Tuned</string>
+	<string name="stay_tuned">Stay Tuned</string>
 	<string name="post">Post</string>
 	<string name="post_comment">Post a comment</string>
 </resources>

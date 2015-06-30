@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 3.0
+apiversion: 2
+architectures: armeabi armeabi-v7a x86
+description: cloudmessaging
+author: Tim Christensen
+license: Specify your license
+copyright: Copyright (c) 2015 by Your Company
+
+# these should not be edited
+name: cloudmessaging
+moduleid: ti.cloudmessaging
+guid: 085685f2-08cd-4fdc-a228-eaaed9e730f5
+platform: android
+minsdk: 4.0.0.GA

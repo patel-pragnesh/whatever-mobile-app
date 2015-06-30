@@ -273,7 +273,7 @@ function ActivateWindow()
 			
 			httpClient.doPost('/v1/activate', request, function(success, response)
 				{
-				Ti.API.info(response);
+				Ti.API.info(JSON.stringify(response));
 				
 				if(success)
 					{
@@ -283,7 +283,7 @@ function ActivateWindow()
 						{
 						activationCodeWindow.removeEventListener('focus', activationCodeWindowFocusEvent);
 						activationCodeWindow.setActionsTimer(20000);
-						win.close();
+						//win.close();
 						};
 							
 					activationCodeWindow.addEventListener('focus', activationCodeWindowFocusEvent);
