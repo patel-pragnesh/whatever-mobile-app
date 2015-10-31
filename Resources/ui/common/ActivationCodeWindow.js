@@ -18,9 +18,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 		orientationModes: [Ti.UI.PORTRAIT]
 		});
 
-	if(config.platform === config.platform_android)
-		{
-		win.navBarHidden = true;
+	if(config.platform === config.platform_android) {
 		win.height = '100%';
 		}
 	else
@@ -35,8 +33,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 	/*
 	 * Called after the UI elements are created
 	 */
-	var windowPostLayoutCallback = function(e)
-		{
+	var windowPostLayoutCallback = function(e) {
 		win.removeEventListener('postlayout', windowPostLayoutCallback);
 		
 		if(config.platform === config.platform_android) {

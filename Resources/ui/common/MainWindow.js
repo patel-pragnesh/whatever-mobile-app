@@ -1,12 +1,11 @@
-function MainWindow(conversations)
-	{
+function MainWindow(conversations) {
 	var config = require('config');
 	var context = require('context');
-	
+
 	var moment = require('lib/Moment');
 	var _ = require('lib/Underscore');
 	var httpClient = require('lib/HttpClient');
-	
+
 	// Create the main window
 	var win = Ti.UI.createWindow({
 		backgroundColor: '#f5f5f5',
@@ -17,445 +16,247 @@ function MainWindow(conversations)
 		});
 
 	if(config.platform === config.platform_android) {
-		win.theme = 'Theme.NoActionBar';
 		win.exitOnClose = true;
 		}
-	
+
 	// The notification view has a zIndex that blocks the UI and provides an indicator
 	var notificationView = require('ui/common/NotificationView').create();
-	
+
 	var mainContainerView = Ti.UI.createView({
 		width: '100%',
 		top: 0,
 		bottom: 0,
 		layout: 'vertical'
 		});
-	
-	var currentTime = new Date();
-    var hours = currentTime.getHours();
-    var minutes = currentTime.getMinutes();
-    
-    var defaultSliderSize = 120;
-    var dayViewOffSet = (((60 * hours) + minutes) - defaultSliderSize) * -1;
-    
-    /**
-     * Create the availability view
-     */
-    var currentDay = 1;
-	var days = 3;
-	var viewBuffer = 0;
-	
-    var availabilityView = Ti.UI.createView({
-		width: '100%',
-		height: 60,
-		top: 0
-		});
-	
-	var availabilityScrollView = Ti.UI.createScrollView({
-		backgroundColor: '#F2F2F2',
+
+	var scrollView = Ti.UI.createScrollView({
 		contentWidth: 'auto',
+  		contentHeight: 'auto',
 		showVerticalScrollIndicator: false,
-		showHorizontalScrollIndicator: false,
-		top: 0,
-		width: '100%',
-		height: 60,
-		layout: 'horizontal'
-		});
-		
-	var leftDayViewBuffer = Ti.UI.createView({
-		backgroundColor: '#F2F2F2',
-		left: 0,
-		width: viewBuffer,
-		height: 60
-		});
-		
-	availabilityScrollView.add(leftDayViewBuffer);
-		
-	for(var i = 0; i < days; i++)
-		{
-		var dayView = require('ui/common/DayView').create(i + 1);
-		availabilityScrollView.add(dayView);
-		}
-		
-	var rightDayViewBuffer = Ti.UI.createView({
-		backgroundColor: '#F2F2F2',
-		left: 0,
-		width: viewBuffer,
-		height: 60
-		});
-		
-	availabilityScrollView.add(rightDayViewBuffer);
-		
-	function updateDateView(date)
-		{
-		Ti.API.info('new day ' + moment().weekday(date.day()) + '  ' + date.format('D'));
-		}
-	
-	function availabilityScrollEvent(e)
-		{
-		//Ti.API.info(JSON.stringify(e));
-		
-		Ti.API.info(e.x);
-		Ti.API.info(days * 24 * 60);
-		
-		if(e.x > 0 && e.x < days * 24 * 60)
-			{
-			var viewDay = Math.floor(e.x / (24 * 60));
-			
-			Ti.API.info(viewDay);
-			}
-		
-		
-		
-		// var viewHour = ((e.x + viewBuffer) / 24) / (viewDay + 1);
-// 		
-		// Ti.API.info(moment().hour());
-// 		
-		// Ti.API.info(viewHour);
-		
-		if(viewDay >= 0 && currentDay !== viewDay)
-			{
-			updateDateView(moment().add(viewDay));
-			currentDay = viewDay;
-			}
-		}
-		
-	// Add the scroll listener
-	availabilityScrollView.addEventListener('scroll', availabilityScrollEvent);
-	
-	availabilityView.add(availabilityScrollView);
-		
-	var centerIndicatorView = Ti.UI.createView({
-		width: Ti.UI.SIZE,
-		height: '100%',
-		touchEnabled: false
-		});
-		
-	var centerHighlightView = Ti.UI.createView({
-		backgroundColor: '#FF264A',
-		height: '100%',
-		width: 1
-		});
-		
-	centerIndicatorView.add(centerHighlightView);
-	
-	var topIndicatorImage = Ti.UI.createImageView({
-		image: '/images/availability-time-down-arrow.png',
-		top: 0,
-		width: 18,
-		height: 8
-		});
-		
-	centerIndicatorView.add(topIndicatorImage);
-	availabilityView.add(centerIndicatorView);
-    
-	mainContainerView.add(availabilityView);
-		
-	var sliderSeparatorView = Ti.UI.createView({
-		backgroundColor: '#7945AD',
-		top: 0,
-		height: 2,
-		width: '100%'
-		});
-		
-	mainContainerView.add(sliderSeparatorView);
-	
-	var scrollableView = Ti.UI.createScrollableView({
-		backgroundColor: '#CBCACC',
-		top: 0,
-		bottom: 0,
-		width: '100%'
-		});
-		
-	// Create the conversations
-	for(var i = 0; i < 10; i++)
-		{
-		var conversation = require('ui/common/ConversationView').create();
-		scrollableView.addView(conversation);
-		}
-		
-	scrollableView.addEventListener('scrollend', function(e)
-		{
-		Ti.API.info(JSON.stringify(e));
-		});
-		
-	mainContainerView.add(scrollableView);
-	
-	win.add(mainContainerView);
-	win.add(notificationView);
-	
-	var menuBarContainer = Ti.UI.createView({
-		width: '100%',
-		bottom: 0,
-		height: 51,
-		});
-		
-	var menuBarSeparator = Ti.UI.createView({
-		backgroundColor: 'black',
-		top: 0,
-		width: '100%',
-		height: 1
-		});
-		
-	menuBarContainer.add(menuBarSeparator);
-	
-	var menuBarView = Ti.UI.createView({
-		backgroundColor: '#F6F5F1',
-		width: '100%',
-		top: 0,
-		height: 50,
-		opacity: .8
-		});
-		
-	menuBarContainer.add(menuBarView);
-	
-	var menuBarActionView = Ti.UI.createView({
-		width: '100%',
-		top: 0,
-		height: 50,
-		layout: 'horizontal'
-		});
-		
-	var buttonGroup = [];
-	
-	function toggleIconState(parent)
-		{
-		for(var c in parent.children)
-			{
-			if(parent.children[c].id == parent.type + '-icon')
-				{
-				if(parent.active)
-					{
-					parent.children[c].image = '/images/' + parent.type + '.png';
-					}
-				else
-					{
-					parent.children[c].image = '/images/' + parent.type + '-active.png';
-					}
-				}
-				
-			if(parent.children[c].id == parent.type + '-label')
-				{
-				if(parent.active)
-					{
-					parent.children[c].color = '#333333';
-					parent.active = false;
-					}
-				else
-					{
-					parent.children[c].color = '#6B20B7';
-					parent.active = true;
-					}
-				}
-			}
-		}
-	
-	function toggleButtonGroup(e)
-		{
-		if(!e.source.active)
-			{
-			for(var i = 0; i < buttonGroup.length; i++)
-				{
-				if(buttonGroup[i].active)
-					{
-					toggleIconState(buttonGroup[i]);
-					break;
-					}
-				}
-			
-			toggleIconState(e.source);
-			
-			if(e.source.type == 'action-timeline')
-				{
-				Ti.API.info('Show Timeline');
-				}
-				
-			if(e.source.type == 'action-notifications')
-				{
-				Ti.API.info('Show Notifications');
-				}
-				
-			if(e.source.type == 'action-more')
-				{
-				Ti.API.info('Show More');
-				}
-			}
-		}
-		
-	var timelineActionView = Ti.UI.createView({
-		width: '33%',
-		top: 0,
-		height: 50,
-		type: 'action-timeline',
-		active: true
-		});
-	
-	timelineActionView.addEventListener('click', toggleButtonGroup);
-	buttonGroup.push(timelineActionView);
-		
-	var timelineActionIcon = Ti.UI.createImageView({
-		id: 'action-timeline-icon',
-		image: '/images/action-timeline-active.png',
-		width: 27,
-		height: 24,
-		bottom: 19,
-		touchEnabled: false
-		});
-		
-	timelineActionView.add(timelineActionIcon);
-		
-	var timelineActionLabel = Ti.UI.createLabel({
-		id: 'action-timeline-label',
-		color: '#6B20B7',
-		bottom: 5,
-		font:
-			{
-			fontSize: 10,
-			fontFamily: config.opensans_regular
-			},
-		text: L('timeline'),
-		touchEnabled: false
-		});
-	
-	timelineActionView.add(timelineActionLabel);
-	menuBarActionView.add(timelineActionView);
-	
-	var notificationsActionView = Ti.UI.createView({
-		width: '33%',
-		top: 0,
-		height: 50,
-		type: 'action-notifications',
-		active: false
+  		showHorizontalScrollIndicator: false,
+		backgroundColor: 'gray',
+		top: 70,
+		bottom: 120,
+		opacity: 0
 		});
 
-	notificationsActionView.addEventListener('click', toggleButtonGroup);	
-	buttonGroup.push(notificationsActionView);
-		
-	var notificationsActionIcon = Ti.UI.createImageView({
-		id: 'action-notifications-icon',
-		image: '/images/action-notifications.png',
-		width: 24,
-		height: 22,
-		bottom: 20,
-		touchEnabled: false
+	var scrollViewContainer = Ti.UI.createView({
+		backgroundColor: 'red',
+		layout: 'vertical'
 		});
-		
-	notificationsActionView.add(notificationsActionIcon);
-	
-	var notificationCountView = Ti.UI.createView({
-		backgroundColor: '#FF264A',
-		borderColor: 'white',
-		height: 18,
-		width: 18,
-		borderRadius: 9,
-		right: 30,
-		bottom: 28,
-		touchEnabled: false
-		});
-		
-	var notificationsCountLabel = Ti.UI.createLabel({
-		color: 'white',
-		font:
-			{
-			fontSize: 10,
-			fontFamily: config.opensans_semibold
-			},
-		text: '99',
-		touchEnabled: false
-		});
-		
-	notificationCountView.add(notificationsCountLabel);
-		
-	notificationsActionView.add(notificationCountView);
-		
-	var notificationsActionLabel = Ti.UI.createLabel({
-		id: 'action-notifications-label',
-		color: '#333333',
-		bottom: 5,
-		font:
-			{
-			fontSize: 10,
-			fontFamily: config.opensans_regular
-			},
-		text: L('notifications'),
-		touchEnabled: false
-		});
-	
-	notificationsActionView.add(notificationsActionLabel);
-	menuBarActionView.add(notificationsActionView);
-	
-	var moreActionView = Ti.UI.createView({
-		width: '33%',
-		top: 0,
-		height: 50,
-		type: 'action-more',
-		active: false
-		});
-		
-	moreActionView.addEventListener('click', toggleButtonGroup);
-	buttonGroup.push(moreActionView);
-		
-	var moreActionIcon = Ti.UI.createImageView({
-		id: 'action-more-icon',
-		image: '/images/action-more.png',
-		width: 22,
-		height: 16,
-		bottom: 22,
-		touchEnabled: false
-		});
-		
-	moreActionView.add(moreActionIcon);
-		
-	var moreActionLabel = Ti.UI.createLabel({
-		id: 'action-more-label',
-		color: '#333333',
-		bottom: 5,
-		font:
-			{
-			fontSize: 10,
-			fontFamily: config.opensans_regular
-			},
-		text: L('more'),
-		touchEnabled: false
-		});
-	
-	moreActionView.add(moreActionLabel);
-	menuBarActionView.add(moreActionView);
-	
-	menuBarContainer.add(menuBarActionView);
-	
-	win.add(menuBarContainer);
-	
-	function scrollAvailabilityViewTo(hour, minute)
-		{
-		availabilityScrollView.removeEventListener('scroll', availabilityScrollEvent);
-		availabilityScrollView.scrollTo((hour * 60) + minute, 0);
-		availabilityScrollView.addEventListener('scroll', availabilityScrollEvent);
+
+	function createRow(index) {
+		var row = Ti.UI.createView({
+			index: index,
+			width: Ti.UI.SIZE,
+			height: Ti.UI.SIZE,
+			layout: 'horizontal'
+			});
+
+		return row;
 		}
-	
+
+	var conversations = [];
+
+	function createConversationView(index) {
+		var containerView = Ti.UI.createView({
+			width: Ti.UI.SIZE,
+			height: Ti.UI.SIZE,
+			index: index
+			});
+
+		var conversation = Ti.UI.createView({
+
+			});
+
+		var label = Ti.UI.createLabel({
+			text: index
+			});
+
+		conversation.add(label);
+
+		containerView.add(conversation);
+
+		return containerView;
+		}
+
+	for(var i = 0; i < 25; i++) {
+		var conversationView = createConversationView(i);
+		conversations.push(conversationView);
+		}
+
+	// Initialize the conversation rows
+	var matrixXY = Math.ceil(Math.sqrt(conversations.length));
+	var spiralArrayIndex = createSpiralArrayIndex(matrixXY);
+
+	var rowColCount = (matrixXY % 2 != 0) ? matrixXY - 1 : matrixXY;
+
+	for (y = 0; y < matrixXY; y++) {
+		Ti.API.info(spiralArrayIndex[y].join(" "));
+		}
+
+	// Track what view we are creating
+	var viewIndex = 0;
+	var TOP_POS = 0, BOTTOM_POS = 1;
+
+	for(var r = 0; r < matrixXY; r++) {
+		var row = createRow(r);
+		var topBottomPos = -1;
+
+		if(r < rowColCount / 2) {
+			topBottomPos = BOTTOM_POS;
+			}
+		else if(r > rowColCount / 2) {
+			topBottomPos = TOP_POS;
+			}
+
+		for(var c = 0; c < matrixXY; c++) {
+			var conversation = conversations[spiralArrayIndex[r][c]];
+
+			if(conversation) {
+				// if(c < rowColCount / 2) {
+					// conversation.children[0].right = 0;
+					// }
+				// else if(c > rowColCount / 2) {
+					// conversation.children[0].left = 0;
+					// }
+//
+				// if(topBottomPos == TOP_POS) {
+					// conversation.children[0].top = 0;
+					// }
+				// else if(topBottomPos == BOTTOM_POS) {
+					// conversation.children[0].bottom = 0;
+					// }
+
+				row.add(conversation);
+				Ti.API.info(JSON.stringify(conversation));
+				}
+			}
+
+		scrollViewContainer.add(row);
+		}
+
+	scrollView.add(scrollViewContainer);
+	mainContainerView.add(scrollView);
+
+	win.add(mainContainerView);
+	win.add(notificationView);
+
 	var windowPostLayoutCallback = function(e) {
 		win.removeEventListener('postlayout', windowPostLayoutCallback);
-		
-		// Set the right and left buffers for the availability view
-		viewBuffer = availabilityScrollView.rect.width / 2;
-		rightDayViewBuffer.width = viewBuffer;
-		leftDayViewBuffer.width = viewBuffer;
-		
-		// TODO - Scroll to the conversation equal to or next after
+
+		var rowIndex = 0;
+		var conversationViewHeight = 80;
+		var conversationViewWidth = 90;
+
+		for(var row in scrollViewContainer.children) {
+			if(scrollViewContainer.children.length > 1) {
+				if(rowIndex % 2 == 0) {
+					scrollViewContainer.children[row].left = conversationViewWidth;
+					}
+
+				rowIndex++;
+				}
+
+			for(var conversation in scrollViewContainer.children[row].children) {
+				scrollViewContainer.children[row].children[conversation].width = conversationViewWidth;
+				//scrollViewContainer.children[row].children[conversation].border = 1;
+				//scrollViewContainer.children[row].children[conversation].borderColor = 'black';
+				scrollViewContainer.children[row].children[conversation].children[0].height = conversationViewHeight;
+				scrollViewContainer.children[row].children[conversation].children[0].width = conversationViewHeight;
+				scrollViewContainer.children[row].children[conversation].children[0].borderRadius = conversationViewHeight / 2;
+				scrollViewContainer.children[row].children[conversation].children[0].border = 1;
+				scrollViewContainer.children[row].children[conversation].children[0].borderColor = 'black';
+				}
+			}
+
+		//scrollViewContainer.width = (conversationViewWidth * (rowColCount + 1)) + conversationViewWidth;
+
+
+		// if(scrollViewContainer.children.length > 1) {
+			// scrollViewContainer.width = (conversationViewWidth * (rowColCount + 1)) + conversationViewWidth;
+			// }
+		// else {
+			// scrollViewContainer.width = (conversationViewWidth * rowColCount) + conversationViewWidth;
+			// }
+
+		scrollViewContainer.height = matrixXY * conversationViewHeight;
+
+		// Now calculate if we need to center the view
+		var scrollViewHeight = scrollView.rect.height;
+		var scrollViewWidth = scrollView.rect.width;
+
+		var scrollToX = 0;
+		var scrollToY = 0;
+
+		if(scrollViewContainer.width > scrollViewWidth) {
+			scrollToX = (scrollViewContainer.width - scrollViewWidth) / 2;
+			}
+
+		if(scrollViewContainer.height > scrollViewHeight) {
+			scrollToY = (scrollViewContainer.height - scrollViewHeight) / 2;
+			}
+
+		scrollView.scrollTo(scrollToX, scrollToY);
+		scrollView.animate({opacity: 1, duration: 400});
 		};
-	
+
 	win.addEventListener('postlayout', windowPostLayoutCallback);
-	
+
+	scrollView.addEventListener('scroll', function(e) {
+		//scrollViewContainer.animate(animation);
+		});
+
 	var windowFocusCallback = function(e) {
 		win.removeEventListener('focus', windowFocusCallback);
-		//win.animate({opacity: 1, duration: 400});
-		
+
 		// Register the device for push
 		context.register();
 		};
-		
+
 	win.addEventListener('focus', windowFocusCallback);
-	
+
+	function createSpiralArrayIndex(edge) {
+		var arr = Array(edge);
+		var x = 0;
+		var y = edge;
+
+		var total = edge * edge--;
+		var dx = 1;
+		var dy = 0;
+		var i = total;
+		var j = 0;
+
+		//Ti.API.info(total);
+
+		while (y) {
+			arr[--y] = [];
+			Ti.API.info(y);
+			}
+
+		while (i) {
+			arr[y][x] = --i;
+
+			//Ti.API.info('Array x:' + x + ' y:' + y + ' = ' + arr[y][x]);
+
+			x += dx;
+			y += dy;
+			if (++j == edge) {
+				if (dy < 0) {
+					x++;
+					y++;
+					edge -= 2;
+					}
+				j = dx;
+				dx = -dy;
+				dy = j;
+				j = 0;
+				}
+			}
+
+		return arr;
+		}
+
 	return win;
 	};
 
