@@ -82,6 +82,8 @@ exports.doGet = function(endpoint, callback)
         });
     
     xhr.open('GET', url);
+    xhr.setRequestHeader("x-key", config.app_key);
+	xhr.setRequestHeader('content-type', 'application/json; charset=utf-8');
     xhr.setRequestHeader(config.namespace_header, config.namespace);
 	xhr.send();
 	};

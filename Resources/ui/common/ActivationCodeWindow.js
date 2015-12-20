@@ -10,6 +10,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 	var MainWindow = require('ui/common/MainWindow');
 	
 	var windowWidth = null;
+	var purple = config.purple;
 	
 	var win = Ti.UI.createWindow({
 		backgroundColor: '#f5f5f5',
@@ -56,14 +57,37 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 		zIndex: 1
 		});
 	
-	var headerView = Ti.UI.createView({
-		backgroundColor: 'white',
-		height: 95,
-		top: 0,
-		width: '100%'
+	//create top nav view to hold logo and user profile 
+	var topNavView = Ti.UI.createView
+	({
+		top: 20,
+		height: '7.2%',
+		width: '100%',	
+	});
+		
+
+	//Add Whatever label upper-left  
+    
+    var labelView = Ti.UI.createImageView({
+		height: '60.41%',
+		width: '29.06%',
+		top: 7,
+		left: 12,
+		image: "/images/whateverlabel",
+		backgroundColor: purple,
+		zIndex: 2
+	});	
+	
+	topNavView.add(labelView);
+	mainContainerView.add(topNavView);
+	
+	
+	labelView.addEventListener('postlayout', function(e) 
+		{
+			labelHeight = labelView.size.height;
+			labelWidth = labelView.size.width;
 		});
 		
-	mainContainerView.add(headerView);
 	
 	var activationViewContainer = Ti.UI.createView({
 		height: 120,
@@ -173,6 +197,8 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 	codesView.add(codeFourViewContainer);
 	
 	activationViewContainer.add(codesView);
+	
+	//TODO  fix bug: clear codeViews after wrong entry or didn't recieve code click
 	
 	// The handler for clicking the code view container - focuses the text field and produces a keyboard
 	var codesViewClickEventHandler = function(e)
@@ -539,11 +565,12 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 					}
 				else
 					{
+					Ti.API.info('setting account');
 					account.first_name = response.first_name;
 					account.last_name = response.last_name;
 					
 					Ti.App.Properties.setObject("account", account);
-					
+					Ti.API.info('opening mainWindow');
 					var mainWindow = new MainWindow();
 					
 					function mainWindowFocusEvent()

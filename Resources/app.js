@@ -8,6 +8,7 @@
 	var config = require('config');
 	var _ = require('lib/Underscore');
 	
+	var whateverDB = require('lib/WhateverDB');
 	//var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
 	var context = require('context');
 	
@@ -41,7 +42,7 @@
 			// Make sure there is an account associated with the app
 			if(!_.isNull(Ti.App.Properties.getObject("account")))
 				{
-				
+					//TODO should there be something here??
 				
 				}
 				
@@ -51,13 +52,17 @@
 	/**
 	 * Launch the app
 	 */
+	whateverDB.checkExistence();
+	
 	if(_.isNull(Ti.App.Properties.getObject('account')))
 		{
 		var activateWindow = context.activate();
+		Ti.API.info('app.js context.activate');
 		}
 	else
 		{
 		var mainWindow = context.launch();
+		Ti.API.info('app.js context.launch');
 		}
 		
 	if(config.platform === config.platform_iphone)

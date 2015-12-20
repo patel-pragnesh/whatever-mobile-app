@@ -1,8 +1,9 @@
 eclipse.preferences.version=1
 iosLaunchConfigurationAttributes/ATTR_MINIFY=true
 iosLaunchConfigurationAttributes/ATTR_PROJECT_NAME=Whatever
+iosLaunchConfigurationAttributes/ATTR_UPLOAD_DEBUG_SYMBOLS=false
 iosLaunchConfigurationAttributes/appid=com.whateverapp.whatever
-iosLaunchConfigurationAttributes/certificate=WOODBLOCK CREATIONS LLC (RCZ72QYT89)
+iosLaunchConfigurationAttributes/certificate=Cole Halverson (AMWUKKC53E)
 iosLaunchConfigurationAttributes/keychain=
-iosLaunchConfigurationAttributes/sdk_version=8.2
-iosLaunchConfigurationAttributes/uuid=887d8c7d-e298-428d-9de6-4559c2ffd68d
+iosLaunchConfigurationAttributes/sdk_version=9.1
+iosLaunchConfigurationAttributes/uuid=12661ffb-51e3-4005-9782-0baaa8c19d87

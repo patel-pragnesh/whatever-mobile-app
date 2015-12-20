@@ -19,6 +19,6 @@ exports.create = function(args)
 		win.navBarHidden = true;
 		win.height = '100%';
 		}
-		
+	
 	return win;
 	};

@@ -1,263 +1,404 @@
-function MainWindow(conversations) {
+
+	
+
+function MainWindow() {
+	
 	var config = require('config');
 	var context = require('context');
-
+	
 	var moment = require('lib/Moment');
 	var _ = require('lib/Underscore');
 	var httpClient = require('lib/HttpClient');
-
+	
+	var CreateCard = require('ui/common/CreateCard');
+	
+	var purple = config.purple;
+	
+	//TODO use blurView module to blur scroll container when bubble is selected - except selected bubble
+	
 	// Create the main window
 	var win = Ti.UI.createWindow({
-		backgroundColor: '#f5f5f5',
+		backgroundColor: purple,
 		width: '100%',
 		height: '100%',
 		orientationModes: [Ti.UI.PORTRAIT],
-		//opacity: 0
 		});
-
+	
+	
+	//Android specific stuff
 	if(config.platform === config.platform_android) {
 		win.exitOnClose = true;
 		}
 
-	// The notification view has a zIndex that blocks the UI and provides an indicator
-	var notificationView = require('ui/common/NotificationView').create();
+    
+    //mainContainerView size is set from top and bottom of win
+	var mainContainerView = Ti.UI.createView
+	({
+			width: '100%',
+			top: '10.1%',
+			bottom: 0,
+			layout: 'absolute',	
+	});	
+	
+		
+	//create top nav view to hold logo and user profile 
+	var topNavView = Ti.UI.createView
+	({
+		top: 20,
+		height: '7.2%',
+		width: '100%',	
+	});
+		
 
-	var mainContainerView = Ti.UI.createView({
-		width: '100%',
-		top: 0,
-		bottom: 0,
-		layout: 'vertical'
+	//Add Whatever label upper-left and profile image and name button.  
+    
+    var labelView = Ti.UI.createImageView
+    ({
+		height: '60.41%',
+		width: '29.06%',
+		top: 7,
+		left: 12,
+		image: "/images/whateverlabel",
+		backgroundColor: purple,
+		zIndex: 2
+	});	
+	
+	topNavView.add(labelView);
+	win.add(topNavView);
+	
+	
+	labelView.addEventListener('postlayout', function(e) 
+		{
+			labelHeight = labelView.size.height;
+			labelWidth = labelView.size.width;
 		});
 
-	var scrollView = Ti.UI.createScrollView({
-		contentWidth: 'auto',
-  		contentHeight: 'auto',
-		showVerticalScrollIndicator: false,
-  		showHorizontalScrollIndicator: false,
-		backgroundColor: 'gray',
-		top: 70,
-		bottom: 120,
-		opacity: 0
-		});
+		
+	//Add Whatever button and make it dissapear when scrolling
+    var btnImageView = Ti.UI.createImageView
+    ({
+		image: "/images/BTN",
+		//zIndex: 2,
+		width: '22%',
+		bottom: '5%'
+	});
+	
+//btnImageView.addEventListener('click', popNewCard);	
 
-	var scrollViewContainer = Ti.UI.createView({
-		backgroundColor: 'red',
-		layout: 'vertical'
-		});
+// /////// testing send push notification   ###########
 
-	function createRow(index) {
-		var row = Ti.UI.createView({
-			index: index,
-			width: Ti.UI.SIZE,
-			height: Ti.UI.SIZE,
-			layout: 'horizontal'
+btnImageView.addEventListener('click', function(e)
+{
+	var request = {};
+	
+	
+	httpClient.doPost('/v1/sendPushNotification', request, function(success, response) {
+		Ti.API.info(JSON.stringify(response));
+	});
+});
+
+		
+	//Create scrollView to hold scrollViewContainer				
+	var scrollView = Ti.UI.createScrollView
+	({
+		    showVerticalScrollIndicator: false,
+			showHorizontalScrollIndicator: false,
+			backgroundColor: purple,
+			width: '100%',
+			height: '100%',
+			opacity: 1	
+	});
+		
+        scrollView.addEventListener('scrollend', showWhateverButton);	
+        scrollView.addEventListener('scrollstart', hideWhateverButton);
+        
+        function hideWhateverButton(e) 
+        {
+			btnImageView.visible = false;
+   		}
+    
+    	function showWhateverButton(e) 
+    	{
+    		btnImageView.visible = true;
+    	}
+	
+	
+	//scrollViewContainer is inside scrollView.  The bubbles are its children.  
+	var scrollViewContainer = Ti.UI.createView
+	({
+			backgroundColor: purple,
+			layout: 'absolute',
+			height: Titanium.UI.SIZE,
+			width: '100%',
+			top: 0
+	});	
+
+scrollView.add(scrollViewContainer);
+mainContainerView.add(scrollView);
+mainContainerView.add(btnImageView);
+win.add(mainContainerView);
+		
+win.addEventListener('postlayout', calcBubbles);
+	
+function calcBubbles(e)
+{
+	Ti.API.info('calcBubbles');
+	win.removeEventListener('postlayout', calcBubbles);
+		
+};
+
+
+	function layoutBubbles(conversations)
+	{
+		var winHeight = win.size.height;
+		var winWidth = win.size.width;
+		
+		for (i = 0; i < conversations.length; i++)
+		{
+			var bubView = new constructBubble(winHeight, winWidth, conversations[i]) ;
+			
+			if (i == (conversations.length - 1))   //Add extra space below last bubView being added to accomidate the whatever button
+			{
+				bubView.bottom = 200;
+			}
+	
+			scrollViewContainer.add(bubView);	
+			bubView.fireEvent('animate', {});
+		}	
+		
+		if (scrollViewContainer.size.height < scrollView.size.height)
+		{
+			scrollViewContainer.height = scrollView.size.height + 10;
+		}
+		if (scrollViewContainer.size.height > 1500)
+		{
+			scrollView.showVerticalScrollIndicator = true;
+		}
+	}
+	
+	
+		function constructBubble(winHeight, winWidth, conversation)  
+		{
+			var bubbleAttribute = 2;
+			
+			//check if iphone 4s aspect ratio
+			if (winHeight / winWidth == 1.5){
+				var bubViewHeight = winHeight * .255;
+				var bubViewWidth = winWidth * .421; 
+				
+				var bubDiameter = bubViewHeight * .932;
+				var bubLeftRight = bubViewWidth * .064; 
+				var bubTopBottom = bubViewHeight * .034;
+				var bubRadius = bubDiameter / 2;
+				var bubBorder = bubDiameter *.025;
+				var buttonBottom = winHeight * .02;
+			} else {
+				var bubViewHeight = winHeight * .221;
+				var bubViewWidth = winWidth * .421;
+				
+				var bubDiameter = bubViewHeight * .932;
+				var bubLeftRight = bubViewWidth * .064; 
+				var bubTopBottom = bubViewHeight * .034;
+				var bubRadius = bubDiameter / 2;
+				var bubBorder = bubDiameter *.025;
+				var buttonBottom = winHeight * .032;
+			
+			}
+			
+				
+				
+			var bubViewTop = conversation.top_y * bubViewHeight;               //get from DB 
+			var bubPosition = conversation.position;
+			
+			var convoKey = conversation.convo_key;
+			var createdBy = conversation.created_by;
+			var newInfo = conversation.new_info;
+			var inOut = conversation.in_out;
+			var hapStatus = conversation.happening_status;
+			
+			
+			var bubView = Ti.UI.createView({
+				width: bubViewWidth,
+				height: bubViewHeight,
+				top: bubViewTop,                  //set to bubViewTop
+				
+				
+				//opacity: formDB,    based off time since activity
 			});
-
-		return row;
-		}
-
-	var conversations = [];
-
-	function createConversationView(index) {
-		var containerView = Ti.UI.createView({
-			width: Ti.UI.SIZE,
-			height: Ti.UI.SIZE,
-			index: index
+			
+			bubView.special = convoKey;
+			
+			bubView.addEventListener('click', function(e)
+			{
+				popBubbleCard(bubView.special);
 			});
-
-		var conversation = Ti.UI.createView({
-
+			
+			if (bubPosition == 'left')
+			{
+				bubView.left = '2%';
+			}
+			if (bubPosition == 'right')
+			{
+				bubView.right = '2%';
+			}
+			
+			
+			
+			var mask = Ti.UI.createImageView({				
+				image: '/images/joe',						//not sure where to put this to pull it from  //prolly the filesystem
+				borderRadius: bubRadius,
+				borderColor: 'white',
+				width: bubDiameter,
+				height: bubDiameter,
+				top: bubTopBottom,
+				botton: bubTopBottom,
+				right: bubLeftRight,
+				left:  bubLeftRight,
+				
 			});
-
-		var label = Ti.UI.createLabel({
-			text: index
+			
+			
+			
+			if (hapStatus == 'happening')
+			{
+				mask.borderWidth = bubBorder;
+				
+			}else{
+				mask.borderColor = purple;		
+				var spinnerView = Ti.UI.createView({
+					height: Ti.UI.SIZE,
+					width: Ti.UI.SIZE
+				});
+				var spinner = Ti.UI.createImageView({
+					image: '/images/spinMask',
+					height: bubDiameter + 10,
+					width: bubDiameter + 10
+				});
+				spinnerView.add(spinner);
+				bubView.add(spinner);
+			
+			var t = Ti.UI.create2DMatrix();	
+					
+			function startRotate()											//TODO figure out why some spinners rotate slower
+			{		
+					var a = Titanium.UI.createAnimation();
+					t = t.rotate(7);
+					a.transform = t;
+					a.duration = 50;
+					
+					a.addEventListener('complete', startRotate);
+				
+					spinner.animate(a);
+			}
+			
+				
+				bubView.addEventListener('animate', function(e){
+					Ti.API.info('animate');
+					startRotate();
+				});			
+				
+			}
+			
+			
+			var bubShadeMask = Ti.UI.createImageView({
+				
+				backgroundColor: 'black',
+				opacity: 0.45,
+				width: Titanium.UI.FILL,
+				height: '35%',
+				bottom: 0
 			});
-
-		conversation.add(label);
-
-		containerView.add(conversation);
-
-		return containerView;
+			
+			var fontSize = bubDiameter * .094;
+			
+			var name = Ti.UI.createLabel({
+				color: 'white',
+				font: {fontSize:fontSize,
+					   fontFamily: 'OpenSans-Semibold'},
+				text: createdBy,								//fromDB
+				textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+				bottom: '18%',
+				width: Ti.UI.SIZE, 
+				height: Ti.UI.SIZE,
+				zIndex: 3,
+				opacity: 1.0,
+			});
+				
+			mask.add(name);
+			
+			var commentIndicator = Ti.UI.createImageView({
+				image: '/images/commentIndicatorBlue',
+				top: '2%',
+				right: '14%',
+				height: '20.5%',
+				width: '19.2%',
+				zIndex: bubbleAttribute,
+				
+			});
+			var imInIndicator = Ti.UI.createImageView({
+				image: '/images/imInIndicator',
+				top: '24%',
+				right: 0,
+				height: '20.5%',
+				width: '19.2%',
+				zIndex: bubbleAttribute
+			});
+		mask.add(bubShadeMask);	
+		bubView.add(mask);	
+		
+		if (newInfo == 'true')
+		{
+			bubView.add(commentIndicator);
 		}
-
-	for(var i = 0; i < 25; i++) {
-		var conversationView = createConversationView(i);
-		conversations.push(conversationView);
+		
+		if (inOut == 'true')
+		{
+			bubView.add(imInIndicator);
 		}
-
-	// Initialize the conversation rows
-	var matrixXY = Math.ceil(Math.sqrt(conversations.length));
-	var spiralArrayIndex = createSpiralArrayIndex(matrixXY);
-
-	var rowColCount = (matrixXY % 2 != 0) ? matrixXY - 1 : matrixXY;
-
-	for (y = 0; y < matrixXY; y++) {
-		Ti.API.info(spiralArrayIndex[y].join(" "));
-		}
-
-	// Track what view we are creating
-	var viewIndex = 0;
-	var TOP_POS = 0, BOTTOM_POS = 1;
-
-	for(var r = 0; r < matrixXY; r++) {
-		var row = createRow(r);
-		var topBottomPos = -1;
-
-		if(r < rowColCount / 2) {
-			topBottomPos = BOTTOM_POS;
-			}
-		else if(r > rowColCount / 2) {
-			topBottomPos = TOP_POS;
-			}
-
-		for(var c = 0; c < matrixXY; c++) {
-			var conversation = conversations[spiralArrayIndex[r][c]];
-
-			if(conversation) {
-				// if(c < rowColCount / 2) {
-					// conversation.children[0].right = 0;
-					// }
-				// else if(c > rowColCount / 2) {
-					// conversation.children[0].left = 0;
-					// }
-//
-				// if(topBottomPos == TOP_POS) {
-					// conversation.children[0].top = 0;
-					// }
-				// else if(topBottomPos == BOTTOM_POS) {
-					// conversation.children[0].bottom = 0;
-					// }
-
-				row.add(conversation);
-				Ti.API.info(JSON.stringify(conversation));
-				}
-			}
-
-		scrollViewContainer.add(row);
-		}
-
-	scrollView.add(scrollViewContainer);
-	mainContainerView.add(scrollView);
-
-	win.add(mainContainerView);
-	win.add(notificationView);
-
-	var windowPostLayoutCallback = function(e) {
-		win.removeEventListener('postlayout', windowPostLayoutCallback);
-
-		var rowIndex = 0;
-		var conversationViewHeight = 80;
-		var conversationViewWidth = 90;
-
-		for(var row in scrollViewContainer.children) {
-			if(scrollViewContainer.children.length > 1) {
-				if(rowIndex % 2 == 0) {
-					scrollViewContainer.children[row].left = conversationViewWidth;
-					}
-
-				rowIndex++;
-				}
-
-			for(var conversation in scrollViewContainer.children[row].children) {
-				scrollViewContainer.children[row].children[conversation].width = conversationViewWidth;
-				//scrollViewContainer.children[row].children[conversation].border = 1;
-				//scrollViewContainer.children[row].children[conversation].borderColor = 'black';
-				scrollViewContainer.children[row].children[conversation].children[0].height = conversationViewHeight;
-				scrollViewContainer.children[row].children[conversation].children[0].width = conversationViewHeight;
-				scrollViewContainer.children[row].children[conversation].children[0].borderRadius = conversationViewHeight / 2;
-				scrollViewContainer.children[row].children[conversation].children[0].border = 1;
-				scrollViewContainer.children[row].children[conversation].children[0].borderColor = 'black';
-				}
-			}
-
-		//scrollViewContainer.width = (conversationViewWidth * (rowColCount + 1)) + conversationViewWidth;
-
-
-		// if(scrollViewContainer.children.length > 1) {
-			// scrollViewContainer.width = (conversationViewWidth * (rowColCount + 1)) + conversationViewWidth;
-			// }
-		// else {
-			// scrollViewContainer.width = (conversationViewWidth * rowColCount) + conversationViewWidth;
-			// }
-
-		scrollViewContainer.height = matrixXY * conversationViewHeight;
-
-		// Now calculate if we need to center the view
-		var scrollViewHeight = scrollView.rect.height;
-		var scrollViewWidth = scrollView.rect.width;
-
-		var scrollToX = 0;
-		var scrollToY = 0;
-
-		if(scrollViewContainer.width > scrollViewWidth) {
-			scrollToX = (scrollViewContainer.width - scrollViewWidth) / 2;
-			}
-
-		if(scrollViewContainer.height > scrollViewHeight) {
-			scrollToY = (scrollViewContainer.height - scrollViewHeight) / 2;
-			}
-
-		scrollView.scrollTo(scrollToX, scrollToY);
-		scrollView.animate({opacity: 1, duration: 400});
-		};
-
-	win.addEventListener('postlayout', windowPostLayoutCallback);
-
-	scrollView.addEventListener('scroll', function(e) {
-		//scrollViewContainer.animate(animation);
-		});
-
-	var windowFocusCallback = function(e) {
-		win.removeEventListener('focus', windowFocusCallback);
-
-		// Register the device for push
-		context.register();
-		};
-
-	win.addEventListener('focus', windowFocusCallback);
-
-	function createSpiralArrayIndex(edge) {
-		var arr = Array(edge);
-		var x = 0;
-		var y = edge;
-
-		var total = edge * edge--;
-		var dx = 1;
-		var dy = 0;
-		var i = total;
-		var j = 0;
-
-		//Ti.API.info(total);
-
-		while (y) {
-			arr[--y] = [];
-			Ti.API.info(y);
-			}
-
-		while (i) {
-			arr[y][x] = --i;
-
-			//Ti.API.info('Array x:' + x + ' y:' + y + ' = ' + arr[y][x]);
-
-			x += dx;
-			y += dy;
-			if (++j == edge) {
-				if (dy < 0) {
-					x++;
-					y++;
-					edge -= 2;
-					}
-				j = dx;
-				dx = -dy;
-				dy = j;
-				j = 0;
-				}
-			}
-
-		return arr;
-		}
-
-	return win;
+		
+	
+		return bubView;
 	};
+	
+	var cardContext = {};
+	function popBubbleCard(args)
+	{
+		Ti.API.info(args);
+		cardContext.context = 'else';
+		var cardView = new CreateCard(cardContext, mainContainerView.size.height);
+		mainContainerView.add(cardView);
+		
+		cardView.addEventListener('postlayout', function(e)
+		{
+			cardView.removeEventListener('postlayout', function(e){});
+	
+				var animation = Titanium.UI.createAnimation();
+					animation.top = 0;
+					animation.duration = 400;
+					
+				cardView.animate(animation);
+				
+				
+		});
+		
+	}
+	
+	function popNewCard()
+	{
+		cardContext.context = 'new';
+		var cardView = new CreateCard(cardContext);
+		mainContainerView.add(cardView);
+		cardView.show();
+	}
+	
+	
+return win;
+}
 
-module.exports = MainWindow;
+module.exports = MainWindow;	
+	
+					
+
+	
+
+

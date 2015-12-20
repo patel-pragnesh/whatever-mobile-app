@@ -4,10 +4,17 @@
 // The key the server requires so the JSON services remain secure just to the app
 exports.app_key = '8083ea6e-a696-44ab-adb5-fb844a290500';
 
+//Current User ID - will need to set this on account creation and make sure it is not null on startups there after
+//exports.user_id = 
+
 // The mode of the app
 var mode;
 var mode_production = 'production';
 var mode_development = 'development';
+
+
+//app colors
+exports.purple = "#7945AD";
 
 /**
  * Set the application mode - this can be used to add code that does not run in simulation
@@ -39,11 +46,11 @@ if(mode === mode_development)
 	{
 	if(Ti.Platform.osname === platform_android)
 		{
-		exports.services_base_url = 'http://10.0.2.2:8080';
+		exports.services_base_url = 'http://10.0.2.2:8888';
 		}
 	else
 		{
-		//exports.services_base_url = 'http://localhost:8080';
+		//exports.services_base_url = 'http://localhost:8888';
 		exports.services_base_url = 'https://whatever-api.appspot.com';
 		}
 	}
@@ -54,6 +61,10 @@ else
 	
 exports.namespace_header = 'WebApplicationMode';
 exports.namespace = (Ti.App.deployType !== 'production') ? 'dev' : 'prod';
+
+//Name of the local database
+exports.dbName = 'v1_DB';
+
 	
 // Export the font names
 exports.opensans_bold = 'OpenSans-Bold';

@@ -2,16 +2,21 @@ function ActivateWindow()
 	{
 	var config = require('config');
 	var _ = require('lib/Underscore');
-	var countryCodeUtil = require('app/util/CountryCodeUtil');
+	
+	
+	var countryCodeUtil = require('app/util/countrycodeutil');
+	
 	var httpClient = require('lib/HttpClient');
 	
 	var ActivationCodeWindow = require('ui/common/ActivationCodeWindow');
 	
 	var windowWidth = null;
 	var deviceCountryCode = countryCodeUtil.getDeviceCode();
+	
+	var purple = config.purple;
 		
 	var win = Ti.UI.createWindow({
-		backgroundColor: '#f5f5f5',
+		backgroundColor: purple,
 		width: '100%',
 		height: '100%',
 		fullscreen: false,
@@ -64,20 +69,45 @@ function ActivateWindow()
 		zIndex: 1
 		});
 	
-	var headerView = Ti.UI.createView({
-		backgroundColor: 'white',
-		height: 125,
-		top: 0,
-		width: '100%'
-		});
+	
+	//create top nav view to hold logo and user profile 
+	var topNavView = Ti.UI.createView
+	({
+		top: 20,
+		height: '7.2%',
+		width: '100%',	
+	});
 		
-	mainContainerView.add(headerView);
+
+	//Add Whatever label upper-left  
+    
+    var labelView = Ti.UI.createImageView({
+		height: '60.41%',
+		width: '29.06%',
+		top: 7,
+		left: 12,
+		image: "/images/whateverlabel",
+		backgroundColor: purple,
+		zIndex: 2
+	});	
+	
+	topNavView.add(labelView);
+	mainContainerView.add(topNavView);
+	
+	
+	labelView.addEventListener('postlayout', function(e) 
+		{
+			labelHeight = labelView.size.height;
+			labelWidth = labelView.size.width;
+		});
+	
 	
 	var activationViewContainer = Ti.UI.createView({
 		height: Ti.UI.SIZE,
-		top: 0,
+		top: '15%',
 		width: '100%',
-		layout: 'vertical'
+		layout: 'vertical',
+		backgroundColor: purple
 		});
 		
 	var phoneNumberView = Ti.UI.createView({
@@ -101,7 +131,7 @@ function ActivateWindow()
 		});
 		
 	var viewTitleLabel = Ti.UI.createLabel({
-		color: '#1763A6',
+		color: purple,
 		font:
 			{
 			fontSize: 20,
@@ -131,7 +161,7 @@ function ActivateWindow()
 			fontSize: 20,
 			fontFamily: config.opensans_light
 			},
-		color: '#1763A6',
+		color: purple,
 		hintText: L('phone_number_label'),
 		keyboardType: Ti.UI.KEYBOARD_NUMBER_PAD,
 		left: 5,
@@ -218,10 +248,9 @@ function ActivateWindow()
 	activationViewContainer.add(countryPickerContainer);
 	
 	var continueButton = Ti.UI.createButton({
-		backgroundImage: '/images/continue-button-gradient.png',
-		backgroundSelectedImage: '/images/continue-button-gradient-selected.png',
+		backgroundColor: '#f5f5f5',
 		borderWidth: 0,
-		color: 'white',
+		color: purple,
 		font:
 			{
 			fontSize: 18,
@@ -248,12 +277,15 @@ function ActivateWindow()
 		{
 		continueButton.removeEventListener('click', continueButtonHandler);
 		phoneNumberField.blur();
-		
+		continueButton.backgroundColor = purple;
+		continueButton.color = '#f5f5f5';
 		if(phoneNumberField.value.replace(/[^\d.]/g, "").length === 0)
 			{
 			phoneNumberField.value = '';
 			phoneNumberField.borderColor = '#b00000';
 			continueButton.error = true;
+			continueButton.backgroundColor = '#f5f5f5';
+			continueButton.color = purple;
 			
 			continueButton.addEventListener('click', continueButtonHandler);
 			}
@@ -307,6 +339,8 @@ function ActivateWindow()
 							message: String.format(L('invalid_phone_number'), phoneNumber),
 							ok: L('okay')
 							}).show();
+							continueButton.backgroundColor = '#f5f5f5';
+							continueButton.color = purple;
 							}
 						else if(response.error == 'service_error')
 							{
@@ -314,6 +348,8 @@ function ActivateWindow()
 							message: String.format(L('activation_service_error'), phoneNumber),
 							ok: L('okay')
 							}).show();
+							continueButton.backgroundColor = '#f5f5f5';
+							continueButton.color = purple;
 							}
 						else
 							{
@@ -321,6 +357,8 @@ function ActivateWindow()
 							message: String.format(L('general_server_error'), phoneNumber),
 							ok: L('okay')
 							}).show();
+							continueButton.backgroundColor = '#f5f5f5';
+							continueButton.color = purple;
 							}
 						}
 						
