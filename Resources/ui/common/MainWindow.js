@@ -91,6 +91,7 @@ btnImageView.addEventListener('click', function(e)
 {
 	var request = {};
 	
+	Ti.API.info('testing change github');
 	
 	httpClient.doPost('/v1/sendPushNotification', request, function(success, response) {
 		Ti.API.info(JSON.stringify(response));
