@@ -97,7 +97,6 @@ btnImageView.addEventListener('click', function(e)
 	});
 });
 
-		
 	//Create scrollView to hold scrollViewContainer				
 	var scrollView = Ti.UI.createScrollView
 	({
