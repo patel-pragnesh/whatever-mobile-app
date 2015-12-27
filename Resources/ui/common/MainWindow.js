@@ -1,5 +1,6 @@
 
-	
+exports.winHeight;
+exports.winWidth;
 
 function MainWindow() {
 	
@@ -12,7 +13,6 @@ function MainWindow() {
 	
 	var bubblesView = require('ui/common/BubblesView');
 	var CreateCard = require('ui/common/CreateCard');
-	var refresher = require('lib/Refresher');
 	
 	var purple = config.purple;
 	
@@ -71,6 +71,7 @@ function MainWindow() {
 	
 	labelView.addEventListener('postlayout', function(e) 
 		{
+			this.removeEventListener('postlayout', arguments.callee);
 			labelHeight = labelView.size.height;
 			labelWidth = labelView.size.width;
 		});
@@ -85,30 +86,83 @@ function MainWindow() {
 		bottom: '5%'
 	});
 	
-//btnImageView.addEventListener('click', popNewCard);	
+	btnImageView.addEventListener('click', popNewCard);	
 
-// /////// testing send push notification   ###########
-
-
-btnImageView.addEventListener('click', function(e){
 	
-	var request = {};
-	request.deviceIds = ['da249cb2afc0ee03b1225f5cd68f1e08e209ce28443dd4d4f6c56844655c4f71'];
-	request.message = 'HelloWorld';
-	request.payload = {};
-	request.payload.event = 'helloworld';
-	Ti.API.info(JSON.stringify(request));
-	httpClient.doPost('/v1/sendPushNotification', request, function(success, response) {
-		Ti.API.info(JSON.stringify(response));
+	//Create scrollView to hold scrollViewContainer				
+	var scrollView = Ti.UI.createScrollView
+	({
+		    showVerticalScrollIndicator: false,
+			showHorizontalScrollIndicator: false,
+			backgroundColor: purple,
+			width: '100%',
+			height: '100%',
+			opacity: 1	
+	});
 		
-		if(!success)
-			{
-			
-			}
-		});
+        scrollView.addEventListener('scrollend', showWhateverButton);	
+        scrollView.addEventListener('scrollstart', hideWhateverButton);
+        
+        function hideWhateverButton(e) 
+        {
+			btnImageView.visible = false;
+   		}
+    
+    	function showWhateverButton(e) 
+    	{
+    		btnImageView.visible = true;
+    	}
 	
+
+mainContainerView.add(scrollView);
+mainContainerView.add(btnImageView);
+win.add(mainContainerView);
+
+		
+win.addEventListener('postlayout', function(e){
+	this.removeEventListener('postlayout', arguments.callee);
+	
+	Ti.API.info('win postlayout ran');
+	exports.winHeight = win.size.height;
+	exports.winWidth = win.size.width;
+	
+	//add BubblesView, which will have a postlayout event to refresh 
+	var bubbleView = new bubblesView();
+	scrollView.add(bubbleView);
 });
 
+
+	var cardContext = {};
+	function popBubbleCard(args)
+	{
+		Ti.API.info(args);
+		cardContext.context = 'else';
+		var cardView = new CreateCard(cardContext, mainContainerView.size.height);
+		mainContainerView.add(cardView);
+		
+		cardView.addEventListener('postlayout', function(e)
+		{
+			cardView.removeEventListener('postlayout', function(e){});
+	
+				var animation = Titanium.UI.createAnimation();
+					animation.top = 0;
+					animation.duration = 400;
+					
+				cardView.animate(animation);	
+		});
+	}
+	
+	function popNewCard()
+	{
+		cardContext.context = 'new';
+		var cardView = new CreateCard(cardContext);
+		mainContainerView.add(cardView);
+		cardView.show();
+	}
+	
+	
+	
+	
 // /////////    testing buttons   ///////////////////
 
 var testButton1 = Ti.UI.createView({
@@ -155,101 +209,18 @@ var testButton2 = Ti.UI.createView({
 });
 
 win.add(testButton2);
+
+
 testButton2.addEventListener('click', function(e){
 	Ti.API.info('refresh');
-	refresher.calledByMainWindowRefresh();
+	Ti.App.fireEvent('app:refresh');
 });
 
 
-///////// end test buttons   //////////////
-
-	//Create scrollView to hold scrollViewContainer				
-	var scrollView = Ti.UI.createScrollView
-	({
-		    showVerticalScrollIndicator: false,
-			showHorizontalScrollIndicator: false,
-			backgroundColor: purple,
-			width: '100%',
-			height: '100%',
-			opacity: 1	
-	});
-		
-        scrollView.addEventListener('scrollend', showWhateverButton);	
-        scrollView.addEventListener('scrollstart', hideWhateverButton);
-        
-        function hideWhateverButton(e) 
-        {
-			btnImageView.visible = false;
-   		}
-    
-    	function showWhateverButton(e) 
-    	{
-    		btnImageView.visible = true;
-    	}
+///////// end test buttons   //////////////	
 	
 	
-	//scrollViewContainer is inside scrollView.  The bubbles are its children.  
 	
-
-
-mainContainerView.add(scrollView);
-mainContainerView.add(btnImageView);
-win.add(mainContainerView);
-
-var winHeight;
-var winWidth;
-		
-win.addEventListener('postlayout', function(e){
-	win.removeEventListener('postlayout', function(e){});
-	
-	Ti.API.info('win postlayout ran');
-	var winHeight = win.size.height;
-	var winWidth = win.size.width;
-	
-	refresher.calledByMainWindowRefresh();
-});
-
-
-Ti.App.addEventListener('app:buildBubblesView', addBubblesView());
-
-
-function addBubblesView(e)
-{
-	var bubbleView = new bubblesView(winHeight, winWidth);
-	scrollView.add(bubblesView);
-}
-
-	
-	
-	var cardContext = {};
-	function popBubbleCard(args)
-	{
-		Ti.API.info(args);
-		cardContext.context = 'else';
-		var cardView = new CreateCard(cardContext, mainContainerView.size.height);
-		mainContainerView.add(cardView);
-		
-		cardView.addEventListener('postlayout', function(e)
-		{
-			cardView.removeEventListener('postlayout', function(e){});
-	
-				var animation = Titanium.UI.createAnimation();
-					animation.top = 0;
-					animation.duration = 400;
-					
-				cardView.animate(animation);
-				
-		});
-		
-	}
-	
-	function popNewCard()
-	{
-		cardContext.context = 'new';
-		var cardView = new CreateCard(cardContext);
-		mainContainerView.add(cardView);
-		cardView.show();
-	}
 	
 	
 return win;

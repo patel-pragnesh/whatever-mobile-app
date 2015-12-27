@@ -6,57 +6,11 @@
  * 
  * @author Cole Halverson
  */
-var httpClient = require('lib/HttpClient');
 var config = require('config');
-
-
-
 var dbName = config.dbName;
 
-
-Ti.App.addEventListener('whatever e.data.event is from context.recievePush' , function(e)
+exports.checkDeletes = function(response, callback)
 {
-	Refresh();
-});
-
-exports.resumedRefresh = function()
-{
-	Ti.API.info('resumedRefresh called');
-	Refresh();
-};
-
-exports.calledByMainWindowRefresh = function()
-{
-	Ti.API.info('calledByMainWindowRefresh');
-	Refresh();
-};
-
-var account; 
-
-function Refresh()
-{
-	
-	account = Ti.App.Properties.getObject('account');
-	var url = '/v1/conversation?userId=' + account.id;
-	
-	httpClient.doGet(url, function(success, response)
-	{
-		if (success)
-		{
-			UpdateDB(response);
-		}
-		else
-		{
-			Ti.API.info('error doGet for userConversations');
-		}
-	});		
-	
-}
-
-function UpdateDB(response)
-{
-	Ti.API.info('UpdateDB');
-	
 	//check for deletes
 	var db = Ti.Database.open(dbName);
 	var toDelete = [];
@@ -79,23 +33,22 @@ function UpdateDB(response)
 				
 				if (removeConvo)
 				{
-					//TODO Tell UI to remove the convo bubView right away
-					
 					//then add it to array to be deleted
-					toDelete.push(localConvos.fieldByName('rowid'));
-					Ti.API.info('deleting ' + localConvos.fieldByName('rowid'));
+					toDelete.push(localConvos.fieldByName('convo_key'));
+					Ti.API.info('deleting ' + localConvos.fieldByName('convo_key'));
 				}
 			localConvos.next();
 			}	
 		}
-		
+	
+	callback(toDelete);	
 	
 	localConvos.close();
-	db.close();
+	
 	
 	if (toDelete.length > 0)
 	{
-		var db = Ti.Database.open(dbName);
+
 		db.execute('BEGIN'); // begin the transaction
 		
 		for(var i=0; i < toDelete.length; i++) 
@@ -106,11 +59,22 @@ function UpdateDB(response)
 		}
 	
 		db.execute('COMMIT');
-		db.close();
 	}
 	
-	
+	db.close();
+};
 
+
+exports.updateDB = function(response, callback)
+{
+	var httpClient = require('lib/HttpClient');
+	var config = require('config');
+
+	var dbName = config.dbName;
+	var account; 
+	
+	Ti.API.info('UpdateDB');
+	
 	var uiArgs = [];
 	
 	
@@ -158,5 +122,5 @@ function UpdateDB(response)
 		row.close();
 	}
 	
-	//Ti.App.fireEvent('app:buildBubblesView');
-}
+callback(uiArgs);
+};

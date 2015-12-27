@@ -79,7 +79,7 @@ exports.buildDB = function()
 	
 	db.close();
 	
-	//Update();
+	
 	displayDB();
 	
 }; //end of buildDB()

@@ -1,32 +1,82 @@
 
 var config = require('config');
+var refreshUtility = require('lib/RefreshUtility');
+var httpClient = require('lib/HttpClient');
 
 var purple = config.purple;
 
-function BubblesView(winHeight, winWidth)
+var mainWindow = require('ui/common/MainWindow');
+
+var winHeight = mainWindow.winHeight;
+var winWidth = mainWindow.winWidth;
+
+function BubblesView()
 {
 	var bubblesView = Ti.UI.createView
 	({
-			backgroundColor: purple,
 			layout: 'absolute',
-			height: Titanium.UI.SIZE,
+			height: 2000,  //Titanium.UI.SIZE
 			width: '100%',
 			top: 0,
 			backgroundColor: 'orange'
 	});	
-		var bubView = Ti.UI.createView
-		({
-			height: 100,
-			width: 100,
-			top: 200,
-		});
 		
-		bubblesView.add(bubView);
+	
+	
+		
+	bubblesView.addEventListener('postlayout', function(e){
+		this.removeEventListener('postlayout', arguments.callee);
+		Ti.API.info('bubblesView post layout');
+		Refresh();
+	});	
+		
+	
 	
 	return bubblesView;
 }
 
 module.exports = BubblesView;
+
+Ti.App.addEventListener('app:refresh', function(e)
+{
+	Refresh();
+});
+
+function Refresh()
+	{
+	Ti.API.info('bubbles view refresh called');
+	var account = Ti.App.Properties.getObject('account');
+	var url = '/v1/conversation?userId=' + account.id;
+	
+	httpClient.doGet(url, function(success, response)
+	{
+		if (success)
+		{
+			Ti.API.info('bubbles View checkDeletes');
+			refreshUtility.checkDeletes(response, function(toDelete)
+			{
+				//call to delete bubView for each convo in toDelete
+				for (i = 0; i < toDelete.length; i++)
+				{
+					Ti.API.info('BubblesView will delete: ' + toDelete[i]);
+				}
+			});
+			
+			refreshUtility.updateDB(response, function(uiArgs)
+			{
+				for (j = 0; j < uiArgs.length; j++)
+				{
+					Ti.API.info('BubblesView will update or create: ' + uiArgs[i]);
+				}
+			});
+		}
+		else
+		{
+			Ti.API.info('error doGet for userConversations');
+		}
+	});		
+	
+	}	
 
 function layoutBubbles(conversations)
 	{
