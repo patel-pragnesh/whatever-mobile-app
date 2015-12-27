@@ -7,6 +7,7 @@
 	var launching = true;
 	var config = require('config');
 	var _ = require('lib/Underscore');
+	var refresher = require('lib/Refresher');
 	
 	var whateverDB = require('lib/WhateverDB');
 	//var newrelic = require('ti.newrelic').start("AA8d163585f446346bb693944e06f5d5f64b37fede");
@@ -25,6 +26,7 @@
 		
 	function resumed()
 		{
+			refresher.resumedRefresh();
 		var pause = setTimeout(function()
 			{
 			if(!_.isNull(Ti.App.Properties.getString('device_token')))
@@ -52,7 +54,8 @@
 	/**
 	 * Launch the app
 	 */
-	whateverDB.checkExistence();
+	
+	whateverDB.buildDB();
 	
 	if(_.isNull(Ti.App.Properties.getObject('account')))
 		{

@@ -5,11 +5,13 @@
 var config = require('config');
 var httpClient = require('lib/HttpClient');
 
+var whateverDB = require('lib/WhateverDB');
 var MainWindow = require('ui/common/MainWindow');
 var ActivateWindow = require('ui/common/ActivateWindow');
 
 // Main launch function
 exports.launch = function() {
+	
 	var mainWindow = new MainWindow();
 	mainWindow.open();
 		
@@ -95,7 +97,9 @@ exports.register = function() {
 			// iOS
 			if(e.data && e.data.event)
 				{
+				Ti.API.info('RECIEVED PUSH!!');
 				Ti.App.fireEvent(e.data.event);
+				
 				}
 			}
 			
@@ -103,6 +107,7 @@ exports.register = function() {
 			{
 			Ti.App.Properties.setString('device_token', e.deviceToken);
 			registerDevice(e.deviceToken, 'IOS');
+			Ti.API.info('device_token' + e.deviceToken);
 			}
 		
 		function deviceTokenError(e)
