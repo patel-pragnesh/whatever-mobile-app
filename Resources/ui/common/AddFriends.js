@@ -1,28 +1,30 @@
 
 function AddFriends() 
-
-
 {
-	
-
 	var config = require('config');
 	var context = require('context');
 	
-
 	var moment = require('lib/Moment');
 	var _ = require('lib/Underscore');
 	var httpClient = require('lib/HttpClient');
 	
+	var addViewHolder = Ti.UI.createView({
+		width: '100%',
+		bottom: '5%',
+		top: '12%',
+		backgroundColor: 'orange',
+		layout: 'absolute'
+	});
+	
+	
 	var addView = Ti.UI.createView({
-		width: '75%',
-		height: '100%',
-		backgroundColor: 'green',
-		layout: 'vertical',
-		right: 0
+		width: '100%',
+		height: Titanium.UI.FILL,
+		backgroundColor: 'white',
+		layout: 'vertical'
 	});
 
-
-
+	
 	var search;
 	var people = [];
 	
@@ -62,7 +64,7 @@ function AddFriends()
 	if(config.platform === config.platform_iphone || Ti.Platform.Android.API_LEVEL < 11)
 		{
 		search = Ti.UI.createSearchBar({
-			showCancel: true,
+			showCancel: false,
 			top: 0
 			});
 			
@@ -96,6 +98,27 @@ function AddFriends()
 		
 	
 	addView.add(search);
+	
+	var selectedView = Ti.UI.createScrollView({
+		width: '100%',
+		height: '10%',
+		backgroundColor: config.purple,
+		bottom: 0,
+		zIndex: 1,
+		opacity: 0.5
+	});
+	
+//event listeners to manage search bar focus
+
+listView.addEventListener('scrollstart', function(e)
+{
+	Ti.API.info('scrollstart');
+	if (search.getValue() === "")
+	{
+		search.blur();
+		Ti.API.info('blur');
+	}
+});
 
 
 // Match the Apple design guidelines for the inset on the separator
@@ -139,8 +162,14 @@ function buildList()
         			people.push(person); 
         		}else if (peopleArray[i].phone.mobile > ""){
         				mobile = peopleArray[i].phone.mobile;
-        				person = {fullName: fullName, mobile: mobile};
-        				people.push(person); 
+        				if (fullName.toString() [0] == "#")
+        				{
+        					Ti.API.info('removed carrier contact');
+        				}else{
+        					person = {fullName: fullName, mobile: mobile};
+        					people.push(person); 
+        				}
+        				
         		}else if(peopleArray[i].phone.main >""){
         				mobile = peopleArray[i].phone.main;
         				person = {fullName: fullName, mobile: mobile};
@@ -330,6 +359,7 @@ function itemClickEvent(itemEvent)
 	}//end of itemPhone.length else if
 						
 }//end of itemClickEvent						
+
 						
 function checkIfAlreadyAdded(itemEvent)
 {
@@ -382,9 +412,10 @@ function display(){
 
 
 addView.add(listView);
+addViewHolder.add(addView);
+addViewHolder.add(selectedView);
 
-
-return addView;
+return addViewHolder;
 };
 
 

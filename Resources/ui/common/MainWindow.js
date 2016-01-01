@@ -1,7 +1,4 @@
 
-exports.winHeight;
-exports.winWidth;
-
 function MainWindow() {
 	
 	var config = require('config');
@@ -86,7 +83,12 @@ function MainWindow() {
 		bottom: '5%'
 	});
 	
-	btnImageView.addEventListener('click', popNewCard);	
+	btnImageView.addEventListener('click', function(e)
+	{
+		var cardArgs = {};
+		cardArgs.context = 'new';
+		Ti.App.fireEvent('app:PopCardView', cardArgs);
+	});	
 
 	
 	//Create scrollView to hold scrollViewContainer				
@@ -97,8 +99,17 @@ function MainWindow() {
 			backgroundColor: purple,
 			width: '100%',
 			height: '100%',
-			opacity: 1	
+			opacity: 1,
+			layout: 'vertical'
 	});
+		
+		var bottomSpacer = Ti.UI.createView
+		({
+			width: '100%',
+			height: 150,
+			bottom: 0,
+			backgroundColor: purple
+		});
 		
         scrollView.addEventListener('scrollend', showWhateverButton);	
         scrollView.addEventListener('scrollstart', hideWhateverButton);
@@ -122,59 +133,51 @@ win.add(mainContainerView);
 win.addEventListener('postlayout', function(e){
 	this.removeEventListener('postlayout', arguments.callee);
 	
-	Ti.API.info('win postlayout ran');
-	exports.winHeight = win.size.height;
-	exports.winWidth = win.size.width;
+	var winHeight = win.size.height;
+	var winWidth = win.size.width;
 	
 	//add BubblesView, which will have a postlayout event to refresh 
-	var bubbleView = new bubblesView();
+	var bubbleView = new bubblesView(winHeight, winWidth);
 	scrollView.add(bubbleView);
+	scrollView.add(bottomSpacer);
 });
 
 
-	var cardContext = {};
-	function popBubbleCard(args)
-	{
-		Ti.API.info(args);
-		cardContext.context = 'else';
-		var cardView = new CreateCard(cardContext, mainContainerView.size.height);
-		mainContainerView.add(cardView);
-		
-		cardView.addEventListener('postlayout', function(e)
-		{
-			cardView.removeEventListener('postlayout', function(e){});
+//Event listener to popCardView
+Ti.App.addEventListener('app:PopCardView', function(e)
+{
+	var cardArgs = e;
+	var cardView = new CreateCard(win, cardArgs, mainContainerView.size.height);
 	
-				var animation = Titanium.UI.createAnimation();
-					animation.top = 0;
-					animation.duration = 400;
+	win.add(cardView);
+
+	cardView.addEventListener('postlayout', function(e)
+	{
+		cardView.removeEventListener('postlayout', arguments.callee);
+		
+		var animation = Titanium.UI.createAnimation();
+				animation.top = '5%';
+				animation.duration = 250;
 					
 				cardView.animate(animation);	
-		});
-	}
-	
-	function popNewCard()
-	{
-		cardContext.context = 'new';
-		var cardView = new CreateCard(cardContext);
-		mainContainerView.add(cardView);
-		cardView.show();
-	}
-	
-	
+	});	
+				
+		
+});
 	
 	
 // /////////    testing buttons   ///////////////////
 
 var testButton1 = Ti.UI.createView({
-	height: 200,
-	width: 200,
+	height: 50,
+	width: 100,
 	bottom: 150,
 	left: 50,
 	backgroundColor: 'orange',
 	zIndex: 10
 });
 
-win.add(testButton1);
+//win.add(testButton1);
 
 testButton1.addEventListener('click', function(e){
 	Ti.API.info('create convo');
@@ -184,7 +187,7 @@ testButton1.addEventListener('click', function(e){
 		account = Ti.App.Properties.getObject("account");
 		
 		request.userId = 12067189809;
-		request.status = "OPEN";
+		request.status = "IT_IS_ON";
 		request.topic = "Call your friends lets get drunk";
 		
 		var invited = ['14066974685'];
@@ -199,29 +202,39 @@ testButton1.addEventListener('click', function(e){
 		});
 });
 
+var button1Label = Ti.UI.createLabel({
+	text: 'Create Convo',
+	color: 'black'
+});
+
+testButton1.add(button1Label);
+
 var testButton2 = Ti.UI.createView({
-	height: 200,
-	width: 200,
+	height: 50,
+	width: 100,
 	bottom: 150,
 	right: 50,
 	backgroundColor: 'green',
 	zIndex: 10
 });
 
-win.add(testButton2);
+var button2Label = Ti.UI.createLabel({
+	text: 'Refresh',
+	color: 'black'
+});
+
+testButton2.add(button2Label);
+//win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){
-	Ti.API.info('refresh');
 	Ti.App.fireEvent('app:refresh');
 });
 
 
 ///////// end test buttons   //////////////	
 	
-	
-	
-	
+
 	
 return win;
 }

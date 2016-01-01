@@ -79,3 +79,7 @@ exports.ptserif_regular = 'PTSerif-Regular';
 // http://docs.appcelerator.com/titanium/latest/#!/guide/iOS_7_Migration_Guide
 var version = Titanium.Platform.version.split(".");
 exports.major = parseInt(version[0],10);
+
+//variables to hold the the screen height and width of the phone.  Used to size the bubbles.
+var winHeight;
+var winWidth;
