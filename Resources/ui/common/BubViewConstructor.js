@@ -65,10 +65,10 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 	bubView.addEventListener('click', function(e)
 	{
 		cardArgs = {};
-		cardArgs.convoKey = bubConvoKey;
-		cardArgs.creator.firstName = '';
-		cardArgs.creator.lastName = '';
-		cardArgs.creator.userId = '';
+		cardArgs.convoKey = convoKey;
+		//cardArgs.creator.firstName = '';
+		//cardArgs.creator.lastName = '';
+		//cardArgs.creator.userId = '';
 		Ti.App.fireEvent('app:PopCardView', cardArgs);
 	});
 			

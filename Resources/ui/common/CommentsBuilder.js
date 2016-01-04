@@ -7,7 +7,7 @@
 
 
 
-exports.buildComments = function(containerWidth)
+exports.buildComments = function(containerWidth, containerHeight)
 	{
 	
 	

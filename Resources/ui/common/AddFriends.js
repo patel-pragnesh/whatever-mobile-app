@@ -1,5 +1,5 @@
 
-function AddFriends() 
+function AddFriends(parentView) 
 {
 	var config = require('config');
 	var context = require('context');
@@ -10,9 +10,9 @@ function AddFriends()
 	
 	var addViewHolder = Ti.UI.createView({
 		width: '100%',
-		bottom: '5%',
-		top: '12%',
-		backgroundColor: 'orange',
+		//bottom: '5%',
+		height: '100%',
+		top: '101%',
 		layout: 'absolute'
 	});
 	
@@ -99,14 +99,47 @@ function AddFriends()
 	
 	addView.add(search);
 	
-	var selectedView = Ti.UI.createScrollView({
+	var selectedView = Ti.UI.createView({
 		width: '100%',
 		height: '10%',
 		backgroundColor: config.purple,
 		bottom: 0,
-		zIndex: 1,
-		opacity: 0.5
+		opacity: 0.8,
+		visible: false
 	});
+	
+	var selectedLabelsViewHolder = Ti.UI.createView({
+		width: '100%',
+		left: '1%',
+		height: '10%',
+		visible: false,
+		layout: 'horizontal',
+		bottom: 0
+	});
+		
+		var doneButton = Ti.UI.createView({
+			width: Titanium.UI.FILL,
+			left: 0,
+			height: Titanium.UI.FILL
+		});
+			var doneLabel = Ti.UI.createLabel({
+				text: 'Done',
+				color: 'black',
+				font: {fontSize: 15,
+						fontFamily: 'OpenSans-Regular'}
+			});
+			doneButton.add(doneLabel);
+			
+		var selectedLabelsView = Ti.UI.createScrollView({
+			width: '85%',
+			height: Titanium.UI.FILL,
+			bottom: 0,
+			layout: 'horizontal'
+		});
+		selectedLabelsViewHolder.add(selectedLabelsView);
+		selectedLabelsViewHolder.add(doneButton);
+	
+
 	
 //event listeners to manage search bar focus
 
@@ -170,11 +203,15 @@ function buildList()
         					people.push(person); 
         				}
         				
-        		}else if(peopleArray[i].phone.main >""){
+        		}
+        		/**
+        		else if(peopleArray[i].phone.main >""){
         				mobile = peopleArray[i].phone.main;
         				person = {fullName: fullName, mobile: mobile};
         				people.push(person); 
-        		}else if(peopleArray[i].phone.home >""){
+        		}
+        		*/
+        		else if(peopleArray[i].phone.home >""){
         				mobile = peopleArray[i].phone.home;
         				person = {fullName: fullName, mobile: mobile};
         				people.push(person);
@@ -296,22 +333,22 @@ var selectedPeople = [];  //keeps track of user listItem choices for the duratio
 								//used mainly to allow 'checks' and 'unchecks'
 var selectedNames = [];							
 var finalOutput;		//A 'checked' contacts mobile phone number after removing non-digits and standardizing to 11 characters
-var item;		
+var item;	
+var itemName;	
 			
 function itemClickEvent(itemEvent)	
 {
 	listView.removeEventListener('itemclick', itemClickEvent);
 				
-	item = itemEvent.section.getItemAt(itemEvent.itemIndex);
+		item = itemEvent.section.getItemAt(itemEvent.itemIndex);
 				
 		item.properties.accessoryType = Ti.UI.LIST_ACCESSORY_TYPE_CHECKMARK;
 		itemEvent.section.updateItemAt(itemEvent.itemIndex, item);
 				
-		itemPhone = item.properties.phone.toString();
+		var itemPhone = item.properties.phone.toString();
+			itemName = item.contact.text;
 		
 		Ti.API.info(JSON.stringify(item));
-		
-		
 				
 	if(itemPhone.length == 0)
 	{
@@ -336,8 +373,10 @@ function itemClickEvent(itemEvent)
 		else if(finalOutput.length == 7)
 		{
 				// Assume same area code as user
-				var areaCode = account.phone_number.substring(1,4);				
+				var account = Ti.App.Properties.getObject('account');
+				var areaCode = account.id.substring(1,4);				
 				finalOutput = '1' + areaCode + finalOutput;
+				Ti.API.info(finalOutput);
 				checkIfAlreadyAdded(itemEvent);												
 				listView.addEventListener('itemclick', itemClickEvent);	
 		}
@@ -363,6 +402,7 @@ function itemClickEvent(itemEvent)
 						
 function checkIfAlreadyAdded(itemEvent)
 {
+	Ti.API.info(itemEvent);
 	var alreadyAdded = false;
 	var i = 0;
 								
@@ -382,38 +422,94 @@ function checkIfAlreadyAdded(itemEvent)
 	{
 		Ti.API.info('already added');
 		selectedPeople.splice(i, 1);
+		selectedNames.splice(i, 1);
 		item.properties.accessoryType = Ti.UI.LIST_ACCESSORY_TYPE_NONE;
 		itemEvent.section.updateItemAt(itemEvent.itemIndex, item);
-		display();
+		displaySelectedNames();
 	}else{
-		addToArray();
+		selectedPeople.push(finalOutput);
+		selectedNames.push(itemName);
+		displaySelectedNames();
 	}
 		
+	//tell parentView (card of CreateCard.js) to update friend label count
+	parentView.fireEvent('updateFriendsLabel', {count: selectedPeople.length});
+
 }//end of checkIfAlreadyAdded			
 						
-								
-							
-function addToArray()
+function displaySelectedNames()
 {
-	Ti.API.info('add to array');
-							
-	selectedPeople.push(finalOutput);
-	display();						
-							
-}//end of addToArray			
-	
-exports.selectedPeople = selectedPeople;
-	
-function display(){
-	
-}	
-										
-
+	if (selectedNames.length > 0)
+	{
+		selectedLabelsView.removeAllChildren();
+		selectedView.show();
+		selectedLabelsViewHolder.show();
+		
+		for (j = 0; j < selectedNames.length; j++)
+		{
+			
+			var nameLabel = Ti.UI.createLabel({
+				text: selectedNames[j] + ", ",
+				color: 'white',
+				left: 0,
+				font: {fontSize: 18,
+						fontFamily: 'OpenSans-Bold'},
+				ellipsize: Titanium.UI.TEXT_ELLIPSIZE_TRUNCATE_START
+			});
+			
+			selectedLabelsView.add(nameLabel);
+			selectedLabelsView.scrollToBottom();
+		}
+		selectedLabelsView.scrollToBottom();
+	}else{
+		selectedView.hide();
+		selectedLabelsViewHolder.hide();
+	}
+}
 
 
 addView.add(listView);
 addViewHolder.add(addView);
 addViewHolder.add(selectedView);
+addViewHolder.add(selectedLabelsViewHolder);
+
+//next button click handler
+doneButton.addEventListener('click', function(e)
+{
+	var args = {};
+	args.selectedPeople = selectedPeople;
+	args.selectedNames = selectedNames;
+	parentView.fireEvent('returnFromAddFriends', args);
+});
+
+
+//Listen for the keyboard event
+var keyboardHidden = true;
+var animation = Ti.UI.createAnimation();
+
+Ti.App.addEventListener('keyboardframechanged', function(e){
+	Ti.API.info('duration = ' + (e.animationDuration * 1000));
+	if(keyboardHidden)
+	{
+		keyboardHidden = false;
+		
+			animation.bottom = e.keyboardFrame.height;
+			animation.duration = e.animationDuration * 1000;
+	}
+	else
+	{
+		keyboardHidden = true;
+		
+		animation.bottom = 0;
+		animation.duration = e.animationDuration * 1000;	
+	}
+	
+	selectedView.animate(animation);
+	selectedLabelsViewHolder.animate(animation);
+	
+});
+
+
 
 return addViewHolder;
 };
