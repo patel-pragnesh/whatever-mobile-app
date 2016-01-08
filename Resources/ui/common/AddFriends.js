@@ -21,9 +21,9 @@ function AddFriends(parentView)
 		width: '100%',
 		height: Titanium.UI.FILL,
 		backgroundColor: 'white',
-		layout: 'vertical'
+		layout: 'vertical',
+		
 	});
-
 	
 	var search;
 	var people = [];
@@ -216,7 +216,7 @@ function buildList()
         				person = {fullName: fullName, mobile: mobile};
         				people.push(person);
         		}else{
-        			Ti.API.info(peopleArray[i].fullName + ' no mobile');	
+        			Ti.API.info(peopleArray[i].fullName + ' no phone');	
         		}
             	
             	  
@@ -473,7 +473,7 @@ addViewHolder.add(addView);
 addViewHolder.add(selectedView);
 addViewHolder.add(selectedLabelsViewHolder);
 
-//next button click handler
+//done button click handler
 doneButton.addEventListener('click', function(e)
 {
 	var args = {};

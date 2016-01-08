@@ -83,11 +83,28 @@ function MainWindow() {
 		bottom: '5%'
 	});
 	
+	//Event listener to popCardView with context 'new'
 	btnImageView.addEventListener('click', function(e)
 	{
 		var cardArgs = {};
 		cardArgs.context = 'new';
-		Ti.App.fireEvent('app:PopCardView', cardArgs);
+		
+			var cardView = new CreateCard(win, cardArgs, mainContainerView.size.height);
+			
+			win.add(cardView);
+		
+			cardView.addEventListener('postlayout', function(e)
+			{
+				cardView.removeEventListener('postlayout', arguments.callee);
+				
+				var animation = Titanium.UI.createAnimation();
+						animation.top = '5%';
+						animation.duration = 250;
+							
+						cardView.animate(animation);	
+			});	
+		
+			
 	});	
 
 	
@@ -142,29 +159,15 @@ win.addEventListener('postlayout', function(e){
 	scrollView.add(bottomSpacer);
 });
 
-
-//Event listener to popCardView
-Ti.App.addEventListener('app:PopCardView', function(e)
+//Event listener to create a card for a conversation
+Ti.App.addEventListener('app:createcard', function(e)
 {
-	var cardArgs = e;
-	var cardView = new CreateCard(win, cardArgs, mainContainerView.size.height);
-	
+	Ti.API.info('card created convo: ' + e.conversationId);
+	var cardView = new CreateCard(win, e, mainContainerView.size.height);
 	win.add(cardView);
-
-	cardView.addEventListener('postlayout', function(e)
-	{
-		cardView.removeEventListener('postlayout', arguments.callee);
-		
-		var animation = Titanium.UI.createAnimation();
-				animation.top = '5%';
-				animation.duration = 250;
-					
-				cardView.animate(animation);	
-	});	
-				
-		
 });
-	
+
+
 	
 // /////////    testing buttons   ///////////////////
 
@@ -224,7 +227,7 @@ var button2Label = Ti.UI.createLabel({
 });
 
 testButton2.add(button2Label);
-//win.add(testButton2);
+win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){

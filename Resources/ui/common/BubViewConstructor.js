@@ -31,7 +31,6 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				var bubRadius = bubDiameter / 2;
 				var bubBorder = bubDiameter *.025;
 				var buttonBottom = winHeight * .032;
-			
 			}
 				
 			var bubViewTop = conversation.top_y * bubViewHeight;               //get from DB 
@@ -48,10 +47,18 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				width: bubViewWidth,
 				height: bubViewHeight,
 				top: bubViewTop,
-				bubConvoKey: convoKey
+				bubConvoKey: convoKey,
 			});
 			
 	//event listeners for the bubView
+	
+	
+	//postlayout listener to tell mainWindow to create a card view for this conversation
+	bubView.addEventListener('postlayout', function(e){
+		bubView.removeEventListener('postlayout', arguments.callee);
+		Ti.App.fireEvent('app:createcard', conversation);
+	});
+	//listener to tell the parent view to delete this
 	Ti.App.addEventListener('app:DeleteBubble:' + convoKey, function(e){
 		Ti.API.info('delete event recieved');
 		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
@@ -61,15 +68,12 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
 		
 	});
-			
+	
+	//listener to tell appropriate cardView to rise when this is clicked	
 	bubView.addEventListener('click', function(e)
 	{
-		cardArgs = {};
-		cardArgs.convoKey = convoKey;
-		//cardArgs.creator.firstName = '';
-		//cardArgs.creator.lastName = '';
-		//cardArgs.creator.userId = '';
-		Ti.App.fireEvent('app:PopCardView', cardArgs);
+		Ti.API.info('bubView clicked convo: ' + convoKey);
+		Ti.App.fireEvent('app:raisecard:' + convoKey);
 	});
 			
 		//position the bubView
@@ -84,7 +88,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			
 			var mask = Ti.UI.createImageView
 				({				
-				image: '/images/joe',						//not sure where to put this to pull it from  //prolly the filesystem
+				image: '/images/profilePic',						
 				borderRadius: bubRadius,
 				borderColor: 'white',
 				borderWidth: bubBorder,
@@ -111,17 +115,15 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			
 			function itsOpen()
 			{
-				mask.borderColor = purple;		
-				var spinnerView = Ti.UI.createView({
-					height: Ti.UI.SIZE,
-					width: Ti.UI.SIZE
-				});
+				mask.setBorderColor('orange');	
+				mask.setBorderWidth(0);
+				
+				
 				var spinner = Ti.UI.createImageView({
-					image: '/images/spinMask',
-					height: bubDiameter + 10,
-					width: bubDiameter + 10
+					image: '/images/Mask',
+					
 				});
-				spinnerView.add(spinner);
+				
 				bubView.add(spinner);
 			
 				var t = Ti.UI.create2DMatrix();	
@@ -129,9 +131,9 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				function startRotate()											
 				{		
 						var a = Titanium.UI.createAnimation();
-						t = t.rotate(7);
+						t = t.rotate(3);
 						a.transform = t;
-						a.duration = 50;
+						a.duration = 19;
 						
 						a.addEventListener('complete', startRotate);
 					
@@ -200,7 +202,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			});
 			bubView.add(imInIndicator);
 		
-		bubView.add(mask);	
+		
 		
 		return bubView;
 	};

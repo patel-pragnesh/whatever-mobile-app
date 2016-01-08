@@ -8,13 +8,18 @@
 function CreateCard(parentView, cardArgs, mainContainerHeight)
 	{
 	
+	var httpClient = require('lib/HttpClient');
 	var config = require('config');
 		
 	var purple = config.purple;
 	
 	var AddFriends = require('ui/common/AddFriends');
+	var MembersView = require('ui/common/MembersView');
 	
-		
+	// The notification view has a zIndex that blocks the UI and provides an indicator
+	var notificationView = require('ui/common/NotificationView').create();
+	
+	var account = Ti.App.properties.getObject('account');
 		
 var card = Ti.UI.createView({
 	width: '97%',
@@ -31,9 +36,7 @@ var card = Ti.UI.createView({
 		top: '1.5%',
 		height: '9%',
 		width: '100%',
-		layout: 'horizontal',
-		//backgroundColor: 'blue'
-			
+		layout: 'horizontal'
 		});
 		
 		var profileLabelsView = Ti.UI.createView({
@@ -42,7 +45,6 @@ var card = Ti.UI.createView({
 			layout: 'vertical',
 			width: Titanium.UI.SIZE
 		});
-		
 		card.add(profileViewRow);	
 	
 	var mainViewContainer = Ti.UI.createView({
@@ -59,9 +61,10 @@ var card = Ti.UI.createView({
 				top: 0,
 				bottom: '10%',
 				width: '100%',
-				backgroundColor: '#f3f3f3'
+				backgroundColor: '#f3f3f3',
+				layout: 'vertical'
 				});
-				mainViewContainer.add(commentsScrollView);
+				
 				
 				commentsScrollView.addEventListener('touchstart', function(e){
 						textArea.blur();
@@ -71,17 +74,16 @@ var card = Ti.UI.createView({
 			height: Titanium.UI.SIZE,
 			width: '100%',
 			backgroundColor: '#c2c2c2',
-			bottom: 0 
+			bottom: 0 ,
+			zIndex: 1
 		});
 		
 		var createCommentView = Ti.UI.createView({
-			//bottom: 0,
 			top: 1,
 			height: Titanium.UI.SIZE,
 			width: '100%',
 			backgroundColor: 'white',
 			layout: 'horizontal'
-			
 		});
 			
 			var leftTextAreaButton = Ti.UI.createView({
@@ -91,21 +93,12 @@ var card = Ti.UI.createView({
 				top: 2,
 				bottom: 2,
 				width: '15%',
-				//backgroundColor: 'blue'
 			});
-			
-				var whateverIcon = Ti.UI.createImageView({
-					width: '80%',
-					image: 'images/whateverIcon.png'
-				});
-				leftTextAreaButton.add(whateverIcon);
 				
 			var textArea = Ti.UI.createTextArea({
 				left: '2%',
 				width: '66%',
 				height: Titanium.UI.SIZE,
-				//backgroundColor: 'red',
-				value: "What are you trying to do?...",
 				font: {fontFamily: 'OpenSans-Light',
 						fontSize: 16},
 				color: 'gray'
@@ -121,33 +114,18 @@ var card = Ti.UI.createView({
 					}
 				});
 				
-				textArea.addEventListener('blur', function(e){
-					
-					if (textArea.getValue() == ""){
-						textArea.setColor('gray');
-						textArea.setValue("What are you trying to do?...");
-					}
-					
-				});
-				var goButton = Ti.UI.createView({
+				var rightTextAreaButton = Ti.UI.createButton({
 					left: 0,
 					height: 53,
 					width: Titanium.UI.FILL,
 					top: 2,
 				    bottom: 2,
-					//backgroundColor: 'orange'
+				    visible: false
 				});
-					var goLabel = Ti.UI.createLabel({
-						text: "Go!",
-						color: 'gray',
-						//color: '#21BF55',
-						font: {fontFamily: 'OpenSans-Bold',
-								fontSize: 20}
-					});
-				goButton.add(goLabel);
+					
 			createCommentView.add(leftTextAreaButton);
 			createCommentView.add(textArea);
-			createCommentView.add(goButton);
+			createCommentView.add(rightTextAreaButton);
 			createCommentHolder.add(createCommentView);
 			mainViewContainer.add(createCommentHolder);
 		
@@ -176,16 +154,13 @@ var card = Ti.UI.createView({
 				
 			});
 				
-	
-	var dissapearingView = Ti.UI.createView({
-		top: 0,
-		width: '100%',
-		height: Ti.UI.SIZE,
-		backgroundColor: 'white',
-		layout: 'vertical',
-		zIndex: 3,
-		backgroundColor: 'pink'
-		});	
+			//this ensures the createCommentHolder doesn't get 'stuck' up at keyboard height
+			Ti.App.addEventListener('pause', function(e)
+			{
+				textArea.blur();
+				keyboardHidden = true;
+			});
+			
 	
 	var membersView = Ti.UI.createView({
 		width: '100%',
@@ -196,16 +171,11 @@ var card = Ti.UI.createView({
 	});
 	
 	
-	
-	
-	
 	function Populate (e){
 		card.removeEventListener('postlayout', Populate);
 		
 		var containerHeight = card.size.height;
 		var containerWidth =  card.size.width;
-		
-		
 		
 		var profileCircleDia = profileViewRow.size.height;      //was conotainerWidth *  .145
 		var profileCircleRadius = profileCircleDia / 2;
@@ -254,7 +224,7 @@ var card = Ti.UI.createView({
 					extraLabelsView.add(andLabel);
 		
 					var numberFriendsLabel = Ti.UI.createLabel({
-						text: "0 friends",
+						text: "0 friends are in",
 						font: {fontSize: 15,
 							   fontFamily: 'OpenSans-Light'},
 						color: purple,
@@ -275,18 +245,42 @@ var card = Ti.UI.createView({
 			});
 					
 	
-	var cancelLabel = Ti.UI.createLabel({
+	var closeButton = Ti.UI.createLabel({
+		width: Titanium.UI.SIZE,
+		top: '1.5%',
+		right: '2.5%',
+		height: '5%',
+	});
+	card.add(closeButton);
+	
+
+//If context is creating a new conversation
+if (cardArgs.context == 'new' )
+{
+	
+	var createConversationRequest = {status: 'OPEN',
+										invitedUsers: []};
+	
+		
+	
+	createConversationRequest.userId = account.id;
+	
+	
+	var selectedNames;
+	
+	//set up closeButton
+	
+	var nevermindLabel = Ti.UI.createLabel({
 		text: "Nevermind",
 		font: {fontSize: 13,
 				fontFamily: 'OpenSans-Regular'},
 		color: purple,
 		top: 0,
-		right: '2.5%',
-		height: 30,
+		right: 0,
 		verticalAlign: Titanium.UI.TEXT_ALIGNMENT_TOP
 	});
 	
-	cancelLabel.addEventListener('click', function(e){
+	closeButton.addEventListener('click', function(e){
 		var animation = Titanium.UI.createAnimation();
 			textArea.blur();
 			animation.top = '101%';
@@ -300,26 +294,56 @@ var card = Ti.UI.createView({
 				
 			
 		});	
+	closeButton.add(nevermindLabel);
 	
-	card.add(cancelLabel);
-	
-
-//If context is creating a new conversation
-if (cardArgs.context == 'new' )
-{
-	
-	var createConversationRequest = {status: 'OPEN',
-										invitedUsers: []};
-		
-	var account = Ti.App.properties.getObject('account');
-	createConversationRequest.userId = account.id;
 	
 	creatorProfilePic.image = '/images/profilePic';
 	creatorLabel.text = 'You';
 	
+	mainViewContainer.add(commentsScrollView);
+	
+	//Set up createCommentView
+	
+	textArea.setValue("What are you trying to do?...");
+	
+	textArea.addEventListener('blur', function(e)
+	{
+		if (textArea.getValue() == "")
+		{
+			textArea.setColor('gray');
+			textArea.setValue("What are you trying to do?...");
+		}
+	});			
+	
+	var whateverIcon = Ti.UI.createImageView({
+		width: '80%',
+		image: 'images/whateverIcon.png'
+	});
+	
+	leftTextAreaButton.add(whateverIcon);
+	
+		leftTextAreaButton.addEventListener('click', function(e){
+			textArea.setValue('');
+			textArea.setColor('black');
+			textArea.setValue('Up for Whatever');
+			checkIfGo();
+		});
+	
+	var goLabel = Ti.UI.createLabel({
+			text: "Go!",
+			color: 'gray',
+			font: {fontFamily: 'OpenSans-Bold',
+						fontSize: 20}
+			});
+			
+			rightTextAreaButton.add(goLabel);
+	
 	textArea.addEventListener('change', function(e){
 		checkIfGo();
 	});
+	
+	//goButton listener to send the createConversationRequest
+		rightTextAreaButton.addEventListener('click', sendRequest);
 	
 	//adjust friendsViewRow to accomadate a button and be added to mainViewContainer
 	friendsViewRow.height = '10%';
@@ -353,7 +377,10 @@ if (cardArgs.context == 'new' )
 		addFriendsButton.removeEventListener('click', arguments.callee);
 		addFriendsButton.setBackgroundColor(purple);
 		buttonLabel.setColor('white');
-		var addView = new AddFriends(card);
+		textArea.blur();
+		createCommentHolder.setZIndex(0);
+		var emptyArray = [];
+		var addView = new AddFriends(card, emptyArray);
 		var animation1 = Ti.UI.createAnimation({
 			top: 0,
 			//bottom: '5%',
@@ -368,16 +395,24 @@ if (cardArgs.context == 'new' )
 			numberFriendsLabel.text = e.count + ' friends';
 		});
 		
-		//listen for event fired by AddFriends 'next' button click
+		//listen for event fired by AddFriends 'done' button click
 		card.addEventListener('returnFromAddFriends', function(e)
 		{
 			Ti.API.info('e.selectedPeople = ' + e.selectedPeople);
-			createConversationRequest.invitedUsers = e.selectedPeople;
-				
+			for (i = 0; i < e.selectedPeople.length; i++)
+			{
+				createConversationRequest.invitedUsers.push(e.selectedPeople[i]);
+			}
+			createCommentHolder.setZIndex(1);
+			selectedNames = e.selectedNames;	
 			checkIfGo();
 			
 			friendsViewRow.remove(addFriendsButton);
 			friendsViewRow.height = containerHeight * .064;
+			
+			friendsViewRow.addEventListener('click', function(e){
+				openMembersView('new');
+			});	
 			PopulateFriendsRow(e.selectedPeople);
 			
 			
@@ -398,228 +433,311 @@ if (cardArgs.context == 'new' )
 	});
 		
 	
-	
-	var startConversationView = Ti.UI.createView({
-		height: Titanium.UI.FILL,
-		width: Titanium.UI.FILL,
-		backgroundColor: 'orange'
-	});
-	var startConversationButton = Ti.UI.createView({
-		left: '13%',
-		right: '13%',
-		height: '16%',
-		top: '10%',
-		borderWidth: 1.5,
-		borderColor: 'gray',
-		borderRadius: 7
-	});
-		
-		var startConversationLabel = Ti.UI.createLabel({
-			text: '2.  Start the Conversation',
-			color: 'gray',
-			font: {fontSize: 15,
-					fontFamily: 'OpenSans-Semibold'
-					}	
-		});
-		startConversationButton.add(startConversationLabel);
-		startConversationView.add(startConversationButton);
-	
-	//commentsScrollView.add(startConversationView);
-	
+	var animationSwitch = false;
 	
 	function checkIfGo()
 	{
 		if (createConversationRequest.invitedUsers.length > 0  && textArea.getColor() == 'black' && textArea.getValue() > "")
 		{
-			goLabel.setColor('#21BF55');
-			var goAnimation = Ti.UI.createAnimation({
-				opacity: 0.2,
-				duration: 800
-			});
-			goAnimation.addEventListener('complete', function(e)
+			
+			if (!animationSwitch)
 			{
-				goLabel.animate(goAnimationReverse);
-			});
-			
-			var goAnimationReverse = Ti.UI.createAnimation({
-				opacity: 1.0,
-				duration: 800
-			});
-			goAnimationReverse.addEventListener('complete', function(e){
+				rightTextAreaButton.show();
+				animationSwitch = true;
+				
+				goLabel.setColor('#21BF55');
+				
+				var goAnimation = Ti.UI.createAnimation({
+					opacity: 0.2,
+					duration: 800
+				});
+				goAnimation.addEventListener('complete', function(e)
+				{
+					if (animationSwitch)
+					{
+						goLabel.animate(goAnimationReverse);
+					}
+					
+				});
+				
+				var goAnimationReverse = Ti.UI.createAnimation({
+					opacity: 1.0,
+					duration: 800
+				});
+				goAnimationReverse.addEventListener('complete', function(e){
+					if (animationSwitch)
+					{
+						goLabel.animate(goAnimation);
+					}
+				});
+				
 				goLabel.animate(goAnimation);
-			});
-			goLabel.animate(goAnimation);
+			}
+				
 			
+		}else{
+				rightTextAreaButton.hide();
+				animationSwitch = false;
+				goLabel.setColor('gray');
+				goLabel.setOpacity(1.0);
 		}
 		
 	}			
 	
+	function sendRequest(e)
+	{
+		notificationView.showIndicator();
+		
+		createConversationRequest.status = "OPEN";
+		createConversationRequest.topic = textArea.getValue();
+		
+		
+		Ti.API.info(JSON.stringify(createConversationRequest));
+		
+		
+		httpClient.doPost('/v1/conversation', createConversationRequest, function(success, response)
+		{
+			Ti.API.info(JSON.stringify(response));
+			
+			if (success)
+			{   
+				var addCommentRequest = {conversationId: response.conversationId, userId: response.userId, comment: createConversationRequest.topic };
+				httpClient.doPost('/v1/addUserComment', addCommentRequest, function(success, response)
+				{
+					Ti.API.info(JSON.stringify(response));
+					if(success)
+					{
+						closeButton.fireEvent('click');
+						Ti.App.fireEvent('app:refresh');
+					}else{
+						Ti.API.info('error adding first comment - ' + JSON.stringify(response));
+					}
+				});
+			}else{
+				Ti.API.info('error creating conversation');
+			}
+		});
+	}
 	
-	/**
-	var letsDoSomethingView = Ti.UI.createView({
-		height: Titanium.UI.FILL,
-		width: Titanium.UI.FILL,
-		backgroundColor: 'white'
+	
+	
+} else {      //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	var CommentView = require('ui/common/CommentsBuilder');
+	
+	var conversationId = cardArgs.conversationId;
+	
+	
+	
+	//set up createCommentHolder
+	var chatProfilePic = Ti.UI.createImageView({
+		width: '80%',
+		height: '80%',
+		backgroundColor: 'black'
 	});
-
-		var doSomethingButton = Ti.UI.createView({
-			height: '50%',
-			right: '13%',
-			left: '13%',
-			top: '10%',
-			borderWidth: 1.5,
-			borderColor: 'gray',
-			borderRadius: 7
+	leftTextAreaButton.add(chatProfilePic);
+	
+	var sendLabel = Ti.UI.createLabel({
+		text: 'Send',
+		font: {fontFamily: 'OpenSans-Regular',
+				fontSize: 12},
+		color: 'black'
+	});
+	rightTextAreaButton.add(sendLabel);
+	rightTextAreaButton.setVisible(true);
+	rightTextAreaButton.addEventListener('click', function(e)
+	{
+		notificationView.showIndicator();
+		
+		var addCommentRequest = {};
+			addCommentRequest.comment = textArea.getValue();
+			addCommentRequest.conversationId = conversationId;
+			addCommentRequest.userId = account.id;
+			
+			httpClient.doPost('/v1/addUserComment', addCommentRequest, function(success, response)
+				{
+					Ti.API.info(JSON.stringify(response));
+					if(success)
+					{
+						textArea.setValue("");
+						textArea.blur();
+						Ti.App.fireEvent('app:refresh');
+						notificationView.hideIndicator();
+					}else{
+						Ti.API.info('error adding first comment - ' + JSON.stringify(response));
+						notificationView.hideIndicator();
+					}
+				});
+			
+	});
+	
+	//eventListener to tell parent to remove this
+	Ti.App.addEventListener('app:DeleteCard:' + cardArgs.conversationId, function(e)
+	{
+		Ti.API.info('delete card recieved for ' + cardArgs.conversationId);
+		parentView.remove(card);
+	});
+	
+	//eventListner to animate this up into view
+	Ti.App.addEventListener('app:raisecard:' + cardArgs.conversationId, function(e)
+	{	
+		Ti.API.info('card raise recieved by convo: ' + cardArgs.conversationId);
+		var animation = Titanium.UI.createAnimation();
+				animation.top = '5%';
+				animation.duration = 250;
+					
+				card.animate(animation);	
+	});	
+	
+	//eventListener to update the comments
+	var localComments = [];
+		
+		//this creates the comments when the card is created
+		commentsScrollView.addEventListener('postlayout', function(e)
+		{
+			commentsScrollView.removeEventListener('postlayout', arguments.callee);
+			
+			Ti.API.info('commentsScrollView postlayout called');
+			for (i = 0; i < cardArgs.comments.length; i++)
+			{
+				var commentView = new CommentView(containerWidth, containerHeight, cardArgs.comments[i]);
+				localComments.push(1);
+				commentsScrollView.add(commentView);
+			}
+			
 		});
 		
-			
-			var doSomethingLabel = Ti.UI.createLabel({
-				text: "3.  Get it Started!",
-				color: 'gray',
-				font: {fontSize: 15,
-					fontFamily: 'OpenSans-Semibold'
-					}	
-			});
-			doSomethingButton.add(doSomethingLabel);
-			letsDoSomethingView.add(doSomethingButton);
-	mainViewContainer.add(letsDoSomethingView);
-	
-	*/
 	
 	
-	//card.addEventListener('what the add friends view fires when click done button, function(e){
-			//if (e.people.length > 0){}
-	//})
-	
-	
-} else {
-	
-	Ti.API.info('convo key = ' + cardArgs.convoKey);
-	
-	
-	mainViewContainer.add(commentsScrollView);
-	mainViewContainer.add(dissapearingView);
-	
-dissapearingView.addEventListener('postlayout', function(e){
-	dissapearingView.removeEventListener('postlayout', arguments.callee);
-	dissapearingView.top = dissapearingView.size.height * -1;
-});
-	
-	dissapearingView.add(friendsViewRow);
-			//call PopulateFriendsRow Function	
-			//PopulateFriendsRow();
-				
-			//set up description text area
-			var descriptionText = Ti.UI.createTextArea({
-				height: Ti.UI.SIZE,
-				left: '6%',
-				right: '6%',
-				top: containerHeight * .015,
-				color: 'black'	,
-				backgroundColor: 'white'
-				});	
-				dissapearingView.add(descriptionText);		
-				
-				
-			//set up buttonsViewRow	
-			var buttonRowView = Ti.UI.createView({
-				top: containerHeight * .015,
-				height: containerHeight * .08,
-				width: '100%',
-				layout: 'absolute'								
-				});
-				dissapearingView.add(buttonRowView);	
-				
-			//set up unCollapseView
-			var unCollapseView = Ti.UI.createView({
-				height: '8%',
-				width: '100%',
-				top: 0,
-				backgroundColor: 'gray',
-				zIndex: 10,
-				opacity: 0.4
-			});
-			mainViewContainer.add(unCollapseView);
-			
-			unCollapseView.addEventListener('click', function(e){
-				var animation = Ti.UI.createAnimation();
-				animation.top = 0;
-				animation.duration = 400;
-				dissapearingView.animate(animation);
-				unCollapseView.hide();
-			});
-			
-			
-			
-			//set up collapse view
-			var collapseView = Ti.UI.createView({
-			top: 15,
-			height: containerHeight * .07,
-			width: '100%',
-			backgroundColor: 'gray'
-			
-			});
-		
-			collapseView.addEventListener('click', function(e) {
-				dissapearingView.hide();
-				unCollapseView.show();
-			});
-		
-			dissapearingView.add(collapseView);
-		
-				var arrow = Ti.UI.createImageView({
-					image: '/images/CloseIconTopRightOfCard',
-					bottom: 1,
-						
-				});
-				collapseView.add(arrow);
-				
-			
-			//call FillComments function	
-			FillComments();
-			
-	
-	
-	
-	/**
-	
-	
-	if (cardContext == 'yours'){
-			//IF cardContext = OPENING YOURS
-				creatorProfilePic.image = '/images/profilePic';
-				creatorLabel.text = 'You';
-		
-		
+		//this listens for calls from the RefreshUtility to add additional comments 
+		Ti.App.addEventListener('app:UpdateComments:' + cardArgs.conversationId, function(e)
+		{
+			Ti.API.info('updatecomments e.comments[0].comment' + e.comments[0].comment);
+			Ti.API.info('e.comments.length = ' + e.comments.length);
+			if(localComments.length < e.comments.length)
+			{
+				//calculate number of new comments
+				var dif = e.comments.length - localComments.length;
+					
+				for(i = (e.comments.length - dif); i < e.comments.length; i++)
+				{
+						Ti.API.info('i = ' + i);
+						var commentView = new CommentView(containerWidth, containerHeight, e.comments[i]);
+						localComments.push(1);
+						commentsScrollView.add(commentView);
+				}
 			}
+			});
 	
+		
+		mainViewContainer.add(commentsScrollView);		
 	
-	if (cardContext == 'thiers'){
-			//IF cardContext = OPENING THIERS
-				creatorProfilePic.image = '/images/joe';
-				creatorLabel.text = 'Joe McMahon';
+		//Set up close button.  The difference here from 'new' context is it moves the card down without actually removing if from the parent (mainwindow)
+		var closeImage = Ti.UI.createImageView({
+			image: 'images/closeIcon',
+			right: 2,
+			top: 2
+		});
+		closeButton.setWidth('15%');
+		closeButton.add(closeImage);
+		closeButton.addEventListener('click', function(e)
+		{
+			var animation = Titanium.UI.createAnimation();
+				textArea.blur();
+				animation.top = '101%';
+				animation.duration = 250;
+				
+				card.animate(animation);
+		});
 		
 		
+	var dissapearingView = Ti.UI.createView({
+		top: 0,
+		width: '100%',
+		height: Ti.UI.SIZE,
+		backgroundColor: 'white',
+		layout: 'vertical',
+		zIndex: 3,
+		backgroundColor: 'pink'
+		});	
+	
+	
+	//mainViewContainer.add(dissapearingView);
+	
+	dissapearingView.addEventListener('postlayout', function(e){
+		dissapearingView.removeEventListener('postlayout', arguments.callee);
+		dissapearingView.top = dissapearingView.size.height * -1;
+	});
 		
-		
-			}
-	
-	*/
-	
-	
-	
-	
-	
-		}
-	
+		dissapearingView.add(friendsViewRow);
+				//call PopulateFriendsRow Function	
+				//PopulateFriendsRow();
+					
+				//set up description text area
+				var descriptionText = Ti.UI.createTextArea({
+					height: Ti.UI.SIZE,
+					left: '6%',
+					right: '6%',
+					top: containerHeight * .015,
+					color: 'black'	,
+					backgroundColor: 'white'
+					});	
+					dissapearingView.add(descriptionText);		
+					
+					
+				//set up buttonsViewRow	
+				var buttonRowView = Ti.UI.createView({
+					top: containerHeight * .015,
+					height: containerHeight * .08,
+					width: '100%',
+					layout: 'absolute'								
+					});
+					dissapearingView.add(buttonRowView);	
+					
+				//set up unCollapseView
+				var unCollapseView = Ti.UI.createView({
+					height: '8%',
+					width: '100%',
+					top: 0,
+					backgroundColor: 'gray',
+					zIndex: 10,
+					opacity: 0.4
+				});
+				mainViewContainer.add(unCollapseView);
+				
+				unCollapseView.addEventListener('click', function(e){
+					var animation = Ti.UI.createAnimation();
+					animation.top = 0;
+					animation.duration = 400;
+					dissapearingView.animate(animation);
+					unCollapseView.hide();
+				});
+				
+				
+				
+				//set up collapse view
+				var collapseView = Ti.UI.createView({
+				top: 15,
+				height: containerHeight * .07,
+				width: '100%',
+				backgroundColor: 'gray'
+				
+				});
+			
+				collapseView.addEventListener('click', function(e) {
+					dissapearingView.hide();
+					unCollapseView.show();
+				});
+			
+				dissapearingView.add(collapseView);
 
 	
-		
-					
-					
-		
+	}
+	
+
 				
 	function PopulateFriendsRow(invitedUsers){
-					
+		
 		var friendCircles = Ti.UI.createView({
 			left: '6%',
 			height: '100%',
@@ -656,21 +774,18 @@ dissapearingView.addEventListener('postlayout', function(e){
 			//TODO do http request for users' profile image here
 		}
 		
-		
-		var inviteMoreLabel = Ti.UI.createLabel({
-			text: "Invite more",
-			color: purple,
-			left: '5%',
-			font: {fontSize: 13,
-					fontFamily: 'OpenSans-Regular'}
-			});						
-			friendsViewRow.add(inviteMoreLabel);			
-					
 	}
-				
 	
 	
-					
+	function openMembersView(context)
+	{
+		var memberViewArgs = {};
+		memberViewArgs.parentView = mainViewContainer;
+		memberViewArgs.context = context;
+		memberViewArgs.selectedNames = selectedNames;
+		var membersView = new MembersView(memberViewArgs) ;
+		mainViewContainer.add(membersView);
+	}				
 		
 	function PopulateButtonsRow(){
 		btnWidth = containerWidth * .41;
@@ -695,51 +810,14 @@ dissapearingView.addEventListener('postlayout', function(e){
 			});
 			buttonRowView.add(btn2);
 		
-	}	
-		
-		
-		
-											
+	}							
 	
-	function FillComments (){
-		
-		var commentsView = require('ui/common/CommentsBuilder').buildComments(containerWidth, containerHeight);
-		commentsScrollView.add(commentsView);
-	}
+	
 	
 		
 };  //end of populate function
 
-
-
-function flipMembersView(){
-	mainViewContainer.add(membersView);
-	if (cardArgs.context == 'new'){
-		ShowAddFriendsView();
-	}
-}
-
-function populateMembersView(){
-	var selectedPeople = AddFriends.selectedPeople;
-	
-		for (i = 0; i < selectedPeople.length; i++){
-			var personView = Ti.UI.createView({
-				width: '100%',
-				height: '10%',	
-			});
-				
-				var personLabel = Ti.UI.createLabel({
-					text: selectedPeople[i]
-				});
-			
-		}
-	
-}
-
-function ShowAddFriendsView(){
-		
-	}	
-	
+card.add(notificationView);
 
 	
 return card;

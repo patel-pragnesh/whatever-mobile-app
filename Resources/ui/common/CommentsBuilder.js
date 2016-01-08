@@ -7,7 +7,7 @@
 
 
 
-exports.buildComments = function(containerWidth, containerHeight)
+function BuildComment(containerWidth, containerHeight, commentObject)
 	{
 	
 	
@@ -19,19 +19,12 @@ exports.buildComments = function(containerWidth, containerHeight)
 	timeFontSize = containerWidth * .03;
 	bodyFontSize = containerWidth * .035;
 	
-	var commentsView = Ti.UI.createView({
-		width: '100%',
-		height: 2000,
-		//height: Ti.UI.SIZE,
-		backgroundColor: 'f1f1f1', 
-		layout: 'vertical'
-							
-							});
 	
-		var comment = Ti.UI.createView({
+	
+		var commentView = Ti.UI.createView({
 			width: '100%',
 			height: Ti.UI.SIZE,
-			top: containerHeight * .08,
+			top: 4,
 			layout: 'horizontal'
 			});
 		
@@ -42,8 +35,8 @@ exports.buildComments = function(containerWidth, containerHeight)
 				top: 3,
 				left: '2%'
 				});
-				comment.add(commentImage);
-				commentsView.add(comment);
+				commentView.add(commentImage);
+				
 	
 			var commentContent = Ti.UI.createView({
 				top: 1,
@@ -52,7 +45,7 @@ exports.buildComments = function(containerWidth, containerHeight)
 				left: '4%',
 				layout: 'vertical',
 			});
-			comment.add(commentContent);
+			commentView.add(commentContent);
 				
 				var nameLabel = Ti.UI.createLabel({
 					text: 'Joe McMahon',
@@ -73,9 +66,11 @@ exports.buildComments = function(containerWidth, containerHeight)
 					right: 2,
 					font: {fontSize: bodyFontSize,
 							   fontFamily: 'OpenSans-Regular'},		
-					value: "This is a comment.  Just talking about what to do and what would be fun.  Call your friends let's get drunk.",
-					backgroundColor: 'f1f1f1',
+					value: commentObject.comment,
+					editable: false,
 					color: 'black',
+					backgroundColor: '#f3f3f3',
+					touchEnabled: false
 					});
 					commentContent.add(commentText);
 				
@@ -94,7 +89,7 @@ exports.buildComments = function(containerWidth, containerHeight)
 	
 
 //inlineNotificationStuff
-
+/**
 	var inline = Ti.UI.createView({
 		top: 0,
 		right: '2%',
@@ -125,14 +120,14 @@ exports.buildComments = function(containerWidth, containerHeight)
 		inline.add(inlineImage);
 		inline.add(inlineLabel);
 	
+*/
 	
 	
-	
-	return commentsView;
+	return commentView;
 	
 	};
 	
-	
+module.exports = BuildComment;
 	
 
 	

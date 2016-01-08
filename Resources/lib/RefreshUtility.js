@@ -11,9 +11,12 @@ var dbName = config.dbName;
 
 var toDelete;
 
-//this lets the RefreshUtility know this is the first refresh after app launch, in which case,
-//each conversation in the response from GAE needs a bubView created for it regardless of it being determined to be
-//an update below.
+/**
+this lets the RefreshUtility know this is the first refresh after app launch, in which case,
+each conversation in the response from GAE needs a bubView created for it regardless of it being determined to be
+an update below.
+*/
+
 var launching = true;
 
 exports.checkDeletes = function(response, callback)
@@ -41,8 +44,10 @@ exports.checkDeletes = function(response, callback)
 				if (removeConvo)
 				{
 					//call app event to tell this conversations bubView to delete itself
-					
 					Ti.App.fireEvent('app:DeleteBubble:' + localConvos.fieldByName('convo_key'));
+					//call app event to tell this conversations cardView to delete itself
+					Ti.App.fireEvent('app:DeleteCard:' + localConvos.fieldByName('convo_key'));
+					
 					//then add it to array to be deleted from DB
 					toDelete.push(localConvos.fieldByName('rowid'));
 					Ti.API.info('deleting ' + localConvos.fieldByName('convo_key'));
@@ -107,7 +112,7 @@ exports.updateDB = function(response)
 				//local push notification gets fired here
 				
 			}
-		//if present, update the row
+		//if present, update the DB row
 		else 
 			{
 				var thingsToUpdate = false;
@@ -133,7 +138,10 @@ exports.updateDB = function(response)
 				row.close();
 				db.close();
 				
-				
+				//extract the comments and fire event to update
+				Ti.API.info('refresh util firing event to comments for : ' + thisConvo.conversationId);
+				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
+				Ti.API.info('thisConvo.comments = ' + JSON.stringify(thisConvo.comments));
 				if(thingsToUpdate)
 				{
 					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , updateArgs);
