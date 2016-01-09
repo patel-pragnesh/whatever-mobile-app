@@ -10,21 +10,21 @@
 function BuildComment(containerWidth, containerHeight, commentObject)
 	{
 	
-	
+	var encoder = require('lib/EncoderUtility');
 		
 	//Comments stuff
 	commentorImageSize = containerWidth * .101;
 	commentorImageRadius = commentorImageSize / 2;
 	nameFontSize = containerWidth * .035;
 	timeFontSize = containerWidth * .03;
-	bodyFontSize = containerWidth * .035;
+	bodyFontSize = containerWidth * .04;
 	
 	
 	
 		var commentView = Ti.UI.createView({
 			width: '100%',
 			height: Ti.UI.SIZE,
-			top: 4,
+			top: 7,
 			layout: 'horizontal'
 			});
 		
@@ -39,10 +39,10 @@ function BuildComment(containerWidth, containerHeight, commentObject)
 				
 	
 			var commentContent = Ti.UI.createView({
-				top: 1,
+				top: 3,
 				right: '14%',
 				height: Ti.UI.SIZE,
-				left: '4%',
+				left: '8%',
 				layout: 'vertical',
 			});
 			commentView.add(commentContent);
@@ -51,9 +51,9 @@ function BuildComment(containerWidth, containerHeight, commentObject)
 					text: 'Joe McMahon',
 					left: 0,
 					top: 0,
-					color: 'black',
+					color: 'gray',
 					font: {fontSize: nameFontSize,
-							   fontFamily: 'OpenSans-SemiBold'},
+							   fontFamily: 'OpenSans-Regular'},
 					zIndex: 2
 					});
 					commentContent.add(nameLabel);
@@ -66,10 +66,10 @@ function BuildComment(containerWidth, containerHeight, commentObject)
 					right: 2,
 					font: {fontSize: bodyFontSize,
 							   fontFamily: 'OpenSans-Regular'},		
-					value: commentObject.comment,
+					value: encoder.decode_utf8(commentObject.comment),
 					editable: false,
 					color: 'black',
-					backgroundColor: '#f3f3f3',
+					backgroundColor: 'white',
 					touchEnabled: false
 					});
 					commentContent.add(commentText);
@@ -83,7 +83,7 @@ function BuildComment(containerWidth, containerHeight, commentObject)
 							   fontFamily: 'OpenSans-Light'},
 					color: 'gray'
 					});
-					commentContent.add(timeLabel);
+					//commentContent.add(timeLabel);
 					
 			
 	

@@ -153,6 +153,10 @@ win.addEventListener('postlayout', function(e){
 	var winHeight = win.size.height;
 	var winWidth = win.size.width;
 	
+	config.setDimensions(winHeight, winWidth);
+	
+	
+	
 	//add BubblesView, which will have a postlayout event to refresh 
 	var bubbleView = new bubblesView(winHeight, winWidth);
 	scrollView.add(bubbleView);

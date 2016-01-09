@@ -65,6 +65,14 @@ exports.namespace = (Ti.App.deployType !== 'production') ? 'dev' : 'prod';
 //Name of the local database
 exports.dbName = 'v1_DB';
 
+//Screen height and width of the device.  Used for sizing varius things and handling keyboardFrameChange events
+
+exports.setDimensions = function(winHeight, winWidth)
+{
+	exports.winHeight = winHeight;
+	exports.winWidth = winWidth;
+};
+
 	
 // Export the font names
 exports.opensans_bold = 'OpenSans-Bold';
