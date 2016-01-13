@@ -1,6 +1,6 @@
 /**
  * 
- * Refresher is called by MainWindow after an app launch, the resumed function in app.js, 
+ * RefresherUtility is called by and app 'refresh event via BubblesView after an app launch, the resumed function in app.js, 
  * 	a recievePush() fired event, or the user by requesting it.  It gets the userConversations from app engine
  * 	and then updates the local DB and fires app events to update the UI as necessary.  
  * 
@@ -13,11 +13,11 @@ var toDelete;
 
 /**
 this lets the RefreshUtility know this is the first refresh after app launch, in which case,
-each conversation in the response from GAE needs a bubView created for it regardless of it being determined to be
-an update below.
+each conversation in the response from GAE needs a bubView and a card created for it.
 */
-
 var launching = true;
+
+
 
 exports.checkDeletes = function(response, callback)
 {
@@ -25,8 +25,10 @@ exports.checkDeletes = function(response, callback)
 	var db = Ti.Database.open(dbName);
 	toDelete = [];
 	
+	//get rows from db that contain a conversation
 	localConvos = db.execute('SELECT rowid, convo_key FROM V1_bubbles WHERE convo_key is not null');
 		
+		//compare the conversations contained in DB with the ones recieved from GAE. Remove the convos not recieved from GAE. 
 		if (localConvos.rowCount > 0)
 		{
 			while (localConvos.isValidRow())
@@ -41,18 +43,19 @@ exports.checkDeletes = function(response, callback)
 					}
 				}
 				
-				if (removeConvo)
-				{
-					//call app event to tell this conversations bubView to delete itself
-					Ti.App.fireEvent('app:DeleteBubble:' + localConvos.fieldByName('convo_key'));
-					//call app event to tell this conversations cardView to delete itself
-					Ti.App.fireEvent('app:DeleteCard:' + localConvos.fieldByName('convo_key'));
-					
-					//then add it to array to be deleted from DB
-					toDelete.push(localConvos.fieldByName('rowid'));
-					Ti.API.info('deleting ' + localConvos.fieldByName('convo_key'));
-				}
-			localConvos.next();
+					if (removeConvo)
+					{
+						//call app event to tell this conversations bubView to delete itself
+						Ti.App.fireEvent('app:DeleteBubble:' + localConvos.fieldByName('convo_key'));
+						//call app event to tell this conversations cardView to delete itself
+						Ti.App.fireEvent('app:DeleteCard:' + localConvos.fieldByName('convo_key'));
+						
+						//then add it to array to be deleted from DB
+						toDelete.push(localConvos.fieldByName('rowid'));
+						Ti.API.info('deleting ' + localConvos.fieldByName('convo_key'));
+					}
+				
+				localConvos.next();
 			}	
 		}
 	
@@ -72,26 +75,23 @@ exports.checkDeletes = function(response, callback)
 
 exports.updateDB = function(response)
 {
-	var httpClient = require('lib/HttpClient');
+	//var httpClient = require('lib/HttpClient');
 	var config = require('config');
 
 	var dbName = config.dbName;
 	var account; 
 	
-	Ti.API.info('UpdateDB');
 	
 	for (i = 0; i < response.length; i++)
 	{
-		Ti.API.info('launching = ' + launching);
 		var db = Ti.Database.open(dbName);
-		//query whateverDB to see if the convesation is already present
+		
+		//query the DB to see if this convesation from GAE is already present
 		var thisConvo = response[i];
-		Ti.API.info('thisConvo Id = ' + thisConvo.conversationId);
 		
 		var row = db.execute('SELECT rowid FROM V1_bubbles WHERE convo_key is (?)', thisConvo.conversationId.toString());
 		
-		Ti.API.info('row count = ' + row.rowCount);
-		//if not present, add it to first vacant row
+		//if not present, add it to the first vacant row
 		if (row.rowCount == 0)
 			{
 				var vacantRow = db.execute('SELECT rowid, position, top_y FROM V1_bubbles WHERE convo_key is null LIMIT 1');
@@ -107,31 +107,35 @@ exports.updateDB = function(response)
 				row.close();
 				db.close();
 				
+				//Fire app event to tell BubblesView to create a bubble for this conversation
 				Ti.App.fireEvent('app:ConstructBubble', thisConvo);
 				
 				//local push notification gets fired here
 				
 			}
+		
 		//if present, update the DB row
 		else 
 			{
 				var thingsToUpdate = false;
-				//see if any MainWindow UI changes are necessary
+				//see if any UI changes are necessary
 				var localConvoState = db.execute('SELECT position, top_y, happening_status FROM V1_bubbles WHERE rowid = ?', row.fieldByName('rowid'));
 				
+				//if this is first refresh after launch, fire app event to tell BubblesView to create a bubble for this conversation
 				if (launching)
 				{
 					thisConvo.position = localConvoState.fieldByName('position');
 					thisConvo.top_y = localConvoState.fieldByName('top_y');
 					Ti.App.fireEvent('app:ConstructBubble', thisConvo);
 				}else{
+					/**
 					var updateArgs = {};
 					
 					if (localConvoState.fieldByName('happening_status') != thisConvo.status)
 						{
 					
 						}
-					
+					*/
 				}
 				
 				localConvoState.close();
@@ -139,9 +143,8 @@ exports.updateDB = function(response)
 				db.close();
 				
 				//extract the comments and fire event to update
-				Ti.API.info('refresh util firing event to comments for : ' + thisConvo.conversationId);
 				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
-				Ti.API.info('thisConvo.comments = ' + JSON.stringify(thisConvo.comments));
+				
 				if(thingsToUpdate)
 				{
 					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , updateArgs);
@@ -169,7 +172,8 @@ exports.doDeletesFromDB = function(toDelete)
 		db.execute('UPDATE V1_bubbles SET convo_key = null, creator = null, new_info = null, in_out = null, happening_status = null, happening_date = null, happening_description = null, active_status = null, last_activity = null WHERE rowid = ? ', rowid);
 		}
 	
-		db.execute('COMMIT');
+		db.execute('COMMIT'); //commit the transaction
+		db.close();
 	}
 	
 };

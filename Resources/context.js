@@ -94,10 +94,11 @@ exports.register = function() {
 		
 		function receivePush(e)
 			{
+				Ti.API.info('RECIEVED PUSH!!');
 			// iOS
 			if(e.data && e.data.event)
 				{
-				Ti.API.info('RECIEVED PUSH!!');
+				
 				Ti.App.fireEvent(e.data.event);
 				
 				}

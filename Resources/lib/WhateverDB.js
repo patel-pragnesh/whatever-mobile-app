@@ -3,8 +3,10 @@
  * @author Cole Halverson
  * 
  * 
- * Handles the local SQLite database: whateverDB.  DB consists of rows of indexes representing 103 'positions' (x and y coordinates)
- * for convo bubbles in the MainWindow.
+ * Handles the local SQLite database: whateverDB.  DB consists of 103 rows representing 103 'positions' (x and y coordinates)
+ * for convo bubbles in the MainWindow.  The main reason for this is to allow conversation bubbles (bubViews) to persist in the 
+ * same position across app and power cycles.  Also, the refresh utility checks the response of userConversations from GAE against 
+ * the db to decide which conversations need to be deleted, or updated, or created.
  * 
  * 
  */
@@ -16,14 +18,13 @@ var dbName = config.dbName;
 var db;
 
 /**
- * Make sure the DB exists
+ * Make sure the DB exists and is as expected.  This is called by app.js during each launch.
  */
-
 exports.buildDB = function()
 {
 	Ti.API.info('buildDB');
 	
-	//open db.  creates it if not exist.
+	//open db.  Creates it if not exist.
 	db = Ti.Database.open(dbName);
 	
 	//db.execute('DROP TABLE IF EXISTS V1_bubbles');  //use this when testing and made a change to the columns
@@ -86,7 +87,7 @@ exports.buildDB = function()
 
 	
 
-function displayDB()  //simply writes the DB rows to the console
+function displayDB()  //simply writes all 103 DB rows to the console
 {
 	db = Ti.Database.open(dbName);
 	

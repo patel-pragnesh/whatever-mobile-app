@@ -566,8 +566,8 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 				else
 					{
 					Ti.API.info('setting account');
-					account.first_name = response.first_name;
-					account.last_name = response.last_name;
+					account.first_name = response.user.first_name;
+					account.last_name = response.user.last_name;
 					
 					Ti.App.Properties.setObject("account", account);
 					Ti.API.info('opening mainWindow');

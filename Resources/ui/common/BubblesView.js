@@ -1,17 +1,16 @@
 
-var config = require('config');
-var refreshUtility = require('lib/RefreshUtility');
-var httpClient = require('lib/HttpClient');
-var constructBubble = require('ui/common/BubViewConstructor');
-
-var purple = config.purple;
-
-
-
 
 
 function BubblesView(winHeight, winWidth)
 {
+	
+	var config = require('config');
+	var refreshUtility = require('lib/RefreshUtility');
+	var httpClient = require('lib/HttpClient');
+	var constructBubble = require('ui/common/BubViewConstructor');
+	
+	var purple = config.purple;
+	
 	var bubblesView = Ti.UI.createView
 	({
 			layout: 'absolute',
@@ -24,7 +23,6 @@ function BubblesView(winHeight, winWidth)
 		
 	bubblesView.addEventListener('postlayout', function(e){
 		this.removeEventListener('postlayout', arguments.callee);
-		Ti.API.info('bubblesView post layout');
 		Refresh();
 	});	
 
@@ -35,7 +33,7 @@ function BubblesView(winHeight, winWidth)
 	
 	function Refresh()
 	{
-	Ti.API.info('bubbles view refresh called');
+	
 	var account = Ti.App.Properties.getObject('account');
 	var url = '/v1/conversation?userId=' + account.id;
 	
@@ -55,7 +53,6 @@ function BubblesView(winHeight, winWidth)
 			});
 			
 			refreshUtility.updateDB(response);
-			
 		
 			refreshUtility.doDeletesFromDB(deletes);
 		}

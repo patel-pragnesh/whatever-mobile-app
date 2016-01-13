@@ -49,33 +49,78 @@ function MainWindow() {
 	});
 		
 
-	//Add Whatever label upper-left and profile image and name button.  
-    
-    var labelView = Ti.UI.createImageView
-    ({
-		height: '60.41%',
-		width: '29.06%',
-		top: 7,
-		left: 12,
-		image: "/images/whateverlabel",
-		backgroundColor: purple,
-		zIndex: 2
-	});	
-	
-	topNavView.add(labelView);
-	win.add(topNavView);
-	
-	
-	labelView.addEventListener('postlayout', function(e) 
-		{
-			this.removeEventListener('postlayout', arguments.callee);
-			labelHeight = labelView.size.height;
-			labelWidth = labelView.size.width;
-		});
-
+		//Add Whatever label upper-left and profile image and name button.  
+	    
+	    var labelView = Ti.UI.createImageView
+	    ({
+			height: '60.41%',
+			//width: '29.06%',
+			top: 7,
+			left: 12,
+			image: "/images/whateverlabel",
+			backgroundColor: purple,
+			zIndex: 2
+		});	
 		
+		topNavView.add(labelView);
+		win.add(topNavView);
+		
+		
+		labelView.addEventListener('postlayout', function(e) 
+			{
+				this.removeEventListener('postlayout', arguments.callee);
+				labelHeight = labelView.size.height;
+				labelWidth = labelView.size.width;
+			});
+		
+		var account = Ti.App.properties.getObject('account');
+		
+		//Profile name and picture
+		var profileView = Ti.UI.createView({
+			height: '80%',
+			width: Titanium.UI.SIZE,
+			right: 12,
+			layout: 'horizontal',
+			
+		});
+		topNavView.add(profileView);
+			
+		
+			var profilePicture = Ti.UI.createImageView({
+				right: 0,
+				image: 'images/joe',
+				borderWidth: 1,
+				borderColor: 'white'
+			});
+			
+			
+			var userNameLabel = Ti.UI.createLabel({
+				right: 0,
+				left: 10,
+				height: Titanium.UI.SIZE,
+				width: Titanium.UI.SIZE,
+				text: account.first_name + " " + account.last_name,
+				color: 'white',
+				font: {fontFamily: 'AvenirNext-Regular',
+						fontSize: 16}
+			});
+			
+	
+		profileView.addEventListener('postlayout', function(e)
+		{
+			profileView.removeEventListener('postlayout', arguments.callee);
+			var profileViewHeight = profileView.size.height;
+			
+			profilePicture.setHeight(profileViewHeight);
+			profilePicture.setBorderRadius(profileViewHeight / 2);
+			
+			profileView.add(profilePicture);
+			profileView.add(userNameLabel);
+			
+		});
+			
 	//Add Whatever button and make it dissapear when scrolling
-    var btnImageView = Ti.UI.createImageView
+    var whateverButton = Ti.UI.createImageView
     ({
 		image: "/images/BTN",
 		//zIndex: 2,
@@ -84,8 +129,9 @@ function MainWindow() {
 	});
 	
 	//Event listener to popCardView with context 'new'
-	btnImageView.addEventListener('click', function(e)
+	whateverButton.addEventListener('click', function(e)
 	{
+		whateverButton.setTouchEnabled(false);
 		var cardArgs = {};
 		cardArgs.context = 'new';
 		
@@ -101,7 +147,9 @@ function MainWindow() {
 						animation.top = '5%';
 						animation.duration = 250;
 							
-						cardView.animate(animation);	
+						cardView.animate(animation);
+						
+						whateverButton.setTouchEnabled(true);
 			});	
 		
 			
@@ -133,40 +181,38 @@ function MainWindow() {
         
         function hideWhateverButton(e) 
         {
-			btnImageView.visible = false;
+			whateverButton.hide();
    		}
     
     	function showWhateverButton(e) 
     	{
-    		btnImageView.visible = true;
+    		whateverButton.show();
     	}
 	
 
 mainContainerView.add(scrollView);
-mainContainerView.add(btnImageView);
+mainContainerView.add(whateverButton);
 win.add(mainContainerView);
 
 		
 win.addEventListener('postlayout', function(e){
 	this.removeEventListener('postlayout', arguments.callee);
 	
+	//set screen dimensions in config.  They are used to size some UI elements including the convo bubbles
 	var winHeight = win.size.height;
 	var winWidth = win.size.width;
 	
 	config.setDimensions(winHeight, winWidth);
 	
-	
-	
-	//add BubblesView, which will have a postlayout event to refresh 
+	//add BubblesView, which has a postlayout event to refresh 
 	var bubbleView = new bubblesView(winHeight, winWidth);
 	scrollView.add(bubbleView);
 	scrollView.add(bottomSpacer);
 });
 
-//Event listener to create a card for a conversation
+//Event listener to create a card for a conversation.  These views persist for the lifespan of its conversation
 Ti.App.addEventListener('app:createcard', function(e)
 {
-	Ti.API.info('card created convo: ' + e.conversationId);
 	var cardView = new CreateCard(win, e, mainContainerView.size.height);
 	win.add(cardView);
 });
@@ -190,27 +236,23 @@ testButton1.addEventListener('click', function(e){
 	Ti.API.info('create convo');
 	
 	var request = {};
-		
+	
+		request.message = 'what is up?';
+		request.payload = {event: 'refresh'};
+		//request.device_ids = ["1eb80362bfb078d941274f812e2e31be432e4dfe3760d0498840c062231ff01e"];
+		request.device_ids = ["1eb80362bfb078d941274f812e2e31be432e4dfe3760d0498840c062231ff01e"];
 		account = Ti.App.Properties.getObject("account");
-		
-		request.userId = 12067189809;
-		request.status = "IT_IS_ON";
-		request.topic = "Call your friends lets get drunk";
-		
-		var invited = ['14066974685'];
-		
-		request.invitedUsers = invited;
 		
 		Ti.API.info(JSON.stringify(request));
 		
-		httpClient.doPost('/v1/conversation', request, function(success, response)
+		httpClient.doPost('/v1/sendPushNotification/', request, function(success, response)
 		{
 			Ti.API.info(JSON.stringify(response));
 		});
 });
 
 var button1Label = Ti.UI.createLabel({
-	text: 'Create Convo',
+	text: 'send push',
 	color: 'black'
 });
 

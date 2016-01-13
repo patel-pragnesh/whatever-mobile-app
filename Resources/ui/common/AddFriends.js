@@ -21,8 +21,7 @@ function AddFriends(parentView)
 		width: '100%',
 		height: Titanium.UI.FILL,
 		backgroundColor: 'white',
-		layout: 'vertical',
-		
+		layout: 'vertical'
 	});
 	
 	var search;
@@ -126,7 +125,7 @@ function AddFriends(parentView)
 				text: 'Done',
 				color: 'black',
 				font: {fontSize: 15,
-						fontFamily: 'OpenSans-Regular'}
+						fontFamily: 'AvenirNext-Regular'}
 			});
 			doneButton.add(doneLabel);
 			
@@ -262,7 +261,7 @@ function createSectionHeader(title)
 			font:
 				{
 				fontSize: 16,
-				fontFamily: config.opensans_bold
+				fontFamily: 'AvenirNext-Bold'
 				},
 			color: '#999999'
 	});
@@ -453,7 +452,7 @@ function displaySelectedNames()
 				color: 'white',
 				left: 0,
 				font: {fontSize: 18,
-						fontFamily: 'OpenSans-Bold'},
+						fontFamily: 'AvenirNext-Bold'},
 				ellipsize: Titanium.UI.TEXT_ELLIPSIZE_TRUNCATE_START
 			});
 			
