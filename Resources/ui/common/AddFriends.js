@@ -1,5 +1,5 @@
 
-function AddFriends(parentView) 
+function AddFriends(parentView, hasContactsAuthorization) 
 {
 	var config = require('config');
 	var context = require('context');
@@ -13,7 +13,8 @@ function AddFriends(parentView)
 		//bottom: '5%',
 		height: '100%',
 		top: '101%',
-		layout: 'absolute'
+		layout: 'absolute',
+		
 	});
 	
 	
@@ -26,8 +27,7 @@ function AddFriends(parentView)
 	
 	var search;
 	var people = [];
-	
-	
+
 // Create the List View Templates
 		var mainTemplate = 
 		{
@@ -57,7 +57,16 @@ function AddFriends(parentView)
 		caseInsensitiveSearch: true
 		});
 	
-
+// Match the Apple design guidelines for the inset on the separator
+// Align with template content since that does not happen automatically	
+	if(config.platform === config.platform_iphone)
+		{
+		listView.separatorInsets = {left: 10};
+		}
+	else
+		{
+		listView.separatorColor = '#eaebeb';
+		}	
 
 // Handle the list view platform differences
 	if(config.platform === config.platform_iphone || Ti.Platform.Android.API_LEVEL < 11)
@@ -153,31 +162,27 @@ listView.addEventListener('scrollstart', function(e)
 });
 
 
-// Match the Apple design guidelines for the inset on the separator
-// Align with template content since that does not happen automatically	
-	if(config.platform === config.platform_iphone)
-		{
-		listView.separatorInsets = {left: 10};
-		}
-	else
-		{
-		listView.separatorColor = '#eaebeb';
-		}	
 
 
 
-//Request access to contacts
-Ti.Contacts.requestAuthorization(function(e){
-		if (e.success){
-			buildList();
-		}else{
-		
-		}
-});
-
-function buildList()
+if(hasContactsAuthorization)
 {
-	//Get all people from phone contacts and load into people array
+	isAuthorized();	
+		
+	addView.add(listView);
+	
+}else{
+	alert('no contacts authorization');
+}
+
+addViewHolder.add(addView);
+addViewHolder.add(selectedView);
+addViewHolder.add(selectedLabelsViewHolder);
+	
+
+function isAuthorized()
+{
+//Get all people from phone contacts and load into people array
 	var peopleArray = Ti.Contacts.getAllPeople(); //Initial contact array
 	
     	var mobile;
@@ -187,6 +192,7 @@ function buildList()
         {
         	
         	var fullName = peopleArray[i].fullName;
+        	Ti.API.info('current contact = ' + JSON.stringify(peopleArray[i].phone));
         		if (peopleArray[i].phone.iPhone > "")
         		{
         			mobile = peopleArray[i].phone.iPhone;
@@ -215,26 +221,25 @@ function buildList()
         				person = {fullName: fullName, mobile: mobile};
         				people.push(person);
         		}else{
-        			Ti.API.info(peopleArray[i].fullName + ' no phone');	
+        			Ti.API.info(peopleArray[i].fullName +  "no phone");	
         		}
             	
-            	  
+            	
         }
      
  	//sort people [] alphabetically by full name    	
       function compare(a,b) 
       {
-      	
   		if (a.fullName < b.fullName)
     		return -1;
   		if (a.fullName > b.fullName)
     		return 1;
   		return 0;
+  		
+  		
 	  }
 
 people.sort(compare);
-
-}//end of buildList
 
 
 //Prepare to create listView sections
@@ -281,8 +286,8 @@ function createSection(sectionTitle, data)
 	return section;
 }//end of createSection
 
-		
-//Loop through people array and create appropriate listView sections
+
+	//Loop through people array and create appropriate listView sections
 	for (var i = 0; i < people.length; i++)
 	{
 			if(!sectionTitle)
@@ -324,6 +329,9 @@ function createSection(sectionTitle, data)
 	listView.sections = sections;
 		
 	listView.addEventListener('itemclick', itemClickEvent);
+	
+	
+}//end of isAuthorized
 
 
 //THIS ALL FIRED BY ITEM CLICK/////////////
@@ -466,12 +474,12 @@ function displaySelectedNames()
 	}
 }
 
-
+/**
 addView.add(listView);
 addViewHolder.add(addView);
 addViewHolder.add(selectedView);
 addViewHolder.add(selectedLabelsViewHolder);
-
+*/
 //done button click handler
 doneButton.addEventListener('click', function(e)
 {

@@ -4,6 +4,7 @@ var _ = require('lib/Underscore');
 exports.doPost = function(endpoint, request, callback)
 	{
 	var url = config.services_base_url + endpoint;
+	Ti.API.info('url = ' + url);
 	
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)

@@ -37,6 +37,7 @@ function MainWindow() {
 			top: '10.1%',
 			bottom: 0,
 			layout: 'absolute',	
+			backgroundColor: 'orange'
 	});	
 	
 		
@@ -98,6 +99,7 @@ function MainWindow() {
 				right: 0,
 				left: 10,
 				height: Titanium.UI.SIZE,
+				width: 100,
 				width: Titanium.UI.SIZE,
 				text: account.first_name + " " + account.last_name,
 				color: 'white',
@@ -165,7 +167,8 @@ function MainWindow() {
 			width: '100%',
 			height: '100%',
 			opacity: 1,
-			layout: 'vertical'
+			layout: 'vertical',
+			backgroundColor: purple
 	});
 		
 		var bottomSpacer = Ti.UI.createView

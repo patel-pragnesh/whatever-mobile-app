@@ -82,7 +82,7 @@ exports.updateDB = function(response)
 	var account; 
 	
 	
-	for (i = 0; i < response.length; i++)
+	for (i = 0; i < response.length && i < 103; i++)
 	{
 		var db = Ti.Database.open(dbName);
 		
@@ -117,8 +117,6 @@ exports.updateDB = function(response)
 		//if present, update the DB row
 		else 
 			{
-				var thingsToUpdate = false;
-				//see if any UI changes are necessary
 				var localConvoState = db.execute('SELECT position, top_y, happening_status FROM V1_bubbles WHERE rowid = ?', row.fieldByName('rowid'));
 				
 				//if this is first refresh after launch, fire app event to tell BubblesView to create a bubble for this conversation
@@ -128,14 +126,8 @@ exports.updateDB = function(response)
 					thisConvo.top_y = localConvoState.fieldByName('top_y');
 					Ti.App.fireEvent('app:ConstructBubble', thisConvo);
 				}else{
-					/**
-					var updateArgs = {};
+					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , thisConvo);
 					
-					if (localConvoState.fieldByName('happening_status') != thisConvo.status)
-						{
-					
-						}
-					*/
 				}
 				
 				localConvoState.close();
@@ -145,10 +137,6 @@ exports.updateDB = function(response)
 				//extract the comments and fire event to update
 				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
 				
-				if(thingsToUpdate)
-				{
-					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , updateArgs);
-				}
 				
 				//local push notifications fire here
 			}

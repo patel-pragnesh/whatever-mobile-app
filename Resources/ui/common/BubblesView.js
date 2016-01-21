@@ -16,8 +16,9 @@ function BubblesView(winHeight, winWidth)
 			layout: 'absolute',
 			height: Titanium.UI.SIZE,
 			width: '100%',
-			top: 0,
+			top: 5,
 			backgroundColor: purple
+			
 	});	
 	
 		

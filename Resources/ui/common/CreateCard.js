@@ -243,7 +243,7 @@ var card = Ti.UI.createView({
 			top: 0,
 			height: containerHeight * .064,
 			width: '100%',
-			backgroundColor: 'blue',
+			backgroundColor: 'white',
 			layout: 'horizontal'	
 			});
 					
@@ -382,15 +382,29 @@ if (cardArgs.context == 'new' )
 		buttonLabel.setColor('white');
 		textArea.blur();
 		createCommentHolder.setZIndex(0);
+		
 		var emptyArray = [];
-		var addView = new AddFriends(card, emptyArray);
-		var animation1 = Ti.UI.createAnimation({
-			top: 0,
-			//bottom: '5%',
-			duration: 250
+		var contactsAuth;
+		var addView;
+		Ti.Contacts.requestAuthorization(function(e)
+		{
+			Ti.API.info(e);
+			if(e.success == 1)
+			{
+				contactsAuth = true;
+			}else{
+				contactsAuth = false;
+			}
+			
+			addView = new AddFriends(card, contactsAuth);
+			var animation1 = Ti.UI.createAnimation({
+				top: 0,
+				//bottom: '5%',
+				duration: 250
+			});
+			mainViewContainer.add(addView);
+			addView.animate(animation1);
 		});
-		mainViewContainer.add(addView);
-		addView.animate(animation1);
 		
 		//Listen to update # of friends label as user picks in AddFriends
 		card.addEventListener('updateFriendsLabel', function(e)
@@ -513,10 +527,16 @@ if (cardArgs.context == 'new' )
 						closeButton.fireEvent('click');
 						Ti.App.fireEvent('app:refresh');
 					}else{
+						
 						Ti.API.info('error adding first comment - ' + JSON.stringify(response));
 					}
 				});
 			}else{
+				if(response.data[0].field == 'invitedUsers')
+				{
+					notificationView.hideIndicator();
+					alert("Error: Can only select numbers registered to a user");
+				}
 				Ti.API.info('error creating conversation');
 			}
 		});
@@ -528,6 +548,15 @@ if (cardArgs.context == 'new' )
 	
 	var CommentView = require('ui/common/CommentsBuilder');
 	
+	Ti.API.info(JSON.stringify(cardArgs));
+	
+	//see if the local user created this conversation
+	var userIsCreator = false;
+		if (account.id == cardArgs.userId)
+		{
+			userIsCreator = true;
+		}
+		
 	var conversationId = cardArgs.conversationId;
 	
 	//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
@@ -668,7 +697,7 @@ if (cardArgs.context == 'new' )
 		right: 2,
 		top: 2
 	});
-	
+	//closeButton.setBackgroundColor('orange');
 	closeButton.setWidth('15%');
 	closeButton.add(closeImage);
 	
@@ -759,13 +788,20 @@ if (cardArgs.context == 'new' )
 		
 						var btn1 = Ti.UI.createImageView({
 							width: '44%',
-							left: '4%',
-							
-							image: 'images/btnIn'
-							
+							left: '4%'
 							});
-							buttonRowView.add(btn1);
+						buttonRowView.add(btn1);
 							
+							if(userIsCreator)
+							{
+								btn1.setImage('images/btnHappening');
+								btn1.addEventListener('click', function(e)
+								{
+									btn1.setImage('images/btnHappeningSelected');
+									setConversationStatus("IT_IS_ON");
+								});
+							}else{
+								btn1.setImage('images/btnIn');
 								btn1.addEventListener('click', function(e)
 								{
 									if (imIn)
@@ -786,15 +822,27 @@ if (cardArgs.context == 'new' )
 									}
 									
 								});
+							}
+								
 																
 						var btn2 = Ti.UI.createImageView({
 							width: '44%',
 							left: '4%',
-							image: 'images/btnOut'
 							});
-							buttonRowView.add(btn2);	
+						buttonRowView.add(btn2);	
 							
-							btn2.addEventListener('click', function(e)
+							if(userIsCreator)
+							{
+								btn2.setImage('images/btnNevermind');
+								btn2.addEventListener('click', function(e)
+								{
+									btn2.setImage('images/btnNevermindSelected');
+									setConversationStatus("CLOSED");
+								});
+								
+							}else{
+								btn2.setImage('images/btnOut');
+								btn2.addEventListener('click', function(e)
 								{
 									if (imOut)
 									{
@@ -815,6 +863,26 @@ if (cardArgs.context == 'new' )
 									}
 									
 								});
+							}
+							
+							function setConversationStatus(status)
+							{
+								var changeStatusRequest = {};
+										changeStatusRequest.status = status;
+										changeStatusRequest.conversationId = conversationId;
+									httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
+									{
+										Ti.API.info(JSON.stringify(response));
+										if(success)
+										{
+											Ti.App.fireEvent('app:refresh');
+										}else{
+											alert('error setting conversation status');
+											btn2.setImage('images/btnNevermind');
+											btn1.setImage('images/btnHappening');
+										}
+									});
+							}
 				
 				var convoLabel = Ti.UI.createImageView({
 					width: '29%',
@@ -850,7 +918,6 @@ if (cardArgs.context == 'new' )
 		disappearingView.addEventListener('postlayout', function(e)
 		{
 			disappearingView.removeEventListener('postlayout', arguments.callee);
-			Ti.API.info('disappearing postlayout called ' + disappearingView.size.height);
 			commentsScrollView.setTop(disappearingView.size.height);
 		});
 				

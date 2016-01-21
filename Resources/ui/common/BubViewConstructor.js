@@ -29,7 +29,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				var bubLeftRight = bubViewWidth * .064; 
 				var bubTopBottom = bubViewHeight * .034;
 				var bubRadius = bubDiameter / 2;
-				var bubBorder = bubDiameter *.025;
+				var bubBorder = bubDiameter *.04;
 				var buttonBottom = winHeight * .032;
 			}
 				
@@ -40,6 +40,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var createdBy = conversation.created_by;
 			var newInfo = conversation.new_info;
 			var inOut = conversation.in_out;
+			var status = conversation.status;
 			
 			
 			
@@ -66,7 +67,18 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 	});
 	
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
-		
+		//check if the status has changed
+		if (e.status != status)
+		{
+			if(e.status == "IT_IS_ON")
+			{
+				itsHappening();
+			}
+			else if (e.status == "OPEN")
+			{
+				itsOpen();
+			}
+		}
 	});
 	
 	//listener to tell appropriate cardView to rise when this is clicked	
@@ -86,12 +98,12 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bubView.right = '2%';
 			}
 			
-			var mask = Ti.UI.createImageView
+			var picture = Ti.UI.createImageView
 				({				
 				image: '/images/profilePic',						
 				borderRadius: bubRadius,
 				borderColor: 'white',
-				borderWidth: bubBorder,
+				borderWidth: 0,
 				width: bubDiameter,
 				height: bubDiameter,
 				top: bubTopBottom,
@@ -100,32 +112,25 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				left:  bubLeftRight,
 				});
 				
+			bubView.add(picture);
+			
+			var mask = Ti.UI.createImageView();
+			
 			bubView.add(mask);
 			
-			
-			if(conversation.status == 'OPEN')
+			if(status == "OPEN")
 			{
 				itsOpen();
-			}else{
+			}else if (status == "IT_IS_ON" ){
 				itsHappening();
 			}
 			
-			
-				
+			var spin;	
 			
 			function itsOpen()
 			{
-				mask.setBorderColor('orange');	
-				mask.setBorderWidth(0);
-				
-				
-				var spinner = Ti.UI.createImageView({
-					image: '/images/Mask',
-					
-				});
-				
-				bubView.add(spinner);
-			
+				mask.setImage('/images/spinMask');
+				spin = true;
 				var t = Ti.UI.create2DMatrix();	
 						
 				function startRotate()											
@@ -135,22 +140,24 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 						a.transform = t;
 						a.duration = 19;
 						
+						
+					if(spin)
+					{
 						a.addEventListener('complete', startRotate);
-					
-						spinner.animate(a);
+					}
+						mask.animate(a);
 				}
 			
-				
 				bubView.addEventListener('animate', function(e){
 					Ti.API.info('animate');
 					startRotate();
 				});			
 			}
 			
-			
 			function itsHappening()
 			{
-				mask.borderWidth = bubBorder;
+				spin = false;
+				mask.setImage('/images/mask');
 			}
 			
 			
@@ -163,7 +170,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bottom: 0
 			});
 			
-			mask.add(bubShadeMask);	
+			picture.add(bubShadeMask);	
 			
 			var fontSize = bubDiameter * .094;
 			
@@ -180,7 +187,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				opacity: 1.0,
 			});
 				
-			mask.add(name);
+			picture.add(name);
 			
 			var commentIndicator = Ti.UI.createImageView({
 				image: '/images/commentIndicatorBlue',
