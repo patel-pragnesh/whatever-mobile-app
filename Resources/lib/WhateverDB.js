@@ -28,7 +28,7 @@ exports.buildDB = function()
 	db = Ti.Database.open(dbName);
 	
 	//use this when testing and made a change to the columns
-	//db.execute('DROP TABLE IF EXISTS V1_bubbles');  
+	db.execute('DROP TABLE IF EXISTS V1_bubbles');  
 	
 	//create V1_bubbles table if not exist
 	db.execute('CREATE TABLE IF NOT EXISTS V1_bubbles (position TEXT, top_y REAL, convo_key INTEGER, creator INTEGER, new_info TEXT, in_out TEXT, happening_status TEXT, happening_date TEXT, happening_description TEXT, active_status TEXT, last_activity TEXT ) ');

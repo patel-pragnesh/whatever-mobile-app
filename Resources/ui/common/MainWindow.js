@@ -9,7 +9,8 @@ function MainWindow() {
 	var httpClient = require('lib/HttpClient');
 	
 	var bubblesView = require('ui/common/BubblesView');
-	var CreateCard = require('ui/common/CreateCard');
+	var startConvoCard = require('ui/common/StartConvoCard');
+	var convoCard = require('ui/common/ConvoCard');
 	
 	var purple = config.purple;
 	
@@ -130,31 +131,29 @@ function MainWindow() {
 		bottom: '5%'
 	});
 	
-	//Event listener to popCardView with context 'new'
+	//whatever button click event creates StartConvoCard view
 	whateverButton.addEventListener('click', function(e)
 	{
 		whateverButton.setTouchEnabled(false);
 		var cardArgs = {};
 		cardArgs.context = 'new';
 		
-			var cardView = new CreateCard(win, cardArgs, mainContainerView.size.height);
+			var startCard = new startConvoCard(win, cardArgs, mainContainerView.size.height);
 			
-			win.add(cardView);
+			win.add(startCard);
 		
-			cardView.addEventListener('postlayout', function(e)
+			startCard.addEventListener('postlayout', function(e)
 			{
-				cardView.removeEventListener('postlayout', arguments.callee);
+				startCard.removeEventListener('postlayout', arguments.callee);
 				
 				var animation = Titanium.UI.createAnimation();
 						animation.top = '5%';
 						animation.duration = 250;
 							
-						cardView.animate(animation);
+						startCard.animate(animation);
 						
 						whateverButton.setTouchEnabled(true);
 			});	
-		
-			
 	});	
 
 	
@@ -216,50 +215,13 @@ win.addEventListener('postlayout', function(e){
 //Event listener to create a card for a conversation.  These views persist for the lifespan of its conversation
 Ti.App.addEventListener('app:createcard', function(e)
 {
-	var cardView = new CreateCard(win, e, mainContainerView.size.height);
-	win.add(cardView);
+	var conversationCard = new convoCard(win, e, mainContainerView.size.height);
+	win.add(conversationCard);
 });
 
 
 	
 // /////////    testing buttons   ///////////////////
-
-var testButton1 = Ti.UI.createView({
-	height: 50,
-	width: 100,
-	bottom: 150,
-	left: 50,
-	backgroundColor: 'orange',
-	zIndex: 10
-});
-
-//win.add(testButton1);
-
-testButton1.addEventListener('click', function(e){
-	Ti.API.info('create convo');
-	
-	var request = {};
-	
-		request.message = 'what is up?';
-		request.payload = {event: 'refresh'};
-		//request.device_ids = ["1eb80362bfb078d941274f812e2e31be432e4dfe3760d0498840c062231ff01e"];
-		request.device_ids = ["1eb80362bfb078d941274f812e2e31be432e4dfe3760d0498840c062231ff01e"];
-		account = Ti.App.Properties.getObject("account");
-		
-		Ti.API.info(JSON.stringify(request));
-		
-		httpClient.doPost('/v1/sendPushNotification/', request, function(success, response)
-		{
-			Ti.API.info(JSON.stringify(response));
-		});
-});
-
-var button1Label = Ti.UI.createLabel({
-	text: 'send push',
-	color: 'black'
-});
-
-testButton1.add(button1Label);
 
 var testButton2 = Ti.UI.createView({
 	height: 50,

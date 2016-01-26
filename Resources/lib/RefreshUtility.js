@@ -13,10 +13,9 @@ var toDelete;
 
 /**
 this lets the RefreshUtility know this is the first refresh after app launch, in which case,
-each conversation in the response from GAE needs a bubView and a card created for it.
+each conversation in the response from GAE needs a bubView created for it.
 */
 var launching = true;
-
 
 
 exports.checkDeletes = function(response, callback)
@@ -75,20 +74,30 @@ exports.checkDeletes = function(response, callback)
 
 exports.updateDB = function(response)
 {
-	//var httpClient = require('lib/HttpClient');
 	var config = require('config');
 
 	var dbName = config.dbName;
-	var account; 
-	
+	var account = Ti.App.properties.getObject('account');
 	
 	for (i = 0; i < response.length && i < 103; i++)
 	{
 		var db = Ti.Database.open(dbName);
-		
-		//query the DB to see if this convesation from GAE is already present
 		var thisConvo = response[i];
 		
+		//find local user's userConversation to determine thier "in" status and get the userConversationId in order to update that status
+		for(j = 0; j < thisConvo.userConversations.length; j++)
+		{
+			if(thisConvo.userConversations[j].userId == account.id)
+			{
+				thisConvo.localUserConversationId = thisConvo.userConversations[j].userConversationId;
+				thisConvo.localUserStatus = thisConvo.userConversations[j].status;
+				break;
+			}
+		}
+		
+		Ti.API.info('thisConvo = ' + JSON.stringify(thisConvo));
+		
+		//query the DB to see if this convesation from GAE is already present
 		var row = db.execute('SELECT rowid FROM V1_bubbles WHERE convo_key is (?)', thisConvo.conversationId.toString());
 		
 		//if not present, add it to the first vacant row
@@ -127,20 +136,19 @@ exports.updateDB = function(response)
 					Ti.App.fireEvent('app:ConstructBubble', thisConvo);
 				}else{
 					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , thisConvo);
-					
 				}
 				
 				localConvoState.close();
 				row.close();
 				db.close();
 				
+				//fire event to update card UI to match happening status and local user "in" status
+				Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, {status: thisConvo.status, localUserStatus: thisConvo.localUserStatus});
 				//extract the comments and fire event to update
 				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
 				
-				
 				//local push notifications fire here
 			}
-		
 	}
 	launching = false;
 };

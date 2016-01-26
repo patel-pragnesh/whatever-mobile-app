@@ -39,10 +39,8 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var convoKey = conversation.conversationId;
 			var createdBy = conversation.created_by;
 			var newInfo = conversation.new_info;
-			var inOut = conversation.in_out;
+			var inStatus = conversation.localUserStatus;
 			var status = conversation.status;
-			
-			
 			
 			var bubView = Ti.UI.createView({
 				width: bubViewWidth,
@@ -51,14 +49,15 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bubConvoKey: convoKey,
 			});
 			
-	//event listeners for the bubView
-	
+
 	
 	//postlayout listener to tell mainWindow to create a card view for this conversation
 	bubView.addEventListener('postlayout', function(e){
 		bubView.removeEventListener('postlayout', arguments.callee);
 		Ti.App.fireEvent('app:createcard', conversation);
+		
 	});
+	
 	//listener to tell the parent view to delete this
 	Ti.App.addEventListener('app:DeleteBubble:' + convoKey, function(e){
 		Ti.API.info('delete event recieved');
@@ -66,26 +65,13 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		parentView.remove(bubView);
 	});
 	
-	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
-		//check if the status has changed
-		if (e.status != status)
-		{
-			if(e.status == "IT_IS_ON")
-			{
-				itsHappening();
-			}
-			else if (e.status == "OPEN")
-			{
-				itsOpen();
-			}
-		}
-	});
+	
 	
 	//listener to tell appropriate cardView to rise when this is clicked	
 	bubView.addEventListener('click', function(e)
 	{
-		Ti.API.info('bubView clicked convo: ' + convoKey);
 		Ti.App.fireEvent('app:raisecard:' + convoKey);
+		commentIndicator.hide();
 	});
 			
 		//position the bubView
@@ -194,24 +180,53 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				top: '2%',
 				right: '14%',
 				height: '20.5%',
-				width: '19.2%',
+				width: Titanium.UI.SIZE,
 				zIndex: bubbleAttribute,
 			});
 			bubView.add(commentIndicator);
 			
-			var imInIndicator = Ti.UI.createImageView({
-				image: '/images/imInIndicator',
+			var inStatusIndicator = Ti.UI.createImageView({
 				top: '24%',
 				right: 0,
 				height: '20.5%',
-				width: '19.2%',
+				width: Titanium.UI.SIZE,
 				zIndex: bubbleAttribute
 			});
-			bubView.add(imInIndicator);
+				if(inStatus == "IN"){inStatusIndicator.setImage('images/imInIndicator');}
+				else if(inStatus == "OUT"){inStatusIndicator.setImage('images/imOutIndicator');}
+				else{inStatusIndicator.hide();}
+			bubView.add(inStatusIndicator);
 		
+	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
+		//check if the happening status has changed
+		if (e.status > "" && e.status != status)
+		{
+			if(e.status == "IT_IS_ON")
+			{
+				itsHappening();
+			}
+			else if (e.status == "OPEN")
+			{
+				itsOpen();
+			}
+		}
 		
+		if(e.localUserStatus > "" && e.localUserStatus != inStatus)
+		{
+			if(e.localUserStatus == "IN"){inStatusIndicator.setImage('images/imInIndicator'); inStatusIndicator.show();}
+				else if(e.localUserStatus == "OUT"){inStatusIndicator.setImage('images/imOutIndicator'); inStatusIndicator.show();}
+				else{inStatusIndicator.hide();}
+			inStatus = e.localUserStatus;
+		}
 		
-		return bubView;
-	};
+		if (e.newComments)
+		{
+			commentIndicator.show();
+		}
+		
+	});	
+		
+	return bubView;
+};
 	
 module.exports = BubViewConstructor;

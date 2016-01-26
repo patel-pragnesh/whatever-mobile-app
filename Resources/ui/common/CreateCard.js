@@ -10,6 +10,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	
 	var httpClient = require('lib/HttpClient');
 	var config = require('config');
+	var cardViewUtility = require('lib/CardViewUtility');
 		
 	var purple = config.purple;
 	
@@ -53,7 +54,7 @@ var card = Ti.UI.createView({
 		width: '100%',
 		bottom: '5%',
 		layout: 'absolute',
-		backgroundColor: 'white'
+		backgroundColor: '#F7F5FA'
 		});
 		card.add(mainViewContainer);
 		
@@ -62,7 +63,7 @@ var card = Ti.UI.createView({
 				top: 0,
 				bottom: '10%',
 				width: '100%',
-				backgroundColor: '#F7F5FA',         // '#f3f3f3',
+				backgroundColor: '#F7F5FA',        
 				layout: 'vertical'
 				});
 				
@@ -172,7 +173,6 @@ var card = Ti.UI.createView({
 		height: Ti.UI.SIZE,
 		backgroundColor: 'orange',
 		layout: 'vertical'
-		
 	});
 	
 	
@@ -556,8 +556,16 @@ if (cardArgs.context == 'new' )
 		{
 			userIsCreator = true;
 		}
+	
+	var happening = false;
+		if (cardArgs.status == "IT_IS_ON")
+		{
+			happening = true;
+		}
 		
 	var conversationId = cardArgs.conversationId;
+	
+	var cardIsRaised = false;
 	
 	//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
 	var scrollToBottom = false;
@@ -643,7 +651,8 @@ if (cardArgs.context == 'new' )
 		var animation = Titanium.UI.createAnimation();
 				animation.top = '5%';
 				animation.duration = 250;	
-			card.animate(animation);	
+		card.animate(animation);	
+		cardIsRaised = true;
 	});	
 	
 	//eventListeners to update the comments
@@ -697,7 +706,7 @@ if (cardArgs.context == 'new' )
 		right: 2,
 		top: 2
 	});
-	//closeButton.setBackgroundColor('orange');
+	
 	closeButton.setWidth('15%');
 	closeButton.add(closeImage);
 	
@@ -716,6 +725,7 @@ if (cardArgs.context == 'new' )
 				
 		textArea.blur();
 		card.animate(closeAnimation);		
+		cardIsRaised = false;
 	});
 		
 		
@@ -754,10 +764,14 @@ if (cardArgs.context == 'new' )
 						bottom: 5,
 						image: 'images/itsHappening'
 					});
-					descriptionView.add(happeningLabel);
+					
+					if (happening)
+					{
+						descriptionView.add(happeningLabel);
+					}
 					
 					var descriptionText = Ti.UI.createTextArea({
-						height: Ti.UI.SIZE,
+						height: 0,
 						left: '4%',
 						right: '4%',
 						top: 0,
@@ -766,10 +780,14 @@ if (cardArgs.context == 'new' )
 						font: {fontFamily: 'AvenirNext-Regular',
 								fontSize: 19},
 						touchEnabled: false,
-						value: "Hitting the Blue Mountain trail, then meeting up with Mike and Andie afterward."
-						
+						//value: "Hitting the Blue Mountain trail, then meeting up with Mike and Andie afterward."
 						});	
-					//descriptionView.add(descriptionText);
+					
+					if (cardArgs.descriptionText > "")
+					{
+						descriptionText.setHeight(Titanium.UI.SIZE);
+						descriptionText.setValue(cardArgs.descriptionText);
+					}
 					
 					disappearingView.add(descriptionView);		
 					disappearingView.add(descriptionText);
@@ -794,6 +812,12 @@ if (cardArgs.context == 'new' )
 							
 							if(userIsCreator)
 							{
+								if(happening)
+								{
+									btn1.setImage('images/btnHappeningSelected');
+								}else{
+									btn1.setImage('images/btnHappening');
+								}
 								btn1.setImage('images/btnHappening');
 								btn1.addEventListener('click', function(e)
 								{
@@ -865,10 +889,10 @@ if (cardArgs.context == 'new' )
 								});
 							}
 							
-							function setConversationStatus(status)
+							function setConversationStatus(newStatus)
 							{
 								var changeStatusRequest = {};
-										changeStatusRequest.status = status;
+										changeStatusRequest.status = newStatus;
 										changeStatusRequest.conversationId = conversationId;
 									httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
 									{
@@ -922,17 +946,15 @@ if (cardArgs.context == 'new' )
 		});
 				
 				
-				
 				unCollapseView.addEventListener('click', showDisappearingView);
-				
-				
 				
 				commentsScrollView.addEventListener('touchstart', hideDisappearingView);
 				
 				commentsScrollView.addEventListener('touchmove', hideDisappearingView);
 				commentsScrollView.addEventListener('dragstart', hideDisappearingView);
 				
-				Ti.App.addEventListener('keyboardframechanged', hideDisappearingView);
+				//Ti.App.addEventListener('keyboardframechanged', hideDisappearingView);
+				textArea.addEventListener('focus', hideDisappearingView);
 				
 				
 			function showDisappearingView(e)
@@ -955,17 +977,17 @@ if (cardArgs.context == 'new' )
 			function hideDisappearingView(e){
 				var collapseAnimation = Ti.UI.createAnimation({
 						top: disappearingView.size.height * -1,
-						duration: 250
+						duration: 251
 					});
 					
-					commentsScrollView.setTop(0);
-					spacer.setHeight(50);
-					unCollapseView.visible = true;	
+					collapseAnimation.addEventListener('complete', function(e){
+						commentsScrollView.setTop(0);
+						spacer.setHeight(50);
+						unCollapseView.visible = true;	
+					});
+					
 					disappearingView.animate(collapseAnimation);		
 			}
-			
-
-	
 	}
 	
 
