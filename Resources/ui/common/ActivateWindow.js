@@ -88,7 +88,6 @@ function ActivateWindow()
 		left: 12,
 		image: "/images/whateverlabel",
 		backgroundColor: purple,
-		zIndex: 2
 	});	
 	
 	topNavView.add(labelView);
@@ -213,14 +212,15 @@ function ActivateWindow()
 		
 	var pickerContainerTopPadding = Ti.UI.createView({
 		height: 15,
-		width: Ti.UI.SIZE
+		width: Ti.UI.SIZE,
+		top: 0
 		});
 		
 	countryPickerContainer.add(pickerContainerTopPadding);
 	
-	var countryPicker = Ti.UI.createPicker({
+	var countryPicker = Titanium.UI.createPicker({
 		top: 0,
-		height: Ti.UI.SIZE,
+		//height: Titanium.UI.SIZE,
 		backgroundColor: '#f5f5f5',
 		useSpinner: true
 		});
@@ -229,6 +229,7 @@ function ActivateWindow()
 	
 	// Build the picker data
 	var countries = countryCodeUtil.getCountries();
+	Ti.API.info('countries length = ' + countries.length);
 	
 	for(var c = 0; c < countries.length; c++)
 		{
@@ -236,6 +237,7 @@ function ActivateWindow()
 		}
 	
 	countryPicker.add(data);
+	Ti.API.info('data length = ' + data.length);
 	countryPicker.selectionIndicator = true;
 	
 	countryPicker.addEventListener('change', function(e)

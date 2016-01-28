@@ -17,9 +17,6 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var MembersView = require('ui/common/MembersView');
 	var encoder = require('lib/EncoderUtility');
 	
-	// The notification view has a zIndex that blocks the UI and provides an indicator
-	var notificationView = require('ui/common/NotificationView').create();
-	
 	var account = Ti.App.properties.getObject('account');
 	
 	var inStatus = cardArgs.localUserStatus;
@@ -40,6 +37,8 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 		}
 		
 	var cardIsRaised = false;
+	var keyboardHeight;
+	var textAreaFocused;
 
 //set up the UI skeleton for the card
 var card = Ti.UI.createView({
@@ -131,6 +130,7 @@ var card = Ti.UI.createView({
 				textArea.addEventListener('focus', function(e){
 					if (textArea.getColor() == 'gray')
 					{
+						textAreaFocused = true;
 						textArea.setValue('');
 						textArea.setFont({fontFamily: 'OpenSans-Regular',
 											fontSize: 16});
@@ -144,7 +144,7 @@ var card = Ti.UI.createView({
 				width: Titanium.UI.FILL,
 				top: 2,
 				bottom: 2,
-				visible: false
+				touchEnabled: false
 			});
 					
 		createCommentView.add(leftTextAreaButton);
@@ -164,11 +164,18 @@ var card = Ti.UI.createView({
 		{
 			animation1.bottom = 0;
 			animation2.bottom = createCommentHolder.size.height;
+			keyboardHeight = 0;
+			textAreaFocused = false;
 		}
 		else
 		{
 			animation1.bottom = e.keyboardFrame.height;
 			animation2.bottom = e.keyboardFrame.height + createCommentHolder.size.height;
+			animation2.addEventListener('complete', function(e)
+			{
+				commentsScrollView.scrollToBottom();
+			});
+			keyboardHeight = e.keyboardFrame.height;
 		}
 				
 			animation1.duration = e.animationDuration * 1000;
@@ -176,7 +183,6 @@ var card = Ti.UI.createView({
 				
 		createCommentHolder.animate(animation1);
 		commentsScrollView.animate(animation2);
-		commentsScrollView.scrollToBottom();
 				
 	});
 			
@@ -212,9 +218,6 @@ function Populate (e){
 	var friendCircleRadius = friendCircleDia / 2;
 	
 	var conversationId = cardArgs.conversationId;
-	
-	
-	
 	
 		
 	//// Set up profileViewRow
@@ -358,19 +361,22 @@ function Populate (e){
 			text: 'Send',
 			font: {fontFamily: 'AvenirNext-Regular',
 					fontSize: 12},
-			color: 'black',
-			visible: false
+			color: 'black'
 		});
+		sendLabel.hide();
 		rightTextAreaButton.add(sendLabel);
-		rightTextAreaButton.setVisible(true);
 		
 		textArea.addEventListener('change', function(e)
 		{
+			commentsScrollView.setBottom(keyboardHeight + createCommentHolder.size.height);
+			commentsScrollView.scrollToBottom();
 			if (textArea.getValue() > "")
 			{
-				sendLabel.setVisible(true);
+				sendLabel.show();
+				rightTextAreaButton.setTouchEnabled(true);
 			}else{
-				sendLabel.setVisible(false);
+				sendLabel.hide();
+				rightTextAreaButton.setTouchEnabled(false);
 			}
 		});
 		
@@ -379,7 +385,6 @@ function Populate (e){
 		//click event listener for the send button
 		rightTextAreaButton.addEventListener('click', function(e)
 		{
-			notificationView.showIndicator();
 			
 			var addCommentRequest = {};
 				addCommentRequest.comment = encoder.encode_utf8(textArea.getValue());;
@@ -392,18 +397,16 @@ function Populate (e){
 						if(success)
 						{
 							textArea.setValue("");
+							rightTextAreaButton.setTouchEnabled(false);
+							sendLabel.hide();
 							scrollToBottom = true;
 							Ti.App.fireEvent('app:refresh');
-							notificationView.hideIndicator();
-							
+							commentsScrollView.scrollToBottom();
 						}else{
 							Ti.API.info('error adding comment - ' + JSON.stringify(response));
-							notificationView.hideIndicator();
 						}
 					});
-				
 		});
-	
 	
 //eventListener to tell parent to remove this card
 	Ti.App.addEventListener('app:DeleteCard:' + cardArgs.conversationId, function(e)
@@ -448,7 +451,7 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 			
 			for (i = 0; i < cardArgs.comments.length; i++)
 			{
-				var commentView = new CommentView(containerWidth, containerHeight, cardArgs.comments[i]);
+				var commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
 				localComments.push(1);
 				commentsScrollView.add(commentView);
 			}	
@@ -465,15 +468,22 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 					
 				for(i = (e.comments.length - dif); i < e.comments.length; i++)
 				{
-						var commentView = new CommentView(containerWidth, containerHeight, e.comments[i]);
+						var commentView = new CommentView.buildComment(containerWidth, containerHeight, e.comments[i]);
 						localComments.push(1);
-						commentsScrollView.add(commentView);
 						
 						if (scrollToBottom)
 						{
-							commentsScrollView.scrollToBottom();
+							commentView.addEventListener('postlayout', function(e){
+								Ti.API.info('scroll to bottom called');
+								commentView.removeEventListener('postlayout', arguments.callee);
+								commentsScrollView.scrollToBottom();
+							});
 							scrollToBottom = false;
-						}	
+							commentsScrollView.add(commentView);
+						}else{
+							commentsScrollView.add(commentView);
+						}
+						
 				}
 				if(!cardIsRaised)
 				{
@@ -537,7 +547,6 @@ var disappearingView = Ti.UI.createView({
 			
 				
 	disappearingView.add(descriptionView);		
-			
 					
 					
 	//set up buttonsViewRow	
@@ -590,9 +599,6 @@ var disappearingView = Ti.UI.createView({
 	});
 	disappearingView.add(line);
 	
-	
-		
-
 mainViewContainer.add(disappearingView);
 
 				
@@ -609,8 +615,6 @@ unCollapseView.addEventListener('click', showDisappearingView);
 	
 mainViewContainer.add(unCollapseView);	
 		
-
-
 
 function setUpHappeningContext()
 {
@@ -811,6 +815,7 @@ function hideDisappearingView(e)
 		commentsScrollView.setTop(0);
 		spacer.setHeight(50);
 		unCollapseView.visible = true;	
+		if(textAreaFocused){commentsScrollView.scrollToBottom();}
 	});
 					
 	disappearingView.animate(collapseAnimation);		
@@ -870,7 +875,7 @@ function openMembersView(context)
 	
 };  //end of populate function
 
-card.add(notificationView);
+
 
 return card;
 };

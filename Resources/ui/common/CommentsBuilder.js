@@ -5,22 +5,17 @@
  * @param {Object} callback
  */
 
+var encoder = require('lib/EncoderUtility');
 
 
-function BuildComment(containerWidth, containerHeight, commentObject)
-	{
-	
-	var encoder = require('lib/EncoderUtility');
-		
-	//Comments stuff
-	commentorImageSize = containerWidth * .101;
-	commentorImageRadius = commentorImageSize / 2;
-	nameFontSize = containerWidth * .035;
-	timeFontSize = containerWidth * .03;
-	bodyFontSize = containerWidth * .04;
-	
-	
-	
+exports.buildComment = function(containerWidth, containerHeight, commentObject)
+{
+	var commentorImageSize = containerWidth * .101;
+	var commentorImageRadius = commentorImageSize / 2;
+	var nameFontSize = containerWidth * .035;
+	var timeFontSize = containerWidth * .03;
+	var bodyFontSize = containerWidth * .04;
+
 		var commentView = Ti.UI.createView({
 			width: '100%',
 			height: Ti.UI.SIZE,
@@ -85,9 +80,6 @@ function BuildComment(containerWidth, containerHeight, commentObject)
 					});
 					//commentContent.add(timeLabel);
 					
-			
-	
-
 //inlineNotificationStuff
 /**
 	var inline = Ti.UI.createView({
@@ -125,10 +117,7 @@ function BuildComment(containerWidth, containerHeight, commentObject)
 	
 	return commentView;
 	
-	};
-	
-module.exports = BuildComment;
-	
+};
 
 	
 	

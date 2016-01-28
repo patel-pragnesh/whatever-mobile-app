@@ -13,6 +13,7 @@ function MainWindow() {
 	var convoCard = require('ui/common/ConvoCard');
 	
 	var purple = config.purple;
+	var account = Ti.App.properties.getObject('account');
 	
 	//TODO use blurView module to blur scroll container when bubble is selected - except selected bubble
 	
@@ -38,7 +39,7 @@ function MainWindow() {
 			top: '10.1%',
 			bottom: 0,
 			layout: 'absolute',	
-			backgroundColor: 'orange'
+			backgroundColor: 'green'
 	});	
 	
 		
@@ -75,7 +76,7 @@ function MainWindow() {
 				labelWidth = labelView.size.width;
 			});
 		
-		var account = Ti.App.properties.getObject('account');
+		
 		
 		//Profile name and picture
 		var profileView = Ti.UI.createView({
@@ -156,8 +157,7 @@ function MainWindow() {
 			});	
 	});	
 
-	
-	//Create scrollView to hold scrollViewContainer				
+	/**	
 	var scrollView = Ti.UI.createScrollView
 	({
 		    showVerticalScrollIndicator: false,
@@ -166,8 +166,56 @@ function MainWindow() {
 			width: '100%',
 			height: '100%',
 			opacity: 1,
-			layout: 'vertical',
-			backgroundColor: purple
+			layout: 'vertical'
+	});
+	*/
+	
+	var tableData = [];
+	
+	var row = Ti.UI.createTableViewRow({
+		backgroundColor: purple,
+		height: '100%',
+		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE, 
+		//layout: 'vertical'
+	});
+	
+		row.addEventListener('postlayout', function(e){
+			if(row.size.height > 1500)
+			{
+				tableView.addEventListener('scrollend', showWhateverButton);	
+		        tableView.addEventListener('scroll', hideWhateverButton);
+			              
+		        function hideWhateverButton(e) 
+		        {
+					whateverButton.hide();
+		   		}
+		    
+		    	function showWhateverButton(e) 
+		    	{
+		    		whateverButton.show();
+		    	}
+			}
+		});
+	
+	var control = Ti.UI.createRefreshControl({
+    tintColor:'white'
+	});
+	
+	control.addEventListener('refreshstart', function(e){
+		Ti.API.info('refreshstart');
+		Ti.App.fireEvent('app:refresh');
+		setTimeout(function(){
+			control.endRefreshing();
+		}, 1500);
+	});
+	
+	
+	var tableView = Ti.UI.createTableView({
+		width: '100%',
+		height: '100%',
+		backgroundColor: purple,
+		separatorStyle: Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
+		refreshControl: control
 	});
 		
 		var bottomSpacer = Ti.UI.createView
@@ -178,21 +226,10 @@ function MainWindow() {
 			backgroundColor: purple
 		});
 		
-        scrollView.addEventListener('scrollend', showWhateverButton);	
-        scrollView.addEventListener('scrollstart', hideWhateverButton);
         
-        function hideWhateverButton(e) 
-        {
-			whateverButton.hide();
-   		}
-    
-    	function showWhateverButton(e) 
-    	{
-    		whateverButton.show();
-    	}
 	
 
-mainContainerView.add(scrollView);
+mainContainerView.add(tableView);
 mainContainerView.add(whateverButton);
 win.add(mainContainerView);
 
@@ -208,8 +245,11 @@ win.addEventListener('postlayout', function(e){
 	
 	//add BubblesView, which has a postlayout event to refresh 
 	var bubbleView = new bubblesView(winHeight, winWidth);
-	scrollView.add(bubbleView);
-	scrollView.add(bottomSpacer);
+	
+	row.add(bubbleView);
+	row.add(bottomSpacer);
+	tableData.push(row);
+	tableView.setData(tableData);
 });
 
 //Event listener to create a card for a conversation.  These views persist for the lifespan of its conversation
@@ -238,7 +278,7 @@ var button2Label = Ti.UI.createLabel({
 });
 
 testButton2.add(button2Label);
-win.add(testButton2);
+//win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){
