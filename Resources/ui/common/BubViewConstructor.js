@@ -4,38 +4,20 @@
 
 var config = require('config');
 var purple = config.purple;
+
 			
 function BubViewConstructor(winHeight, winWidth, parentView, conversation)  
 		{
 
 			var bubbleAttribute = 2;
-			
-			//check if iphone 4s aspect ratio
-			if (winHeight / winWidth == 1.5){
-				var bubViewHeight = winHeight * .255;
-				var bubViewWidth = winWidth * .421; 
-				
-				var bubDiameter = bubViewHeight * .932;
-				var bubLeftRight = bubViewWidth * .064; 
-				var bubTopBottom = bubViewHeight * .034;
-				var bubRadius = bubDiameter / 2;
-				var bubBorder = bubDiameter *.025;
-				var buttonBottom = winHeight * .02;
-			} else {
-				var bubViewHeight = winHeight * .221;
-				var bubViewWidth = winWidth * .421;
-				
-				var bubDiameter = bubViewHeight * .932;
-				var bubLeftRight = bubViewWidth * .064; 
-				var bubTopBottom = bubViewHeight * .034;
-				var bubRadius = bubDiameter / 2;
-				var bubBorder = bubDiameter *.04;
-				var buttonBottom = winHeight * .032;
-			}
-				
+			var bubViewHeight = winHeight * .221;
+			var bubViewWidth = winWidth * .421;
+			var bubDiameter = bubViewHeight * .932;
+			var bubBorder = bubDiameter *.04;
+			var buttonBottom = winHeight * .032;
+	
 			var bubViewTop = conversation.top_y * bubViewHeight;               //get from DB 
 			var bubPosition = conversation.position;
-			
 			var convoKey = conversation.conversationId;
 			var createdBy = conversation.created_by;
 			var newInfo = conversation.new_info;
@@ -47,14 +29,22 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				height: bubViewHeight,
 				top: bubViewTop,
 				bubConvoKey: convoKey,
+				opacity: 0.0
 			});
-			
 
 	
 	//postlayout listener to tell mainWindow to create a card view for this conversation
 	bubView.addEventListener('postlayout', function(e){
-		bubView.removeEventListener('postlayout', arguments.callee);
+		this.removeEventListener('postlayout', arguments.callee);
 		Ti.App.fireEvent('app:createcard', conversation);
+		mask.setWidth(mask.size.height);
+		bubView.fireEvent('startRotate');
+		
+		var time = setTimeout(function(){
+			bubView.animate({opacity: 1.0, duration: 400});
+			picture.add(bubShadeMask);
+			bubShadeMask.animate({opacity: 0.45, duration: 1000});
+		}, 500);
 		
 	});
 	
@@ -63,6 +53,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		Ti.API.info('delete event recieved');
 		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
 		parentView.remove(bubView);
+		parentView.setSize();
 	});
 	
 	
@@ -74,41 +65,48 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		commentIndicator.hide();
 	});
 			
-		//position the bubView
-			if (bubPosition == 'left')
-			{
-				bubView.left = '2%';
-			}
-			else if (bubPosition == 'right')
-			{
-				bubView.right = '2%';
-			}
+	//position the bubView
+	if (bubPosition == 'left')
+	{
+		bubView.left = '2%';
+	}
+	else if (bubPosition == 'right')
+	{
+		bubView.right = '2%';
+	}
+			
 			
 			var picture = Ti.UI.createImageView
 				({				
-				image: '/images/profilePic',						
-				borderRadius: bubRadius,
+				image: '/images/profilePic',
 				borderColor: 'white',
 				borderWidth: 0,
-				width: bubDiameter,
-				height: bubDiameter,
-				top: bubTopBottom,
-				botton: bubTopBottom,
-				right: bubLeftRight,
-				left:  bubLeftRight,
+				height: '93.2%',
+				width: Ti.UI.SIZE
 				});
 				
+				picture.addEventListener('postlayout', function()
+			{
+				picture.removeEventListener('postlayout', arguments.callee);
+				picture.setWidth(picture.size.height);
+				picture.setBorderRadius(picture.size.height / 2);
+			});
+			
 			bubView.add(picture);
 			
-			var mask = Ti.UI.createImageView();
+			var mask = Ti.UI.createImageView({
+				height: Ti.UI.FILL,
+				width: Ti.UI.SIZE,
+			});
 			
-			bubView.add(mask);
 			
 			if(status == "OPEN")
 			{
 				itsOpen();
+				bubView.add(mask);
 			}else if (status == "IT_IS_ON" ){
 				itsHappening();
+				bubView.add(mask);
 			}
 			
 			var spin;	
@@ -118,7 +116,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				mask.setImage('/images/spinMask');
 				spin = true;
 				var t = Ti.UI.create2DMatrix();	
-						
+					
 				function startRotate()											
 				{		
 						var a = Titanium.UI.createAnimation();
@@ -134,8 +132,8 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 						mask.animate(a);
 				}
 			
-				bubView.addEventListener('animate', function(e){
-					Ti.API.info('animate');
+			
+				bubView.addEventListener('startRotate', function(e){
 					startRotate();
 				});			
 			}
@@ -143,7 +141,10 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			function itsHappening()
 			{
 				spin = false;
+				picture.setBorderWidth(1);
+				mask.setHeight('98%');
 				mask.setImage('/images/mask');
+				
 			}
 			
 			
@@ -156,7 +157,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bottom: 0
 			});
 			
-			picture.add(bubShadeMask);	
+			//picture.add(bubShadeMask);	
 			
 			var fontSize = bubDiameter * .094;
 			

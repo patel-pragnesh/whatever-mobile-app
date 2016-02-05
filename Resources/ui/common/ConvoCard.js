@@ -10,6 +10,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var httpClient = require('lib/HttpClient');
 	var config = require('config');
 	var cardViewUtility = require('lib/CardViewUtility');
+	var moment = require('lib/Moment');
 		
 	var purple = config.purple;
 	
@@ -41,7 +42,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var textAreaFocused;
 
 //set up the UI skeleton for the card
-var card = Ti.UI.createView({
+var card = Ti.UI.createWindow({
 	width: '97%',
 	height: '100%',
 	top: '101%',
@@ -50,7 +51,7 @@ var card = Ti.UI.createView({
 	borderRadius: 10,
 	});
 
- card.addEventListener('postlayout', Populate);
+ card.addEventListener('postlayout', cardPostLayoutCallback);
 
 	var profileViewRow = Ti.UI.createView({
 		top: '1.5%',
@@ -186,7 +187,7 @@ var card = Ti.UI.createView({
 				
 	});
 			
-	//this ensures the createCommentHolder doesn't get 'stuck' up at keyboard height
+	//this ensures the createCommentHolder doesn't get stuck up at keyboard height
 	Ti.App.addEventListener('pause', function(e)
 	{
 		textArea.blur();
@@ -200,8 +201,8 @@ var card = Ti.UI.createView({
 	});
 	
 //Populate the UI skeleton	
-function Populate (e){
-	card.removeEventListener('postlayout', Populate);
+function cardPostLayoutCallback(e){
+	card.removeEventListener('postlayout', cardPostLayoutCallback);
 	
 	card.addEventListener('postlayout', function(e)
 	{
@@ -343,6 +344,18 @@ function Populate (e){
 		});
 		commentsScrollView.add(spacer);
 		
+		var localComments = [];
+		
+		//this creates the comments views when the card is created
+			
+		for (i = 0; i < cardArgs.comments.length; i++)
+		{
+			var commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
+			localComments.push(1);
+			commentsScrollView.add(commentView);
+		}	
+			
+		
 		commentsScrollView.addEventListener('touchstart', hideDisappearingView);
 		commentsScrollView.addEventListener('touchmove', hideDisappearingView);
 		commentsScrollView.addEventListener('dragstart', hideDisappearingView);
@@ -412,7 +425,7 @@ function Populate (e){
 	Ti.App.addEventListener('app:DeleteCard:' + cardArgs.conversationId, function(e)
 	{
 		Ti.API.info('delete card recieved for ' + cardArgs.conversationId);
-		parentView.remove(card);
+		card.close();
 	});
 	
 //eventListner to animate this up into view
@@ -441,23 +454,9 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 	}
 });
 
-//eventListeners to update the comments
-	var localComments = [];
-		
-		//this creates the comments views when the card is created
-		commentsScrollView.addEventListener('postlayout', function(e)
-		{
-			commentsScrollView.removeEventListener('postlayout', arguments.callee);
-			
-			for (i = 0; i < cardArgs.comments.length; i++)
-			{
-				var commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
-				localComments.push(1);
-				commentsScrollView.add(commentView);
-			}	
-		});
-		
-		//this listens for calls from the RefreshUtility to add additional comments 
+
+	
+//this listens for calls from the RefreshUtility to add additional comments 
 		Ti.App.addEventListener('app:UpdateComments:' + cardArgs.conversationId, function(e)
 		{
 			//are there new comments to add?
@@ -482,8 +481,7 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 							commentsScrollView.add(commentView);
 						}else{
 							commentsScrollView.add(commentView);
-						}
-						
+						}	
 				}
 				if(!cardIsRaised)
 				{
@@ -511,10 +509,11 @@ var disappearingView = Ti.UI.createView({
 			top: 5,
 			left: '4%',
 			right: '4%',
-			height:  0,                   //Titanium.UI.SIZE,
+			height:  0,
 			layout: 'vertical',
-			
+			opacity: 0.0
 		});
+				
 			var itsHappeningView = Ti.UI.createView({
 				top: 0,
 				bottom: 0,
@@ -532,22 +531,31 @@ var disappearingView = Ti.UI.createView({
 					image: 'images/itsHappening'
 				});
 			itsHappeningView.add(happeningLabel);
-					
+			Ti.API.info('card width = ' + card.size.width);
 			var descriptionText = Ti.UI.createTextArea({
 				height: Ti.UI.SIZE,
 				width: '100%',
-				top: 0,
+				top: -1,
 				color: 'black'	,
 				backgroundColor: 'white',
 				font: {fontFamily: 'AvenirNext-Regular',
-						fontSize: 19},
+						fontSize: card.size.width * 0.0494},
 				touchEnabled: false,
-				
+				scrollable: false,
+				returnKeyType: Titanium.UI.RETURNKEY_NEXT
 			});	
 			
-				
+		descriptionView.add(itsHappeningView);	
+		//descriptionText.setValue("Hitting the Blue Mountain trail, then meeting up with Mike and Andie afterward.");	
+		descriptionView.add(descriptionText);
 	disappearingView.add(descriptionView);		
-					
+	
+	
+	//set up setTimeView
+	var setTimeView = require('ui/common/SetTimeView').createScroll();
+	
+	disappearingView.add(setTimeView);
+	
 					
 	//set up buttonsViewRow	
 	
@@ -620,15 +628,12 @@ function setUpHappeningContext()
 {
 	//adjust disappearingView
 	
-		
-		
-	
 	if(itsHappening)
 	{
 		//set up descriptionView
-		descriptionView.add(itsHappeningView);
-		descriptionText.setValue("Hitting the Blue Mountain trail, then meeting up with Mike and Andie afterward.");
-		descriptionView.add(descriptionText);
+		//descriptionView.add(itsHappeningView);
+		//descriptionText.setValue("Hitting the Blue Mountain trail, then meeting up with Mike and Andie afterward.");
+		//descriptionView.add(descriptionText);
 		descriptionView.setHeight(Titanium.UI.SIZE);
 		//set buttons
 		if(userIsCreator)
@@ -643,7 +648,7 @@ function setUpHappeningContext()
 		if(userIsCreator)
 		{
 			btn1.setImage('images/btnHappening');
-			btn1.addEventListener('click', setConversationStatusHappening);
+			btn1.addEventListener('click', itsHappeningButtonHandler);
 		}
 		commentsScrollView.setTop(disappearingView.size.height);
 	}
@@ -683,6 +688,7 @@ var setUserStatusOut = function()
 {
 	Ti.API.info('set user out');
 	buttonRowView.setTouchEnabled(false);
+	btn2.setImage('images/btnOutSelected');
 	btn1.removeEventListener('click', setUserStatusIn);
 	btn2.removeEventListener('click', setUserStatusOut);
 	var changeStatusRequest = {userConversationId: userConversationId, status: "OUT"};
@@ -704,6 +710,7 @@ var setUserStatusIn = function()
 {
 	Ti.API.info('set user in');
 	buttonRowView.setTouchEnabled(false);
+	btn1.setImage('images/btnInSelected');
 	btn1.removeEventListener('click', setUserStatusIn);
 	btn2.removeEventListener('click', setUserStatusOut);
 	
@@ -726,6 +733,8 @@ var setUserStatusNeutral = function()
 {
 	Ti.API.info('set user neutral');
 	buttonRowView.setTouchEnabled(false);
+	btn1.setImage('images/btnIn');
+	btn2.setImage('images/btnOut');
 	btn1.removeEventListener('click', setUserStatusNeutral);
 	btn2.removeEventListener('click', setUserStatusNeutral);
 	var changeStatusRequest = {userConversationId: userConversationId, status: "NEUTRAL"};
@@ -743,9 +752,239 @@ var setUserStatusNeutral = function()
 	});
 };
 
+function itsHappeningButtonHandler()
+{
+	btn1.removeEventListener('click', itsHappeningButtonHandler);
+	btn2.removeEventListener('click', setConversationStatusNevermind);
+	btn1.setImage('images/btnHappeningSelected');
+	
+	var changeStatusRequest = {status: "IT_IS_ON", conversationId: conversationId};
+	var friendsViewHeight;
+	
+	card.animate({top: 20, duration: 200});
+	friendsViewRow.setTouchEnabled(false);
+	friendsViewHeight = friendsViewRow.size.height;
+		friendsViewRow.animate({opacity: 0.0, duration: 200}, function(){
+			friendsViewRow.setHeight(0);
+			descriptionView.setHeight(Ti.UI.SIZE);
+			descriptionText.setTouchEnabled(true);
+			descriptionText.setMaxLength(140);
+			descriptionText.setColor('gray');
+			descriptionText.setValue('What did you decide on?');
+			createCommentHolder.hide();
+			descriptionView.animate({opacity: 1.0, duration: 200});
+			setTimeView.expand();
+			setTimeView.setTouchEnabled(true);
+			
+			var timer = setTimeout(function(){
+				buttonRowView.animate({opacity: 0.0, duration: 250}, function(){
+				btn1.setImage('images/btnConfirm');
+				btn1.setOpacity(0.4);
+				btn2.setImage('images/btnCancel');
+				btn2.addEventListener('click', cancelButtonHandler);
+				btn1.setWidth('58.6%');
+				btn2.setWidth('29.3%');
+				buttonRowView.animate({opacity: 1.0, duration: 250});
+			});
+				
+			}, 100);
+			
+		});
+		
+			
+		descriptionText.addEventListener('change', function()
+		{
+			if(descriptionText.getColor() == 'gray')
+			{
+				descriptionText.setValue("");
+				descriptionText.setColor('black');
+			}else if (descriptionText.getValue() == "")
+			{
+				descriptionText.setColor('gray');
+				descriptionText.setValue('What did you decide on?');
+			}
+			
+			checkConfirm();
+		});
+	
+	descriptionText.focus();
+	
+	setTimeView.addEventListener('touchstart', function()
+	{
+		descriptionText.blur();
+	});
+	
+	setTimeView.addEventListener('scrollend', checkConfirm);
+		
+		var animationSwitch = false;
+		
+		function checkConfirm()
+		{
+			Ti.API.info('current = ' + setTimeView.getCurrentPage());
+			if (descriptionText.getColor() == 'black' && descriptionText.getValue() > "" && setTimeView.getCurrentPage() > 0)
+			{
+				btn1.setOpacity(1.0);
+			}else{
+				btn1.setOpacity(0.4);
+			}
+			
+			/**
+			if (descriptionText.getColor() == 'black' && descriptionText.getValue() > "" && setTimeView.getCurrentPage() > 0)
+			{
+				if (!animationSwitch)
+				{
+					animationSwitch = true;
+					pulse();
+					function pulse()
+					{
+						if(animationSwitch)
+						{
+							btn1.animate({opacity: 0.5, duration: 800}, function(){
+								btn1.animate({opacity: 1.0, duration: 800}, function(){
+									pulse();
+								});
+							});
+						}else{
+							btn1.setOpacity(1.0);
+						}
+					};
+				}
+			}else{
+				animationSwitch = false;
+			}
+			*/
+		};
+		
+		var confirmButtonHandler = function()
+		{
+			
+		};
+		
+		
+		var cancelButtonHandler = function()
+		{
+			buttonRowView.setTouchEnabled(false);
+			btn2.setImage('images/btnCancelSelected');
+			btn2.removeEventListener('click', cancelButtonHandler);
+			//btn1 removeEventListener
+			descriptionText.setTouchEnabled(false);
+			setTimeView.setTouchEnabled(false);
+			setTimeView.blur();
+			descriptionText.blur();
+			setTimeView.collapse();
+			descriptionView.animate({opacity: 0.0, duration: 200}, function(){
+				descriptionView.setHeight(0);
+				friendsViewRow.setHeight(friendsViewHeight);
+				friendsViewRow.animate({opacity: 1.0, duration: 200}, function(){
+					friendsViewRow.setTouchEnabled(true);
+					
+					timer = setTimeout(function(){
+						buttonRowView.animate({opacity: 0.0, duration: 250}, function(){
+							btn1.setWidth('44%');
+							btn1.setImage('images/btnHappening');
+							btn1.setOpacity(1.0);
+							btn1.addEventListener('click', itsHappeningButtonHandler);
+							btn2.setWidth('44%');
+							btn2.setImage('images/btnNevermind');
+							btn2.addEventListener('click', setConversationStatusNevermind);
+							buttonRowView.setTouchEnabled(true);
+							buttonRowView.animate({opacity: 1.0, duration: 250});
+							card.animate({top: '5%', duration: 200});
+						});
+						
+					}, 100);
+				});
+			});
+		};
+	
+	
+		
+	
+	
+	
+	
+	
+	
+	/**
+	var minDate = new Date();
+	var maxDate = new Date();
+		maxDate.setDate(maxDate.getDate() + 7);
+	
+	
+	var dayData = [];
+		dayData.push("Right Now");
+		dayData.push("In 2 Hours");
+		dayData.push("Today");
+	
+	var dayColumn = Ti.UI.createPickerColumn();
+		
+		for(i = 0; i < dayData.length; i++)
+		{
+			var row = Ti.UI.createPickerRow({
+				title: dayData[i]
+			});
+			dayColumn.addRow(row);
+		}
+	
+	var timeData = [];
+		timeData.push("10");
+		timeData.push("11");
+		timeData.push("12");
+	
+	var timeColumn = Ti.UI.createPickerColumn();
+	
+		for(i = 0; i < timeData.length; i++)
+		{
+			var row = Ti.UI.createPickerRow({
+				title: timeData[i]
+			});
+			timeColumn.addRow(row);
+		}
+	
+	var picker = Ti.UI.createPicker({
+		columns: [dayColumn, timeColumn],
+		top: 0,
+		width: Ti.UI.FILL,
+		useSpinner: true
+	});
+		
+	
+		
+		if(config.platform == config.platform_iphone && config.major >= 9)
+		{
+			picker.setHeight(130);
+		}
+		
+		picker.addEventListener('change', function(e)
+		{
+			descriptionText.blur();
+			Ti.API.info(JSON.stringify(e));
+			
+		});
+	setTimeView.add(picker);
+	*/
+	
+	
+	/**			
+	httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
+	{
+		Ti.API.info(JSON.stringify(response));
+		if(success)
+		{
+			Ti.App.fireEvent('app:refresh');
+		}else{
+			alert('error setting conversation status');
+			btn1.setImage('images/btnHappening');
+			btn1.addEventListener('click', itsHappeningButtonHandler);
+		}
+	});
+	*/
+}
+
+/**
 function setConversationStatusHappening(e)
 {
-	btn1.removeEventListener('click', setConversationStatusHappening);
+	btn1.removeEventListener('click', itsHappeningButtonHandler);
 	btn1.setImage('images/btnHappeningSelected');
 	var changeStatusRequest = {status: "IT_IS_ON", conversationId: conversationId};
 				
@@ -758,10 +997,11 @@ function setConversationStatusHappening(e)
 		}else{
 			alert('error setting conversation status');
 			btn1.setImage('images/btnHappening');
-			btn1.addEventListener('click', setConversationStatusHappening);
+			btn1.addEventListener('click', itsHappeningButtonHandler);
 		}
 	});
 }
+*/
 
 function setConversationStatusNevermind(e)
 {
@@ -783,7 +1023,7 @@ function setConversationStatusNevermind(e)
 		}
 	});
 }
-		
+	
 			
 function showDisappearingView(e)
 {

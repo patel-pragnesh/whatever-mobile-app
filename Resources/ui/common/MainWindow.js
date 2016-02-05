@@ -141,7 +141,7 @@ function MainWindow() {
 		
 			var startCard = new startConvoCard(win, cardArgs, mainContainerView.size.height);
 			
-			win.add(startCard);
+			startCard.open();
 		
 			startCard.addEventListener('postlayout', function(e)
 			{
@@ -157,26 +157,21 @@ function MainWindow() {
 			});	
 	});	
 
-	/**	
-	var scrollView = Ti.UI.createScrollView
-	({
-		    showVerticalScrollIndicator: false,
-			showHorizontalScrollIndicator: false,
-			backgroundColor: purple,
-			width: '100%',
-			height: '100%',
-			opacity: 1,
-			layout: 'vertical'
-	});
-	*/
 	
 	var tableData = [];
 	
 	var row = Ti.UI.createTableViewRow({
 		backgroundColor: purple,
-		height: '100%',
+		height: Ti.UI.SIZE,
 		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE, 
 		//layout: 'vertical'
+	});
+	
+	var bottomPadding = Ti.UI.createTableViewRow({
+		width: '100%',
+		height: 150,
+		backgroundColor: purple,
+		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
 	});
 	
 		row.addEventListener('postlayout', function(e){
@@ -218,16 +213,6 @@ function MainWindow() {
 		refreshControl: control
 	});
 		
-		var bottomSpacer = Ti.UI.createView
-		({
-			width: '100%',
-			height: 150,
-			bottom: 0,
-			backgroundColor: purple
-		});
-		
-        
-	
 
 mainContainerView.add(tableView);
 mainContainerView.add(whateverButton);
@@ -247,8 +232,8 @@ win.addEventListener('postlayout', function(e){
 	var bubbleView = new bubblesView(winHeight, winWidth);
 	
 	row.add(bubbleView);
-	row.add(bottomSpacer);
 	tableData.push(row);
+	tableData.push(bottomPadding);
 	tableView.setData(tableData);
 });
 
@@ -256,7 +241,7 @@ win.addEventListener('postlayout', function(e){
 Ti.App.addEventListener('app:createcard', function(e)
 {
 	var conversationCard = new convoCard(win, e, mainContainerView.size.height);
-	win.add(conversationCard);
+	conversationCard.open();
 });
 
 

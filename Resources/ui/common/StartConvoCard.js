@@ -24,7 +24,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var account = Ti.App.properties.getObject('account');
 
 //set up the UI skeleton of the card	
-var card = Ti.UI.createView({
+var card = Ti.UI.createWindow({
 	width: '97%',
 	height: '100%',
 	top: '101%',
@@ -32,7 +32,6 @@ var card = Ti.UI.createView({
 	layout: 'absolute',
 	borderRadius: 10,
 	});
-
 
  card.addEventListener('postlayout', Populate);
 
@@ -281,7 +280,7 @@ function Populate (e)
 			
 			animation.addEventListener('complete', function(e)
 			{
-				parentView.remove(card);
+				card.close();
 			});
 			card.animate(animation);
 	});	
@@ -366,7 +365,7 @@ function Populate (e)
 	
 	
 	//Click Add Friends button, choose, then call PopulateFriendsRow function
-	var createConversationRequest = {};
+	var createConversationRequest = {invitedUsers: []};
 	
 	addFriendsButton.addEventListener('click', function(e)
 	{
@@ -408,7 +407,7 @@ function Populate (e)
 		//listen for event fired by AddFriends 'done' button click
 		card.addEventListener('returnFromAddFriends', function(e)
 		{
-			createConversationRequest.invitedUsers = [];
+			
 			for (i = 0; i < e.selectedPeople.length; i++)
 			{
 				createConversationRequest.invitedUsers.push(e.selectedPeople[i]);

@@ -21,6 +21,17 @@ function BubblesView(winHeight, winWidth)
 			
 	});	
 	
+		bubblesView.setSize = function()
+		{
+			if((bubblesView.size.height + 150) < winHeight)
+			{
+				bubblesView.setHeight(winHeight - 150);
+			}else{
+				bubblesView.setHeight(Ti.UI.SIZE);
+			}
+		};
+	
+	
 		
 	bubblesView.addEventListener('postlayout', function(e){
 		this.removeEventListener('postlayout', arguments.callee);
@@ -70,9 +81,11 @@ function BubblesView(winHeight, winWidth)
 	{
 		var bubView = new constructBubble(winHeight, winWidth, bubblesView, e) ;
 			
-			bubblesView.add(bubView);	
-			bubView.fireEvent('animate');
+		bubblesView.add(bubView);
 		
+		bubblesView.setSize();
+		
+		//bubView.fireEvent('animate');
 	});
 	
 	
