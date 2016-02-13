@@ -517,12 +517,15 @@ function Populate (e)
 					}
 				});
 			}else{
+				/**
 				if(response.data[0].field == 'invitedUsers')
 				{
 					notificationView.hideIndicator();
 					alert("Error: Can only select numbers registered to a user");
 				}
+				*/
 				Ti.API.info('error creating conversation');
+				
 			}
 		});
 	}

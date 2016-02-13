@@ -3,7 +3,9 @@
  */
 
 var config = require('config');
+var httpClient = require('/lib/HttpClient');
 var purple = config.purple;
+var account = Ti.App.properties.getObject('account');
 
 			
 function BubViewConstructor(winHeight, winWidth, parentView, conversation)  
@@ -19,7 +21,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var bubViewTop = conversation.top_y * bubViewHeight;               //get from DB 
 			var bubPosition = conversation.position;
 			var convoKey = conversation.conversationId;
-			var createdBy = conversation.created_by;
+			var createdBy = conversation.userId;
 			var newInfo = conversation.new_info;
 			var inStatus = conversation.localUserStatus;
 			var status = conversation.status;
@@ -31,7 +33,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bubConvoKey: convoKey,
 				opacity: 0.0
 			});
-
+Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	//postlayout listener to tell mainWindow to create a card view for this conversation
 	bubView.addEventListener('postlayout', function(e){
@@ -53,7 +55,6 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		Ti.API.info('delete event recieved');
 		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
 		parentView.remove(bubView);
-		parentView.setSize();
 	});
 	
 	
@@ -81,7 +82,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				image: '/images/profilePic',
 				borderColor: 'white',
 				borderWidth: 0,
-				height: '93.2%',
+				height: '95%',     //'93.2%',
 				width: Ti.UI.SIZE
 				});
 				
@@ -95,25 +96,34 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			bubView.add(picture);
 			
 			var mask = Ti.UI.createImageView({
+				image: 'images/mask',
+				height: '98%',
+				width: Ti.UI.SIZE,
+				visible: false
+			});
+			bubView.add(mask);
+			
+			var spinMask = Ti.UI.createImageView({
 				height: Ti.UI.FILL,
 				width: Ti.UI.SIZE,
+				image: 'images/spinMask',
+				visible: false
 			});
-			
+			bubView.add(spinMask);
 			
 			if(status == "OPEN")
 			{
 				itsOpen();
-				bubView.add(mask);
 			}else if (status == "IT_IS_ON" ){
 				itsHappening();
-				bubView.add(mask);
 			}
 			
 			var spin;	
 			
 			function itsOpen()
 			{
-				mask.setImage('/images/spinMask');
+				mask.hide();
+				spinMask.show();
 				spin = true;
 				var t = Ti.UI.create2DMatrix();	
 					
@@ -129,7 +139,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 					{
 						a.addEventListener('complete', startRotate);
 					}
-						mask.animate(a);
+						spinMask.animate(a);
 				}
 			
 			
@@ -140,13 +150,11 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			
 			function itsHappening()
 			{
+				spinMask.hide();
 				spin = false;
 				picture.setBorderWidth(1);
-				mask.setHeight('98%');
-				mask.setImage('/images/mask');
-				
+				mask.show();
 			}
-			
 			
 			var bubShadeMask = Ti.UI.createImageView
 			({
@@ -157,15 +165,10 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bottom: 0
 			});
 			
-			//picture.add(bubShadeMask);	
-			
-			var fontSize = bubDiameter * .094;
-			
 			var name = Ti.UI.createLabel({
 				color: 'white',
-				font: {fontSize:fontSize,
-					   fontFamily: 'OpenSans-Semibold'},
-				text: createdBy,								//fromDB
+				font: {fontSize: bubDiameter * .094,
+					   fontFamily: 'AvenirNext-DemiBold'},
 				textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 				bottom: '18%',
 				width: Ti.UI.SIZE, 
@@ -175,6 +178,30 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			});
 				
 			picture.add(name);
+				
+				var namePopulated = false;
+				if (createdBy == account.id)
+				{
+					name.setText('You');
+					namePopulated = true;
+					//TODO: get picture from filesystem
+				}else{
+					getCreator();
+				}
+			
+				
+				function getCreator()
+				{
+					var request = {userId: createdBy};
+					httpClient.doPost('/v1/getUser', request, function(success, response){
+						Ti.API.info(JSON.stringify(response));
+						if (success)
+						{
+							name.setText(response.firstName);
+							namePopulated = true;
+						}
+					});
+				}
 			
 			var commentIndicator = Ti.UI.createImageView({
 				image: '/images/commentIndicatorBlue',
@@ -223,6 +250,11 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		if (e.newComments)
 		{
 			commentIndicator.show();
+		}
+		
+		if (!namePopulated)
+		{
+			getCreator();
 		}
 		
 	});	

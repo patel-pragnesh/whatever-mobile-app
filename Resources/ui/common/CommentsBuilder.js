@@ -6,7 +6,8 @@
  */
 
 var encoder = require('lib/EncoderUtility');
-
+var httpClient = require('lib/HttpClient');
+var account = Ti.App.properties.getObject('account');
 
 exports.buildComment = function(containerWidth, containerHeight, commentObject)
 {
@@ -28,7 +29,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				borderRadius: commentorImageRadius,
 				width: commentorImageSize,
 				top: 3,
-				left: '4%'
+				left: '3%'
 				});
 				commentView.add(commentImage);
 				
@@ -37,27 +38,39 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				top: 4,
 				right: '14%',
 				height: Ti.UI.SIZE,
-				left: '6%',
+				left: '5%',
 				layout: 'vertical',
 			});
 			commentView.add(commentContent);
 				
 				var nameLabel = Ti.UI.createLabel({
-					text: 'Joe McMahon',
 					left: 0,
-					top: 0,
+					top: -2,
 					color: '#666666',
 					font: {fontSize: nameFontSize,
 							   fontFamily: 'AvenirNext-Medium'},
 					zIndex: 2
 					});
 					commentContent.add(nameLabel);
-				
-				
 					
+						var namePopulated = false;
+						
+						function getCreator()
+						{
+							var request = {userId: commentObject.userId};
+							httpClient.doPost('/v1/getUser', request, function(success, response){
+								if (success)
+								{
+									nameLabel.setText(response.firstName + " " + response.lastName);
+									namePopulated = true;
+								}
+							});
+						}
+					getCreator();
+				
 				var commentText = Ti.UI.createTextArea({
 					left: -5,
-					top: -7,
+					top: -11,
 					right: 2,
 					font: {fontSize: bodyFontSize,
 							   fontFamily: 'AvenirNext-Regular'},		

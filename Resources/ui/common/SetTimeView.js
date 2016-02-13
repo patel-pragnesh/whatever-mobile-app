@@ -116,7 +116,6 @@ exports.createScroll = function(args, callback)
 		
 	view.setViews(views);
 	
-	
 	view.addEventListener('scrollend', function(e){
 		if(e.view.canType)
 		{
@@ -136,7 +135,6 @@ exports.createScroll = function(args, callback)
 			pickerView.setHeight(0);
 			holder.setBottom(15);
 		}
-		
 	});
 	
 	holder.expand = function()

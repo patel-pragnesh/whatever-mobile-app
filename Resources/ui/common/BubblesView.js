@@ -21,16 +21,6 @@ function BubblesView(winHeight, winWidth)
 			
 	});	
 	
-		bubblesView.setSize = function()
-		{
-			if((bubblesView.size.height + 150) < winHeight)
-			{
-				bubblesView.setHeight(winHeight - 150);
-			}else{
-				bubblesView.setHeight(Ti.UI.SIZE);
-			}
-		};
-	
 	
 		
 	bubblesView.addEventListener('postlayout', function(e){
@@ -71,6 +61,7 @@ function BubblesView(winHeight, winWidth)
 		else
 		{
 			Ti.API.info('error doGet for userConversations');
+			Ti.API.info(JSON.stringify(response));
 		}
 	});		
 	
@@ -82,10 +73,6 @@ function BubblesView(winHeight, winWidth)
 		var bubView = new constructBubble(winHeight, winWidth, bubblesView, e) ;
 			
 		bubblesView.add(bubView);
-		
-		bubblesView.setSize();
-		
-		//bubView.fireEvent('animate');
 	});
 	
 	

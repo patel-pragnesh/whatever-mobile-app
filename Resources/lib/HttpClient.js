@@ -34,7 +34,7 @@ exports.doPost = function(endpoint, request, callback)
             	}
             },
             
-        timeout: 29000
+        timeout:  29000
         });
     
     xhr.open('POST', url);

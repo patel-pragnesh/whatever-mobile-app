@@ -15,6 +15,9 @@ function MainWindow() {
 	var purple = config.purple;
 	var account = Ti.App.properties.getObject('account');
 	
+	var topNavHeight;
+	var mainViewTop;
+	
 	//TODO use blurView module to blur scroll container when bubble is selected - except selected bubble
 	
 	// Create the main window
@@ -36,7 +39,7 @@ function MainWindow() {
 	var mainContainerView = Ti.UI.createView
 	({
 			width: '100%',
-			top: '10.1%',
+			top: 70,
 			bottom: 0,
 			layout: 'absolute',	
 			backgroundColor: 'green'
@@ -44,24 +47,22 @@ function MainWindow() {
 	
 		
 	//create top nav view to hold logo and user profile 
+	
 	var topNavView = Ti.UI.createView
 	({
 		top: 20,
-		height: '7.2%',
-		width: '100%',	
+		height: 50,
+		width: '100%'
 	});
-		
+	
 
 		//Add Whatever label upper-left and profile image and name button.  
 	    
 	    var labelView = Ti.UI.createImageView
 	    ({
 			height: '60.41%',
-			//width: '29.06%',
-			top: 7,
 			left: 12,
 			image: "/images/whateverlabel",
-			backgroundColor: purple,
 			zIndex: 2
 		});	
 		
@@ -91,6 +92,7 @@ function MainWindow() {
 		
 			var profilePicture = Ti.UI.createImageView({
 				right: 0,
+				height: Ti.UI.FILL,
 				image: 'images/joe',
 				borderWidth: 1,
 				borderColor: 'white'
@@ -100,7 +102,7 @@ function MainWindow() {
 			var userNameLabel = Ti.UI.createLabel({
 				right: 0,
 				left: 10,
-				height: Titanium.UI.SIZE,
+				height: Ti.UI.FILL,
 				width: 100,
 				width: Titanium.UI.SIZE,
 				text: account.first_name + " " + account.last_name,
@@ -108,7 +110,8 @@ function MainWindow() {
 				font: {fontFamily: 'AvenirNext-Regular',
 						fontSize: 16}
 			});
-			
+		
+		
 	
 		profileView.addEventListener('postlayout', function(e)
 		{
@@ -119,8 +122,7 @@ function MainWindow() {
 			profilePicture.setBorderRadius(profileViewHeight / 2);
 			
 			profileView.add(profilePicture);
-			profileView.add(userNameLabel);
-			
+			profileView.add(userNameLabel);	
 		});
 			
 	//Add Whatever button and make it dissapear when scrolling
@@ -164,19 +166,20 @@ function MainWindow() {
 		backgroundColor: purple,
 		height: Ti.UI.SIZE,
 		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE, 
-		//layout: 'vertical'
 	});
-	
+	tableData.push(row);
 	var bottomPadding = Ti.UI.createTableViewRow({
 		width: '100%',
 		height: 150,
 		backgroundColor: purple,
 		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
 	});
-	
+	tableData.push(bottomPadding);
 		row.addEventListener('postlayout', function(e){
+			
 			if(row.size.height > 1500)
 			{
+				tableView.setShowVerticalScrollIndicator(true);
 				tableView.addEventListener('scrollend', showWhateverButton);	
 		        tableView.addEventListener('scroll', hideWhateverButton);
 			              
@@ -189,6 +192,8 @@ function MainWindow() {
 		    	{
 		    		whateverButton.show();
 		    	}
+			}else{
+				tableView.setShowVerticalScrollIndicator(false);
 			}
 		});
 	
@@ -210,8 +215,10 @@ function MainWindow() {
 		height: '100%',
 		backgroundColor: purple,
 		separatorStyle: Titanium.UI.iPhone.TableViewSeparatorStyle.NONE,
-		refreshControl: control
+		refreshControl: control,
+		showVerticalScrollIndicator: false
 	});
+		
 		
 
 mainContainerView.add(tableView);
@@ -232,8 +239,6 @@ win.addEventListener('postlayout', function(e){
 	var bubbleView = new bubblesView(winHeight, winWidth);
 	
 	row.add(bubbleView);
-	tableData.push(row);
-	tableData.push(bottomPadding);
 	tableView.setData(tableData);
 });
 
@@ -241,7 +246,7 @@ win.addEventListener('postlayout', function(e){
 Ti.App.addEventListener('app:createcard', function(e)
 {
 	var conversationCard = new convoCard(win, e, mainContainerView.size.height);
-	conversationCard.open();
+	win.add(conversationCard);
 });
 
 
@@ -267,7 +272,18 @@ testButton2.add(button2Label);
 
 
 testButton2.addEventListener('click', function(e){
-	Ti.App.fireEvent('app:refresh');
+	var req = {};
+	req.message = "Hello World";
+	req.Integer = 1;
+	req.callback = "refresh";
+	req.payload = {};
+	req.payload ["event"] = "payload event";
+	req.device_ids = ["f4d4abb8230b86fb981df1c367e192c6382b86bb90f94899f249ffe66c7150ba"];
+	
+	
+	httpClient.doPost('/v1/sendPushNotification', req, function(success, response){
+		Ti.API.info(JSON.stringify(response));
+	});
 });
 
 
