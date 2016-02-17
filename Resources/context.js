@@ -4,6 +4,7 @@
 // Imports
 var config = require('config');
 var httpClient = require('lib/HttpClient');
+var Cloud = require('ti.cloud');
 
 var whateverDB = require('lib/WhateverDB');
 var MainWindow = require('ui/common/MainWindow');
@@ -37,6 +38,7 @@ exports.activate = function()
  */
 function registerDevice(deviceId, deviceType)
 	{
+		
 	var account = Ti.App.Properties.getObject("account");
 						
 	var request = {};
@@ -94,7 +96,8 @@ exports.register = function() {
 		
 		function receivePush(e)
 			{
-				Ti.API.info('RECIEVED PUSH!!');
+				Ti.API.info('recieved');
+				alert('received push');
 			// iOS
 			if(e.data && e.data.event)
 				{
@@ -103,6 +106,8 @@ exports.register = function() {
 				
 				}
 			}
+			
+				
 			
 		function deviceTokenSuccess(e)
 			{

@@ -268,17 +268,21 @@ var button2Label = Ti.UI.createLabel({
 });
 
 testButton2.add(button2Label);
-//win.add(testButton2);
+win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){
+	
+	Ti.API.info('remote notify enabled  = ' + JSON.stringify(Titanium.Network.getRemoteNotificationsEnabled()));
+	Ti.API.info('notify types = ' + JSON.stringify(Ti.Network.getRemoteNotificationTypes()));
+	Ti.API.info('uuid  =  ' + Ti.Network.getRemoteDeviceUUID());
+	
 	var req = {};
 	req.message = "Hello World";
-	req.Integer = 1;
-	req.callback = "refresh";
 	req.payload = {};
 	req.payload ["event"] = "payload event";
-	req.device_ids = ["f4d4abb8230b86fb981df1c367e192c6382b86bb90f94899f249ffe66c7150ba"];
+	req.user_ids = ["14066974685"];
+	req.callback = "receivePush";
 	
 	
 	httpClient.doPost('/v1/sendPushNotification', req, function(success, response){

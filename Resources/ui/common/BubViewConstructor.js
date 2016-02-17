@@ -167,7 +167,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 			var name = Ti.UI.createLabel({
 				color: 'white',
-				font: {fontSize: bubDiameter * .094,
+				font: {fontSize: bubDiameter *  0.1,     //.094,
 					   fontFamily: 'AvenirNext-DemiBold'},
 				textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 				bottom: '18%',

@@ -52,6 +52,8 @@ var card = Ti.UI.createView({
 	});
 
  card.addEventListener('postlayout', cardPostLayoutCallback);
+ 
+ 
 
 	var profileViewRow = Ti.UI.createView({
 		top: '1.5%',
@@ -351,6 +353,14 @@ function cardPostLayoutCallback(e){
 		cardIsRaised = false;
 	});
 	
+		profileViewRow.addEventListener('swipe', function(e){
+		 	Ti.API.info(JSON.stringify(e));
+		 	if(e.direction == 'down')
+		 	{
+		 		closeButton.fireEvent('click');
+		 	}
+		 });
+	
 	card.add(closeButton);
 	
 	//set up comments view
@@ -527,6 +537,18 @@ var disappearingView = Ti.UI.createView({
 	zIndex: 3,
 	backgroundColor: 'white'
 });	
+	
+	disappearingView.addEventListener('swipe', function(e){
+		 	Ti.API.info(JSON.stringify(e));
+		 	if(e.direction == 'down')
+		 	{
+		 		closeButton.fireEvent('click');
+		 	}
+		 	if(e.direction == 'up')
+		 	{
+		 		commentsScrollView.fireEvent('touchstart');
+		 	}
+	});
 	
 	disappearingView.add(friendsViewRow);
 				//call PopulateFriendsRow Function	
@@ -824,6 +846,7 @@ function itsHappeningButtonHandler()
 				btn2.addEventListener('click', cancelButtonHandler);
 				btn1.setWidth('58.6%');
 				btn2.setWidth('29.3%');
+				buttonRowView.setTop(5);
 				buttonRowView.animate({opacity: 1.0, duration: 250});
 			});
 				
@@ -940,6 +963,7 @@ function itsHappeningButtonHandler()
 							btn2.setImage('images/btnNevermind');
 							btn2.addEventListener('click', setConversationStatusNevermind);
 							buttonRowView.setTouchEnabled(true);
+							buttonRowView.setTop(0);
 							buttonRowView.animate({opacity: 1.0, duration: 250});
 							card.animate({top: '5%', duration: 200});
 						});
