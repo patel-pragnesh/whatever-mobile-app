@@ -11,6 +11,7 @@ function MainWindow() {
 	var bubblesView = require('ui/common/BubblesView');
 	var startConvoCard = require('ui/common/StartConvoCard');
 	var convoCard = require('ui/common/ConvoCard');
+	var profileWindow = require('ui/common/ProfileWindow');
 	
 	var purple = config.purple;
 	var account = Ti.App.properties.getObject('account');
@@ -123,6 +124,11 @@ function MainWindow() {
 			
 			profileView.add(profilePicture);
 			profileView.add(userNameLabel);	
+		});
+		
+		profileView.addEventListener('click', function(e){
+			profileWin = new profileWindow();
+			profileWin.open();
 		});
 			
 	//Add Whatever button and make it dissapear when scrolling
@@ -268,7 +274,7 @@ var button2Label = Ti.UI.createLabel({
 });
 
 testButton2.add(button2Label);
-win.add(testButton2);
+//win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){
