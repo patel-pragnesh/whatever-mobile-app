@@ -1,5 +1,5 @@
 
-function ProfileCamera()
+function ProfileCamera(callback)
 {
 	
 	var overlay = Ti.UI.createView();
@@ -35,7 +35,11 @@ function ProfileCamera()
 			});
 	
 	Titanium.Media.showCamera({
-		success: function(e){Titanium.Media.hideCamera();},
+		success: function(e)
+					{Titanium.Media.hideCamera();
+								Ti.API.info(JSON.stringify(e));
+								callback(e.media);
+					},
 		cancel: function(){},
 		error: function (error){},
 		overlay: overlay,
