@@ -211,13 +211,25 @@ function Populate (e)
 		
 	// Set up profileViewRow
 	var creatorProfilePic = Ti.UI.createImageView ({
-		//top: 0,
 		left: '4%',
-		width: profileCircleDia,
 		height: profileCircleDia,
-		borderRadius: profileCircleRadius
+		backgroundColor: '#D3D3D3'
 		});
 			
+			creatorProfilePic.addEventListener('postlayout', function(){
+				creatorProfilePic.setWidth(creatorProfilePic.size.height);
+				creatorProfilePic.setBorderRadius(creatorProfilePic.size.height / 2);
+				getProfile();
+			});
+		
+		Ti.App.addEventListener('updateProfilePicture', getProfile);
+		
+		function getProfile()
+		{
+			if(config.profileFile.exists()){
+				creatorProfilePic.setImage(config.profileFile.read());
+			}
+		}
 		profileViewRow.add(creatorProfilePic);
 	
 		var creatorLabel = Ti.UI.createLabel({
@@ -288,7 +300,6 @@ function Populate (e)
 	closeButton.add(nevermindLabel);
 	
 	//Populate profileView
-	creatorProfilePic.image = '/images/profilePic';
 	creatorLabel.text = 'You';
 	
 	mainViewContainer.add(commentsScrollView);

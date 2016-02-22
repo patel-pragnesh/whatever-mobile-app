@@ -1,14 +1,12 @@
 
-function AccessGallery()
+function AccessGallery(callback)
 {
-	Ti.API.info('accessgallery');
-	
 	
 	Titanium.Media.openPhotoGallery({
-				success: function(e){Ti.API.info('success');},
+				success: function(e){callback(e.media);},
 				cancel: function(){},
-				error: function (error){Ti.API.info('error');},
-				mediaTypes: [Titanium.Media.MEDIA_TYPE_PHOTO]
+				error: function (error){Ti.API.info('error' + JSON.stringify(error));},
+				mediaTypes: [Titanium.Media.MEDIA_TYPE_PHOTO],
 			});
 	
 }

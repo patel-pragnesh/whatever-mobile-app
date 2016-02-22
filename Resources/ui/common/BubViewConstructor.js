@@ -2,14 +2,16 @@
  * @author Cole Halverson
  */
 
-var config = require('config');
-var httpClient = require('/lib/HttpClient');
-var purple = config.purple;
-var account = Ti.App.properties.getObject('account');
+
 
 			
 function BubViewConstructor(winHeight, winWidth, parentView, conversation)  
-		{
+{
+			var config = require('config');
+			var httpClient = require('/lib/HttpClient');
+			var purple = config.purple;
+			var account = Ti.App.properties.getObject('account');
+
 
 			var bubbleAttribute = 2;
 			var bubViewHeight = winHeight * .221;
@@ -79,20 +81,34 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 			var picture = Ti.UI.createImageView
 				({				
-				image: '/images/profilePic',
+				backgroundColor: '#D3D3D3',
 				borderColor: 'white',
 				borderWidth: 0,
-				height: '95%',     //'93.2%',
+				height: '95%',     
 				width: Ti.UI.SIZE
 				});
 				
 				picture.addEventListener('postlayout', function()
-			{
-				picture.removeEventListener('postlayout', arguments.callee);
-				picture.setWidth(picture.size.height);
-				picture.setBorderRadius(picture.size.height / 2);
-			});
+				{
+					picture.removeEventListener('postlayout', arguments.callee);
+					picture.setWidth(picture.size.height);
+					picture.setBorderRadius(picture.size.height / 2);
+					getProfile();
+				});
+				
+				Ti.App.addEventListener('updateProfilePicture', getProfile);
 			
+				function getProfile()
+				{
+					if (account.id == createdBy && config.profileFile.exists()){
+						picture.setImage(config.profileFile.read());
+					}
+					else if (account.id != createdBy){
+						httpClient.doMediaGet('/v1/media/' + createdBy + '/PROFILE/profilepic.jpeg', function(success, response){
+							picture.setImage(Ti.Utils.base64decode(response));
+						});
+					}
+				}
 			bubView.add(picture);
 			
 			var mask = Ti.UI.createImageView({

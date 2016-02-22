@@ -4,8 +4,6 @@
 // The key the server requires so the JSON services remain secure just to the app
 exports.app_key = '8083ea6e-a696-44ab-adb5-fb844a290500';
 
-//Current User ID - will need to set this on account creation and make sure it is not null on startups there after
-//exports.user_id = 
 
 // The mode of the app
 var mode;
@@ -64,6 +62,10 @@ exports.namespace = (Ti.App.deployType !== 'production') ? 'dev' : 'prod';
 
 //Name of the local database
 exports.dbName = 'v1_DB';
+
+//Local file to hold the user's profile picture
+exports.profileFile = Titanium.Filesystem.getFile(Ti.Filesystem.applicationDataDirectory, 'profile.jpg');
+
 
 //Screen height and width of the device.  Used for sizing varius things and handling keyboardFrameChange events
 

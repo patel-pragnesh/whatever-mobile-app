@@ -37,7 +37,7 @@ function ProfileCamera(callback)
 	Titanium.Media.showCamera({
 		success: function(e)
 					{Titanium.Media.hideCamera();
-								Ti.API.info(JSON.stringify(e));
+						
 								callback(e.media);
 					},
 		cancel: function(){},

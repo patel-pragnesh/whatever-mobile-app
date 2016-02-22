@@ -93,12 +93,27 @@ function MainWindow() {
 		
 			var profilePicture = Ti.UI.createImageView({
 				right: 0,
-				height: Ti.UI.FILL,
-				image: 'images/joe',
+				height: '95%',
+				backgroundColor: '#D3D3D3',
 				borderWidth: 1,
-				borderColor: 'white'
+				borderColor: 'white',
+				opacity: 0.0
 			});
 			
+				profilePicture.addEventListener('postlayout', function(){
+					profilePicture.setWidth(profilePicture.size.height);
+					getProfile();
+					profilePicture.setOpacity(1.0);
+				});
+				
+				Ti.App.addEventListener('updateProfilePicture', getProfile);
+				
+				function getProfile(){
+					if (config.profileFile.exists())
+					{
+						profilePicture.setImage(config.profileFile.read());
+					}
+				}
 			
 			var userNameLabel = Ti.UI.createLabel({
 				right: 0,

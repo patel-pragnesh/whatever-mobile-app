@@ -5,9 +5,11 @@
  * @param {Object} callback
  */
 
+var config = require('config');
 var encoder = require('lib/EncoderUtility');
 var httpClient = require('lib/HttpClient');
 var account = Ti.App.properties.getObject('account');
+
 
 exports.buildComment = function(containerWidth, containerHeight, commentObject)
 {
@@ -25,13 +27,31 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 			});
 		
 			var commentImage = Ti.UI.createImageView({
-				image: '/images/joe',
-				borderRadius: commentorImageRadius,
-				width: commentorImageSize,
+				backgroundColor: '#D3D3D3',
+				height: commentorImageSize,
 				top: 3,
 				left: '3%'
 				});
-				commentView.add(commentImage);
+				
+				commentImage.addEventListener('postlayout', function(){
+					commentImage.setWidth(commentImage.size.height);
+					commentImage.setBorderRadius(commentImage.size.height / 2);
+					getProfile();
+				});
+				
+				Ti.App.addEventListener('updateProfilePicture', getProfile);
+				
+				function getProfile(){
+					if(commentObject.userId == account.id && config.profileFile.exists())
+					{
+						commentImage.setImage(config.profileFile.read());
+					}else if (commentObject.userId != account.id){
+						httpClient.doMediaGet('/v1/media/' + commentObject.userId + '/PROFILE/profilepic.jpeg', function(success, response){
+							commentImage.setImage(Ti.Utils.base64decode(response));
+						});
+					}
+				}
+		commentView.add(commentImage);
 				
 	
 			var commentContent = Ti.UI.createView({

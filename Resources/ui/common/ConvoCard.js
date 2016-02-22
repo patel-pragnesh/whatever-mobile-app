@@ -227,14 +227,28 @@ function cardPostLayoutCallback(e){
 		
 	//// Set up profileViewRow
 	var creatorProfilePic = Ti.UI.createImageView ({
-		//top: 0,
 		left: '4%',
-		width: profileCircleDia,
+		backgroundColor: '#D3D3D3',
 		height: profileCircleDia,
-		borderRadius: profileCircleRadius,
-		image: '/images/profilePic'
 	});
-
+		creatorProfilePic.addEventListener('postlayout', function(){
+			creatorProfilePic.setWidth(creatorProfilePic.size.height);
+			creatorProfilePic.setBorderRadius(creatorProfilePic.size.height / 2);
+			getProfile();
+		});
+		
+		Ti.App.addEventListener('updateProfilePicture', getProfile);
+		
+		function getProfile()
+		{
+			if(userIsCreator && config.profileFile.exists()){
+				creatorProfilePic.setImage(config.profileFile.read());
+			}else if(!userIsCreator){
+				httpClient.doMediaGet('/v1/media/' + cardArgs.userId + '/PROFILE/profilepic.jpeg', function(success, response){
+							creatorProfilePic.setImage(Ti.Utils.base64decode(response));
+						});
+			}
+		}
 	profileViewRow.add(creatorProfilePic);
 	
 	var creatorLabel = Ti.UI.createLabel({

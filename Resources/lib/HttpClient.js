@@ -4,11 +4,12 @@ var _ = require('lib/Underscore');
 exports.doPost = function(endpoint, request, callback)
 	{
 	var url = config.services_base_url + endpoint;
-	Ti.API.info('url = ' + url);
+	
 	
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
+            	Ti.API.info(JSON.stringify('response = ' + this.responseData));
             callback(true, JSON.parse(this.responseText));
             },
         onerror: function(e)
@@ -50,10 +51,11 @@ exports.doPost = function(endpoint, request, callback)
 exports.doGet = function(endpoint, callback)
 	{
 	var url = config.services_base_url + endpoint;
-	
+	Ti.API.info('url = ' + url);
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
+            	Ti.API.info('initial response =  ' + JSON.stringify(this.responseText));
             callback(true, JSON.parse(this.responseText));
             },
         onerror: function(e)
@@ -65,6 +67,49 @@ exports.doGet = function(endpoint, callback)
             	try
             		{
             		var errorResponse = JSON.parse(this.responseText);
+            		callback(false, errorResponse);
+            		}
+            	catch(e) 
+            		{
+            		Ti.API.error(this.responseText);
+            		callback(false, getHttpClientErrorResponse());
+            		}
+            	}
+            else
+            	{
+            	callback(false, getHttpClientErrorResponse());
+            	}
+            },
+            
+        timeout: 29000
+        });
+    
+    xhr.open('GET', url);
+    xhr.setRequestHeader("x-key", config.app_key);
+	xhr.setRequestHeader('content-type', 'application/json; charset=utf-8');
+    xhr.setRequestHeader(config.namespace_header, config.namespace);
+	xhr.send();
+	};
+
+exports.doMediaGet = function(endpoint, callback)
+	{
+	var url = config.services_base_url + endpoint;
+	Ti.API.info('url = ' + url);
+	var xhr = Ti.Network.createHTTPClient({
+        onload: function(e)
+            {
+            	Ti.API.info('initial response =  ' + JSON.stringify(this.responseText));
+            callback(true, this.responseText);
+            },
+        onerror: function(e)
+            {
+			if(this.responseText)
+            	{
+            	var errorResponse;
+            	
+            	try
+            		{
+            		var errorResponse = this.responseText;
             		callback(false, errorResponse);
             		}
             	catch(e) 
