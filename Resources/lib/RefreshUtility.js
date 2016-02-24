@@ -111,7 +111,7 @@ exports.updateDB = function(response)
 				
 				thisConvo.position = vacantRow.fieldByName('position');
 				thisConvo.top_y = vacantRow.fieldByName('top_y');
-				
+				thisConvo.row = vacantRow.fieldByName('rowid');
 				vacantRow.close(); 
 				row.close();
 				db.close();
@@ -133,6 +133,7 @@ exports.updateDB = function(response)
 				{
 					thisConvo.position = localConvoState.fieldByName('position');
 					thisConvo.top_y = localConvoState.fieldByName('top_y');
+					thisConvo.row = row.fieldByName('rowid');
 					Ti.App.fireEvent('app:ConstructBubble', thisConvo);
 				}else{
 					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , thisConvo);
@@ -143,7 +144,7 @@ exports.updateDB = function(response)
 				db.close();
 				
 				//fire event to update card UI to match happening status and local user "in" status
-				Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, {status: thisConvo.status, localUserStatus: thisConvo.localUserStatus});
+				Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, {status: thisConvo.status, localUserStatus: thisConvo.localUserStatus, userConversations: thisConvo.userConversations});
 				//extract the comments and fire event to update
 				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
 				

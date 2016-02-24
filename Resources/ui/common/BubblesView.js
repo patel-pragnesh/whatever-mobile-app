@@ -27,6 +27,8 @@ function BubblesView(winHeight, winWidth)
 		this.removeEventListener('postlayout', arguments.callee);
 		Refresh();
 	});	
+	
+	
 
 	
 	Ti.App.addEventListener('app:refresh', function(e){
@@ -73,6 +75,7 @@ function BubblesView(winHeight, winWidth)
 		var bubView = new constructBubble(winHeight, winWidth, bubblesView, e) ;
 			
 		bubblesView.add(bubView);
+		
 	});
 	
 	

@@ -7,6 +7,7 @@ function AccessGallery(callback)
 				cancel: function(){},
 				error: function (error){Ti.API.info('error' + JSON.stringify(error));},
 				mediaTypes: [Titanium.Media.MEDIA_TYPE_PHOTO],
+				allowEditing: true
 			});
 	
 }

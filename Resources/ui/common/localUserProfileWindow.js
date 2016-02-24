@@ -4,7 +4,7 @@
 
 
 
-function ProfileWindow()
+function LocalUserProfileWindow()
 {
 	var config = require('config');
 	var account = Ti.App.properties.getObject('account');
@@ -26,7 +26,7 @@ function ProfileWindow()
 		backgroundColor: 'black',
 		opacity: 0.6
 	});
-		shadeView.addEventListener('click', close);
+		
 	profileWindow.add(shadeView);
 	
 	var view = Ti.UI.createView({
@@ -132,6 +132,7 @@ function ProfileWindow()
 		});
 	view.add(nameLabel);
 
+	var actionsViewExpanded = false;
 	
 	function handleImage(media)
 	{
@@ -171,32 +172,40 @@ function ProfileWindow()
 		pictureView.setImage(image);
 		Ti.API.info(image.getWidth() + "  " + image.getHeight());
 		
-		var actionsViewHeight = actionsView.size.height;
 		
-		uploadButton.addEventListener('click', function(){
-			uploadButton.removeEventListener('click', arguments.callee);
-			uploadButton.setTouchEnabled(false);
-			upload();
-			uploadButton.setColor('white');
-			uploadButton.setBackgroundColor(config.purple);
-			//save to local file
-			config.profileFile.write(image);
-			Ti.App.fireEvent('updateProfilePicture');
-			var timer = setTimeout(function(){
-				uploadButton.animate({opacity: 0.0, duration: 200}, function(){
-					actionsView.remove(uploadButton);
-					uploadButton.setBackgroundColor('white');
-					uploadButton.setColor(config.purple);
-					uploadButton.setTouchEnabled(true);
-					actionsView.animate({height: actionsViewHeight, duration: 200});
-				});
-			}, 1500);
+		
+		if (!actionsViewExpanded)
+		{
+			var actionsViewHeight = actionsView.size.height;
+		
+			uploadButton.addEventListener('click', function(){
+				uploadButton.removeEventListener('click', arguments.callee);
+				uploadButton.setTouchEnabled(false);
+				upload();
+				uploadButton.setColor('white');
+				uploadButton.setBackgroundColor(config.purple);
+				//save to local file
+				config.profileFile.write(image);
+				Ti.App.fireEvent('updateProfilePicture');
+				var timer = setTimeout(function(){
+					uploadButton.animate({opacity: 0.0, duration: 200}, function(){
+						actionsView.remove(uploadButton);
+						uploadButton.setBackgroundColor('white');
+						uploadButton.setColor(config.purple);
+						uploadButton.setTouchEnabled(true);
+						actionsView.animate({height: actionsViewHeight, duration: 200});
+					});
+				}, 1500);
+				
+				
+			});
+			actionsView.add(uploadButton);
+			actionsView.animate({height: actionsViewHeight + uploadButton.getHeight() + 5, duration: 200});
+			uploadButton.animate({opacity: 1.0, duration: 200});
 			
-			
-		});
-		actionsView.add(uploadButton);
-		actionsView.animate({height: actionsViewHeight + uploadButton.getHeight() + 5, duration: 200});
-		uploadButton.animate({opacity: 1.0, duration: 200});
+			actionsViewExpanded = true;
+		}
+		
 		
 		function upload()
 		{
@@ -235,4 +244,4 @@ function ProfileWindow()
 	
 }
 
-module.exports = ProfileWindow;
+module.exports = LocalUserProfileWindow;

@@ -243,10 +243,18 @@ function cardPostLayoutCallback(e){
 		{
 			if(userIsCreator && config.profileFile.exists()){
 				creatorProfilePic.setImage(config.profileFile.read());
-			}else if(!userIsCreator){
+			}else if(!userIsCreator && !creatorProfilePic.getImage()){
 				httpClient.doMediaGet('/v1/media/' + cardArgs.userId + '/PROFILE/profilepic.jpeg', function(success, response){
-							creatorProfilePic.setImage(Ti.Utils.base64decode(response));
-						});
+							if(success){
+								creatorProfilePic.setImage(Ti.Utils.base64decode(response));
+							}else{
+								Ti.App.addEventListener('app:refresh', function(){
+									this.removeEventListener('app:refresh', arguments.callee);
+									getProfile();
+								});
+							}
+							
+				});
 			}
 		}
 	profileViewRow.add(creatorProfilePic);
@@ -323,14 +331,7 @@ function cardPostLayoutCallback(e){
 	profileViewRow.add(profileLabelsView);
 	
 	
-	//set up friendsViewRow
-	var friendsViewRow = Ti.UI.createView({
-		top: 0,
-		height: containerHeight * .064,
-		width: '100%',
-		backgroundColor: 'white',
-		layout: 'horizontal'	
-	});
+	
 					
 	var closeButton = Ti.UI.createLabel({
 		width: Titanium.UI.SIZE,
@@ -368,7 +369,6 @@ function cardPostLayoutCallback(e){
 	});
 	
 		profileViewRow.addEventListener('swipe', function(e){
-		 	Ti.API.info(JSON.stringify(e));
 		 	if(e.direction == 'down')
 		 	{
 		 		closeButton.fireEvent('click');
@@ -490,6 +490,7 @@ function cardPostLayoutCallback(e){
 //eventLestner to update the card UI
 Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 {
+	//Ti.API.info('card update = ' + JSON.stringify(e));
 	if (e.status == "IT_IS_ON" && itsHappening == false)
 	{
 		itsHappening = true;
@@ -504,6 +505,8 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 	{
 		getCreator();
 	}
+	
+	membersView.fireEvent('updateMembers', {users: e.userConversations});
 });
 
 
@@ -553,7 +556,6 @@ var disappearingView = Ti.UI.createView({
 });	
 	
 	disappearingView.addEventListener('swipe', function(e){
-		 	Ti.API.info(JSON.stringify(e));
 		 	if(e.direction == 'down')
 		 	{
 		 		closeButton.fireEvent('click');
@@ -564,9 +566,8 @@ var disappearingView = Ti.UI.createView({
 		 	}
 	});
 	
-	disappearingView.add(friendsViewRow);
-				//call PopulateFriendsRow Function	
-				//PopulateFriendsRow();
+	
+	
 					
 		//set up description text area
 		var descriptionView = Ti.UI.createView({
@@ -657,15 +658,25 @@ var disappearingView = Ti.UI.createView({
 	var convoLabel = Ti.UI.createImageView({
 		width: '29%',
 		height: Titanium.UI.SIZE,
-		top: 30,  
+		top: 10,  
 		left: '4%',
-		bottom: 15,
+		bottom: 5,
 		image: 'images/conversationLabel'
 	});
 	disappearingView.add(convoLabel);
+	
+	var membersViewArgs = {};
+		membersViewArgs.height = containerHeight * .15;
+		membersViewArgs.users = cardArgs.userConversations;
+	//set up membersView
+	var membersView = new MembersView(membersViewArgs);
+	
+	disappearingView.add(membersView);
+	
 				
 	var line = Ti.UI.createView({
 		height: 1,
+		top: 2,
 		width:  '100%',
 		backgroundColor: 'gray'
 	});
@@ -762,6 +773,7 @@ var setUserStatusOut = function()
 		{
 			inStatus = "OUT";
 			setUpInOutContext();
+			Ti.App.fireEvent('app:refresh');
 		}else{
 			alert('error setting user in status');
 			setUpInOutContext();
@@ -785,6 +797,7 @@ var setUserStatusIn = function()
 		{
 			inStatus = "IN";
 			setUpInOutContext();
+			Ti.App.fireEvent('app:refresh');
 		}else{
 			alert('error setting user in status');
 			setUpInOutContext();
@@ -808,6 +821,7 @@ var setUserStatusNeutral = function()
 		{
 			inStatus = "NEUTRAL";
 			setUpInOutContext();
+			Ti.App.fireEvent('app:refresh');
 		}else{
 			alert('error setting user in status');
 			setUpInOutContext();
@@ -838,10 +852,10 @@ function itsHappeningButtonHandler()
 	var friendsViewHeight;
 	
 	card.animate({top: 20, duration: 200});
-	friendsViewRow.setTouchEnabled(false);
-	friendsViewHeight = friendsViewRow.size.height;
-		friendsViewRow.animate({opacity: 0.0, duration: 200}, function(){
-			friendsViewRow.setHeight(0);
+	membersView.setTouchEnabled(false);
+	membersViewHeight = membersView.size.height;
+		membersView.animate({opacity: 0.0, duration: 200}, function(){
+			membersView.setHeight(0);
 			descriptionView.setHeight(Ti.UI.SIZE);
 			descriptionText.setTouchEnabled(true);
 			descriptionText.setMaxLength(140);
@@ -927,8 +941,8 @@ function itsHappeningButtonHandler()
 					setTimeView.removeEventListener('scrollend', checkConfirm);
 					setTimeView.collapse();
 					descriptionText.setTouchEnabled(false);
-					friendsViewRow.setHeight(friendsViewHeight);
-					friendsViewRow.setOpacity(1.0);
+					membersView.setHeight(membersViewHeight);
+					membersView.setOpacity(1.0);
 					buttonRowView.animate({opacity: 0.0, duration: 200}, function(){
 						btn1.setWidth('44%');
 						btn1.setImage('images/btnHappeningSelected');
@@ -962,9 +976,9 @@ function itsHappeningButtonHandler()
 			Ti.App.addEventListener('keyboardframechanged', reactToKeyboard);
 			descriptionView.animate({opacity: 0.0, duration: 200}, function(){
 				descriptionView.setHeight(0);
-				friendsViewRow.setHeight(friendsViewHeight);
-				friendsViewRow.animate({opacity: 1.0, duration: 200}, function(){
-					friendsViewRow.setTouchEnabled(true);
+				membersView.setHeight(membersViewHeight);
+				membersView.animate({opacity: 1.0, duration: 200}, function(){
+					membersView.setTouchEnabled(true);
 					
 					timer = setTimeout(function(){
 						buttonRowView.animate({opacity: 0.0, duration: 250}, function(){
@@ -1149,7 +1163,7 @@ function PopulateFriendsRow(invitedUsers)
 		width: '45%',
 		layout: 'horizontal'
 	});
-	friendsViewRow.add(friendCircles);
+	membersView.add(friendCircles);
 		
 	if (invitedUsers.length >= 4)
 	{

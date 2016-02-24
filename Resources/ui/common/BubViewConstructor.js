@@ -2,8 +2,6 @@
  * @author Cole Halverson
  */
 
-
-
 			
 function BubViewConstructor(winHeight, winWidth, parentView, conversation)  
 {
@@ -14,8 +12,8 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 
 
 			var bubbleAttribute = 2;
-			var bubViewHeight = winHeight * .221;
-			var bubViewWidth = winWidth * .421;
+			var bubViewHeight = winWidth * .43;   //winHeight * .221;
+			var bubViewWidth = winWidth * .43;     //.421;
 			var bubDiameter = bubViewHeight * .932;
 			var bubBorder = bubDiameter *.04;
 			var buttonBottom = winHeight * .032;
@@ -32,17 +30,28 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				width: bubViewWidth,
 				height: bubViewHeight,
 				top: bubViewTop,
+				bottom: 10,
 				bubConvoKey: convoKey,
-				opacity: 0.0
+				opacity: 0.0,
+				//backgroundColor: 'orange',
+				clipMode: Titanium.UI.iOS.CLIP_MODE_DISABLED,
+				zIndex: 104 - conversation.row
 			});
 Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	//postlayout listener to tell mainWindow to create a card view for this conversation
 	bubView.addEventListener('postlayout', function(e){
 		this.removeEventListener('postlayout', arguments.callee);
+		//bubView.setHeight(bubView.size.width);
 		Ti.App.fireEvent('app:createcard', conversation);
 		mask.setWidth(mask.size.height);
+		bubView.setBorderRadius(bubViewWidth / 2);
+		bubView.setViewShadowColor('#2f2f2f');
+		bubView.setViewShadowOffset({x:2, y:3});
 		bubView.fireEvent('startRotate');
+		
+		Ti.API.info(bubView.size.width + "    "  + bubView.size.height);
+		
 		
 		var time = setTimeout(function(){
 			bubView.animate({opacity: 1.0, duration: 400});
@@ -103,9 +112,16 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 					if (account.id == createdBy && config.profileFile.exists()){
 						picture.setImage(config.profileFile.read());
 					}
-					else if (account.id != createdBy){
+					else if (account.id != createdBy && !picture.getImage()){
 						httpClient.doMediaGet('/v1/media/' + createdBy + '/PROFILE/profilepic.jpeg', function(success, response){
-							picture.setImage(Ti.Utils.base64decode(response));
+							if(success){
+								picture.setImage(Ti.Utils.base64decode(response));
+							}else{
+								Ti.App.addEventListener('app:refresh', function(){
+									this.removeEventListener('app:refresh', arguments.callee);
+									getProfile();
+								});
+							}
 						});
 					}
 				}
@@ -113,15 +129,15 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 			var mask = Ti.UI.createImageView({
 				image: 'images/mask',
-				height: '98%',
-				width: Ti.UI.SIZE,
+				width: Ti.UI.FILL,
+				height: Ti.UI.SIZE,
 				visible: false
 			});
 			bubView.add(mask);
 			
 			var spinMask = Ti.UI.createImageView({
-				height: Ti.UI.FILL,
-				width: Ti.UI.SIZE,
+				width: Ti.UI.FILL,
+				height: Ti.UI.SIZE,
 				image: 'images/spinMask',
 				visible: false
 			});
@@ -146,9 +162,9 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				function startRotate()											
 				{		
 						var a = Titanium.UI.createAnimation();
-						t = t.rotate(3);
+						t = t.rotate(2);
 						a.transform = t;
-						a.duration = 19;
+						a.duration = 15;
 						
 						
 					if(spin)
@@ -168,7 +184,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			{
 				spinMask.hide();
 				spin = false;
-				picture.setBorderWidth(1);
 				mask.show();
 			}
 			
@@ -200,7 +215,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				{
 					name.setText('You');
 					namePopulated = true;
-					//TODO: get picture from filesystem
 				}else{
 					getCreator();
 				}
@@ -221,7 +235,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 			var commentIndicator = Ti.UI.createImageView({
 				image: '/images/commentIndicatorBlue',
-				top: '2%',
+				top: '2.5%',
 				right: '14%',
 				height: '20.5%',
 				width: Titanium.UI.SIZE,
@@ -240,7 +254,30 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				else if(inStatus == "OUT"){inStatusIndicator.setImage('images/imOutIndicator');}
 				else{inStatusIndicator.hide();}
 			bubView.add(inStatusIndicator);
-		
+	
+	//Accelerometer stuff
+	Ti.Accelerometer.addEventListener('update', accelerometerCallback);
+	
+	Ti.App.addEventListener('pause', function(){
+		Ti.Accelerometer.removeEventListener('update', accelerometerCallback);
+	});
+	Ti.App.addEventListener('paused', function(){
+		Ti.Accelerometer.removeEventListener('update', accelerometerCallback);
+	});
+	
+	Ti.App.addEventListener('resume', function(){
+		Ti.Accelerometer.addEventListener('update', accelerometerCallback);
+	});
+	Ti.App.addEventListener('resumed', function(){
+		Ti.Accelerometer.addEventListener('update', accelerometerCallback);
+	});
+	
+	function accelerometerCallback(e)
+	{
+		y = (e.y * 6) * -1;
+		x = e.x * 6;
+		bubView.setViewShadowOffset({x: x ,y: y});
+	}
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
 		//check if the happening status has changed
 		if (e.status > "" && e.status != status)

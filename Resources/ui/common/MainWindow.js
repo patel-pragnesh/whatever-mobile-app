@@ -11,7 +11,7 @@ function MainWindow() {
 	var bubblesView = require('ui/common/BubblesView');
 	var startConvoCard = require('ui/common/StartConvoCard');
 	var convoCard = require('ui/common/ConvoCard');
-	var profileWindow = require('ui/common/ProfileWindow');
+	var localUserProfileWindow = require('ui/common/LocalUserProfileWindow');
 	
 	var purple = config.purple;
 	var account = Ti.App.properties.getObject('account');
@@ -142,7 +142,7 @@ function MainWindow() {
 		});
 		
 		profileView.addEventListener('click', function(e){
-			profileWin = new profileWindow();
+			profileWin = new localUserProfileWindow();
 			profileWin.open();
 		});
 			
@@ -150,35 +150,64 @@ function MainWindow() {
     var whateverButton = Ti.UI.createImageView
     ({
 		image: "/images/BTN",
-		//zIndex: 2,
-		width: '22%',
+		//backgroundColor: 'green',
+		width: '21%',
 		bottom: '5%'
 	});
 	
-	//whatever button click event creates StartConvoCard view
-	whateverButton.addEventListener('click', function(e)
-	{
-		whateverButton.setTouchEnabled(false);
-		var cardArgs = {};
-		cardArgs.context = 'new';
+		Ti.Accelerometer.addEventListener('update', accelerometerCallback);
 		
-			var startCard = new startConvoCard(win, cardArgs, mainContainerView.size.height);
+		Ti.App.addEventListener('pause', function(){
+			Ti.Accelerometer.removeEventListener('update', accelerometerCallback);
+		});
+		Ti.App.addEventListener('paused', function(){
+			Ti.Accelerometer.removeEventListener('update', accelerometerCallback);
+		});
+		
+		Ti.App.addEventListener('resume', function(){
+			Ti.Accelerometer.addEventListener('update', accelerometerCallback);
+		});
+		Ti.App.addEventListener('resumed', function(){
+			Ti.Accelerometer.addEventListener('update', accelerometerCallback);
+		});
+		
+		function accelerometerCallback(e)
+		{
+			y = (e.y * 6) * -1;
+			x = e.x * 6;
+			whateverButton.setViewShadowOffset({x: x ,y: y});
+		}
+		
+		whateverButton.addEventListener('postlayout', function(){
+			this.setBorderRadius(whateverButton.size.width / 2);
+			this.setViewShadowColor('#2f2f2f');
+			this.setViewShadowOffset({x:2, y:3});
+		});
+		
+		//whatever button click event creates StartConvoCard view
+		whateverButton.addEventListener('click', function(e)
+		{
+			whateverButton.setTouchEnabled(false);
+			var cardArgs = {};
+			cardArgs.context = 'new';
 			
-			startCard.open();
-		
-			startCard.addEventListener('postlayout', function(e)
-			{
-				startCard.removeEventListener('postlayout', arguments.callee);
+				var startCard = new startConvoCard(win, cardArgs, mainContainerView.size.height);
 				
-				var animation = Titanium.UI.createAnimation();
-						animation.top = '5%';
-						animation.duration = 250;
+				startCard.open();
+			
+				startCard.addEventListener('postlayout', function(e)
+				{
+					startCard.removeEventListener('postlayout', arguments.callee);
+					
+					var animation = Titanium.UI.createAnimation();
+							animation.top = '5%';
+							animation.duration = 250;
+								
+							startCard.animate(animation);
 							
-						startCard.animate(animation);
-						
-						whateverButton.setTouchEnabled(true);
-			});	
-	});	
+							whateverButton.setTouchEnabled(true);
+				});	
+		});	
 
 	
 	var tableData = [];

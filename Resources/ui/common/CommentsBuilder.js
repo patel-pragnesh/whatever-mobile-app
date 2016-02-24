@@ -45,9 +45,16 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					if(commentObject.userId == account.id && config.profileFile.exists())
 					{
 						commentImage.setImage(config.profileFile.read());
-					}else if (commentObject.userId != account.id){
+					}else if (commentObject.userId != account.id  && !commentImage.getImage()){
 						httpClient.doMediaGet('/v1/media/' + commentObject.userId + '/PROFILE/profilepic.jpeg', function(success, response){
-							commentImage.setImage(Ti.Utils.base64decode(response));
+							if(success){
+								commentImage.setImage(Ti.Utils.base64decode(response));
+							}else{
+								Ti.App.addEventListener('app:refresh', function(){
+									this.removeEventListener('app:refresh', arguments.callee);
+									getProfile();
+								});
+							}
 						});
 					}
 				}

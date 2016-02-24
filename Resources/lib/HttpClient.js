@@ -5,11 +5,9 @@ exports.doPost = function(endpoint, request, callback)
 	{
 	var url = config.services_base_url + endpoint;
 	
-	
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
-            	Ti.API.info(JSON.stringify('response = ' + this.responseData));
             callback(true, JSON.parse(this.responseText));
             },
         onerror: function(e)
@@ -55,7 +53,6 @@ exports.doGet = function(endpoint, callback)
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
-            	Ti.API.info('initial response =  ' + JSON.stringify(this.responseText));
             callback(true, JSON.parse(this.responseText));
             },
         onerror: function(e)
@@ -98,7 +95,6 @@ exports.doMediaGet = function(endpoint, callback)
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
-            	Ti.API.info('initial response =  ' + JSON.stringify(this.responseText));
             callback(true, this.responseText);
             },
         onerror: function(e)
