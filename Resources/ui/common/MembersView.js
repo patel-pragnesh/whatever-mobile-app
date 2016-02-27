@@ -8,71 +8,81 @@ function MembersView(args)
 	var MemberView = require('ui/common/MemberView');
 	
 	var holder = Ti.UI.createView({
-		width: Ti.UI.FILL,
+		width: '92%',
 		height: args.height,
-		top: 0,
-		//backgroundColor: 'orange',
+		top: 5
 	});
 	
-	var scrollView = Ti.UI.createScrollView({
-		height: Ti.UI.FILL,
-		width: Ti.UI.FILL,
-		//backgroundColor: 'blue'
-	});
-	holder.add(scrollView);
-		
-	scrollView.addEventListener('postlayout', populate);
-		
-		var scrollViewContainer = Ti.UI.createView({
-			left: 0,
-			height: Ti.UI.FILL,
-			width: Ti.UI.SIZE,
-			//backgroundColor: 'pink',
-			layout: 'horizontal',
-			horizontalWrap: false
-		});
-		scrollView.add(scrollViewContainer);
-		
-	
-	function populate()
-	{
-		scrollView.removeEventListener('postlayout', populate);
-		
-		//make sure the scrollViewContainer is atleast big enough to force scrollView to scroll.
-		scrollViewContainer.addEventListener('postlayout', function(){
-			if (scrollViewContainer.size.width <= scrollView.size.width)
-				{
-					scrollViewContainer.setWidth(scrollView.size.width + 1);
-				}
-		});
 		
 		var inviteView = Ti.UI.createView({
 			left: 0,
+			top: 0,
 			height: Ti.UI.FILL,
-			width: '22%',
+			width: '20%',
 			layout: 'vertical',
-			//backgroundColor: 'orange'
 		});
 		
 			var inviteButton = Ti.UI.createImageView({
-				top: "5%",
-				width: '70%',
+				top: 0,
+				width: '75%',
 				image: 'images/inviteButton'
 			});
 			inviteView.add(inviteButton);
 			
 			var inviteLabel = Ti.UI.createLabel({
-				top: 6,
+				top: '3%',
 				text: 'Add More'
 			});
 			inviteView.add(inviteLabel);
 		
 		inviteView.addEventListener('postlayout', function(){
-			inviteLabel.setFont({fontSize: inviteView.size.width * .15,
+			inviteLabel.setFont({fontSize: inviteView.size.width * .18,
 									fontFamily: 'AvenirNext-Medium'});
 		});
 			
-		scrollViewContainer.add(inviteView);
+		holder.add(inviteView);
+		
+			var profiles = Ti.UI.createView({
+				width: '80%',
+				left: '20%',
+				height: Ti.UI.FILL,
+				layout: 'horizontal'
+			});
+		
+		holder.add(profiles);
+		
+		//if more than 4 memberViews will be added to profiles, this covers the 4th one
+		var extrasView = Ti.UI.createView({
+			width: '20%',
+			height: Ti.UI.FILL,
+			right: 0,
+			zIndex: 1,
+			visible: false
+		});
+		
+			var extrasCircle = Ti.UI.createView({
+				top: 0,
+				width: '75%',
+				backgroundColor: '#d3d3d3'
+			});
+			
+				extrasCircle.addEventListener('postlayout', function(e){
+					this.setHeight(this.size.width);
+					this.setBorderRadius(this.size.height / 2);
+				});
+			
+				var extrasLabel = Ti.UI.createLabel({
+					color: 'black'
+				});
+					
+		extrasView.addEventListener('postlayout', function(){
+			extrasLabel.setFont({fontSize: this.size.width * .18,
+							fontFamily: 'AvenirNext-DemiBold'});
+		});
+					
+			extrasCircle.add(extrasLabel);
+			extrasView.add(extrasCircle);
+		holder.add(extrasView);
 		
 		var currentMembers = args.users;
 		
@@ -85,6 +95,7 @@ function MembersView(args)
 				var startIndex = e.users.length - currentMembers.length;
 				currentMembers = e.users;
 				
+				//if there are new members add them
 				if(startIndex != 0){
 					createMembers(startIndex);
 				}
@@ -99,16 +110,36 @@ function MembersView(args)
 		
 		function createMembers(startIndex)
 		{
-				for (i = startIndex; i < currentMembers.length; i++)
+				//Are there more than 4 members besides the creator?  If so, we will need the extrasView
+				if (currentMembers.length > 5)
 				{
-					var memberView = new MemberView(currentMembers[i], scrollView.size.width);
-					scrollViewContainer.add(memberView);
+					var extras = true;
+				}else{
+						extrasView.hide();
 				}
-				holder.animate({opacity: 1.0, duration: 50});
+				
+				var count = (currentMembers.length > 5) ? 4 : currentMembers.length;
+				
+				for (i = startIndex; i < count; i++)
+				{
+					if (currentMembers[i].type != "CREATOR"){
+						var memberView = new MemberView(currentMembers[i]);
+						if(i == 3 && extras)
+						{
+							extrasLabel.setText("+ " + (currentMembers.length - 4));
+							extrasView.show();
+						}
+						profiles.add(memberView);
+						Ti.API.info('addMember');
+					}
+					
+					
+				}
+				
+			
 		}
 		
-	}
-		
+	
 	return holder;
 }
 

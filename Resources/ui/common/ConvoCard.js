@@ -299,38 +299,19 @@ function cardPostLayoutCallback(e){
 					});
 		}
 	
-	var extraLabelsView = Ti.UI.createView({
-		left: '4%',
-		bottom: '3%',
-		height: Ti.UI.SIZE,
-		width: Ti.UI.SIZE,
-		layout: 'horizontal'
-	});
-					
-	var andLabel = Ti.UI.createLabel({
-		left: 0,
-		bottom: '3%',
-		text: 'and',
-		font: {fontSize: 15,
-				fontFamily: 'AvenirNext-Regular'},
-		color: 'black',	
-	});
-					
-	extraLabelsView.add(andLabel);
-		
+	
 	var numberFriendsLabel = Ti.UI.createLabel({
-		text: "0 friends are in",
+		text: "and 0 friends are in so far",
 		font: {fontSize: 15,
 				fontFamily: 'AvenirNext-Regular'},
-		color: purple,
-		left: 2
+		color: 'black',
+		left: '4%',
+		bottom: '3%'
 	});
 	
-	extraLabelsView.add(numberFriendsLabel);
-	profileLabelsView.add(extraLabelsView);
+	
+	profileLabelsView.add(numberFriendsLabel);
 	profileViewRow.add(profileLabelsView);
-	
-	
 	
 					
 	var closeButton = Ti.UI.createLabel({
@@ -565,54 +546,38 @@ var disappearingView = Ti.UI.createView({
 		 		commentsScrollView.fireEvent('touchstart');
 		 	}
 	});
+		
+		var membersViewArgs = {};
+		membersViewArgs.height = containerHeight * .11;
+		membersViewArgs.users = cardArgs.userConversations;
+		//set up membersView
+		var membersView = new MembersView(membersViewArgs);
 	
-	
-	
+		disappearingView.add(membersView);
 					
+		//add happeningBar
+		var happeningView = Ti.UI.createImageView({
+				top: 5,
+				width: '92%'
+			});
+		disappearingView.add(happeningView);
+		
 		//set up description text area
-		var descriptionView = Ti.UI.createView({
-			top: 5,
+		var descriptionText = Ti.UI.createTextArea({
+			height: Ti.UI.SIZE,
+			width: '100%',
 			left: '4%',
 			right: '4%',
-			height:  0,
-			layout: 'vertical',
-			opacity:  0.0
-		});
-				
-			var itsHappeningView = Ti.UI.createView({
-				top: 0,
-				bottom: 0,
-				width: '100%',
-				height: Titanium.UI.SIZE,
-				backgroundColor: '#F3F0F7',
-				borderRadius: 4
-			});
-			
-				var happeningLabel = Ti.UI.createImageView({
-					width: '41%', 
-					height: Titanium.UI.SIZE,
-					top: 5,
-					bottom: 5,
-					image: 'images/itsHappening'
-				});
-			itsHappeningView.add(happeningLabel);
-			
-			var descriptionText = Ti.UI.createTextArea({
-				height: Ti.UI.SIZE,
-				width: '100%',
-				top: -1,
-				color: 'black'	,
-				backgroundColor: 'white',
-				font: {fontFamily: 'AvenirNext-Regular',
+			color: 'black'	,
+			backgroundColor: 'white',
+			font: {fontFamily: 'AvenirNext-Regular',
 						fontSize: card.size.width * 0.0494},
-				touchEnabled: false,
-				scrollable: false,
-				returnKeyType: Titanium.UI.RETURNKEY_NEXT
-			});	
+			touchEnabled: false,
+			scrollable: false,
+			returnKeyType: Titanium.UI.RETURNKEY_NEXT
+		});	
 			
-		descriptionView.add(itsHappeningView);	
-		descriptionView.add(descriptionText);
-	disappearingView.add(descriptionView);		
+	disappearingView.add(descriptionText);		
 	
 	
 	//set up setTimeView
@@ -656,24 +621,16 @@ var disappearingView = Ti.UI.createView({
 		
 				
 	var convoLabel = Ti.UI.createImageView({
-		width: '29%',
-		height: Titanium.UI.SIZE,
-		top: 10,  
+		//width: '29%',
+		height: 10,
+		top: 20,  
 		left: '4%',
-		bottom: 5,
-		image: 'images/conversationLabel'
+		bottom: 10,
+		
 	});
 	disappearingView.add(convoLabel);
 	
-	var membersViewArgs = {};
-		membersViewArgs.height = containerHeight * .15;
-		membersViewArgs.users = cardArgs.userConversations;
-	//set up membersView
-	var membersView = new MembersView(membersViewArgs);
-	
-	disappearingView.add(membersView);
-	
-				
+		
 	var line = Ti.UI.createView({
 		height: 1,
 		top: 2,
@@ -705,10 +662,12 @@ function setUpHappeningContext()
 	
 	if(itsHappening)
 	{
-		//set up descriptionView
+		//set up descriptionText
 		descriptionText.setValue(cardArgs.whatsHappening);
-		descriptionView.setHeight(Titanium.UI.SIZE);
-		descriptionView.setOpacity(1.0);
+		happeningView.setImage('images/happeningBar');
+		buttonRowView.setTop(-10);
+		convoLabel.setImage('images/conversationLabel');
+		convoLabel.setHeight(10);
 		//set buttons
 		if(userIsCreator)
 		{
@@ -717,8 +676,12 @@ function setUpHappeningContext()
 		commentsScrollView.setTop(disappearingView.size.height);
 		
 	}else{
-		descriptionView.setHeight(0);
+		descriptionText.setHeight(0);
+		happeningView.setImage('images/notHappeningBar');
 		//set buttons
+		buttonRowView.setTop(0);
+		convoLabel.setImage('images/whatsHappeningLabel');
+		convoLabel.setHeight(9);
 		if(userIsCreator)
 		{
 			btn1.setImage('images/btnHappening');
@@ -856,13 +819,12 @@ function itsHappeningButtonHandler()
 	membersViewHeight = membersView.size.height;
 		membersView.animate({opacity: 0.0, duration: 200}, function(){
 			membersView.setHeight(0);
-			descriptionView.setHeight(Ti.UI.SIZE);
+			descriptionText.setHeight(Ti.UI.SIZE);
+			happeningView.setImage('images/happeningBar');
 			descriptionText.setTouchEnabled(true);
 			descriptionText.setMaxLength(140);
 			descriptionText.setColor('gray');
 			descriptionText.setValue('What did you decide on?');
-			//createCommentHolder.hide();
-			descriptionView.animate({opacity: 1.0, duration: 200});
 			setTimeView.expand();
 			setTimeView.setTouchEnabled(true);
 			
@@ -974,8 +936,8 @@ function itsHappeningButtonHandler()
 			descriptionText.blur();
 			setTimeView.collapse();
 			Ti.App.addEventListener('keyboardframechanged', reactToKeyboard);
-			descriptionView.animate({opacity: 0.0, duration: 200}, function(){
-				descriptionView.setHeight(0);
+			descriptionText.animate({height: 0, duration: 200}, function(){
+				happeningView.setImage('images/notHappeningBar');
 				membersView.setHeight(membersViewHeight);
 				membersView.animate({opacity: 1.0, duration: 200}, function(){
 					membersView.setTouchEnabled(true);

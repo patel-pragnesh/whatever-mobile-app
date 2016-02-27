@@ -2,7 +2,7 @@
  * @author Cole Halverson
  */
 
-function MemberView(user, parentWidth)
+function MemberView(user)
 {
 	var httpClient = require('lib/HttpClient');
 	var account = Ti.App.properties.getObject('account');
@@ -11,7 +11,7 @@ function MemberView(user, parentWidth)
 	
 	var view = Ti.UI.createView({
 		height: Ti.UI.FILL,
-		width: parentWidth * .22,
+		width: '25%',
 		left: 0
 	});
 	
@@ -26,51 +26,44 @@ function MemberView(user, parentWidth)
 		var pictureAndName = Ti.UI.createView({
 			height: Ti.UI.FILL,
 			width: Ti.UI.FILL,
+			top: 0,
 			layout: 'vertical'
 		});
 	
 	view.add(pictureAndName);	
 	
 	var picture = Ti.UI.createImageView({
-		width: '80%',
-		top: '1%',
-		backgroundColor: '#D3D3D3',
-		borderColor: '#D3D3D3',
-		borderWidth: 1,
-		opacity: 0.0
+		width: '75%',
+		top: 0,
+		opacity: 0.0,
+		backgroundColor: '#d3d3d3'
 	});
 				
 		picture.addEventListener('postlayout', function(){
 			this.removeEventListener('postlayout', arguments.callee);
 			this.setHeight(this.size.width);
 			this.setBorderRadius(this.size.width / 2);
+			this.animate({opacity: 1.0, duration: 250});
 			getProfile();
-			
 		});			
 	pictureAndName.add(picture);
 	
 		var statusIcon = Ti.UI.createImageView({
 			width: '30%',
-			top: '6.5%',
-			right: 0,
-			zIndex: 2,
-			borderColor: '#D3D3D3',
-			borderWidth: 1
+			top: '5%',
+			right: '5%',
+			zIndex: 2
 		});
-		
-			statusIcon.addEventListener('postlayout', function(){
-				this.setBorderRadius(this.size.height / 2);
-			});
 			
 			setStatus(user.status);
 	
 			
 			function setStatus(status){
 				if(status == "IN"){
-					statusIcon.setImage('images/imInIndicator');
+					statusIcon.setImage('images/inDot');
 					statusIcon.show();
 				}else if (status == "OUT"){
-					statusIcon.setImage('images/imOutIndicator');
+					statusIcon.setImage('images/outDot');
 					statusIcon.show();
 				}else{
 					statusIcon.hide();
@@ -90,7 +83,6 @@ function MemberView(user, parentWidth)
 				httpClient.doMediaGet('/v1/media/' + user.userId + '/PROFILE/profilepic.jpeg', function(success, response){
 					if(success){
 						picture.setImage(Ti.Utils.base64decode(response));
-						picture.animate({opacity: 1.0, duration: 50});
 					}else{
 						Ti.App.addEventListener('app:refresh', function(){
 							this.removeEventListener('app:refresh', arguments.callee);
@@ -104,8 +96,8 @@ function MemberView(user, parentWidth)
 				
 				
 	var memberName = Ti.UI.createLabel({
-		top: 3,
-		width: '90%',
+		top: '4%',
+		width: '95%',
 		height: Ti.UI.SIZE,
 		textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 		ellipsize: Titanium.UI.TEXT_ELLIPSIZE_TRUNCATE_END
@@ -113,7 +105,7 @@ function MemberView(user, parentWidth)
 				
 		memberName.addEventListener('postlayout', function(){
 			this.removeEventListener('postlayout', arguments.callee);
-			this.setFont({fontSize: view.size.width * .15,
+			this.setFont({fontSize: view.size.width * .18,
 							fontFamily: 'AvenirNext-Medium'});
 			getName();
 		});				

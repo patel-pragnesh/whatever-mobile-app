@@ -237,16 +237,16 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				image: '/images/commentIndicatorBlue',
 				top: '2.5%',
 				right: '14%',
-				height: '20.5%',
+				height: '25.5%',
 				width: Titanium.UI.SIZE,
 				zIndex: bubbleAttribute,
 			});
 			bubView.add(commentIndicator);
 			
 			var inStatusIndicator = Ti.UI.createImageView({
-				top: '24%',
+				top: '23%',
 				right: 0,
-				height: '20.5%',
+				height: '25.5%',
 				width: Titanium.UI.SIZE,
 				zIndex: bubbleAttribute
 			});
@@ -274,8 +274,8 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	function accelerometerCallback(e)
 	{
-		y = (e.y * 6) * -1;
-		x = e.x * 6;
+		y = (e.y * 8) * -1;
+		x = e.x * 8;
 		bubView.setViewShadowOffset({x: x ,y: y});
 	}
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
