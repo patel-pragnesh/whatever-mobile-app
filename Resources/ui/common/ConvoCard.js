@@ -16,11 +16,13 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	
 	var AddFriends = require('ui/common/AddFriends');
 	var MembersView = require('ui/common/MembersView');
+	var TunedView = require('ui/common/TunedView');
 	var encoder = require('lib/EncoderUtility');
 	
 	var account = Ti.App.properties.getObject('account');
 	
 	var inStatus = cardArgs.localUserStatus;
+	var tuned;
 	var userConversationId = cardArgs.localUserConversationId;
 	
 	//see if the local user created this conversation
@@ -96,6 +98,15 @@ var card = Ti.UI.createView({
 					textArea.blur();
 				});
 		
+		var tunedDialog = Ti.UI.createImageView({
+			width: '50%',
+			left: '1%',
+			visible: false,
+			zIndex: 3
+		});
+		
+		mainViewContainer.add(tunedDialog);
+		
 		var createCommentHolder = Ti.UI.createView({
 			height: Titanium.UI.SIZE,
 			width: '100%',
@@ -103,6 +114,11 @@ var card = Ti.UI.createView({
 			bottom: 0 ,
 			zIndex: 1
 		});
+		
+			createCommentHolder.addEventListener('postlayout', function(){
+					this.removeEventListener('postlayout', arguments.callee);
+					tunedDialog.setBottom(this.size.height + 5);
+			});
 		
 		var createCommentView = Ti.UI.createView({
 			top: 1,
@@ -122,12 +138,13 @@ var card = Ti.UI.createView({
 			});
 				
 			var textArea = Ti.UI.createTextArea({
-				left: '2%',
-				width: '66%',
+				left: 0,
+				width: '67%',
 				height: Titanium.UI.SIZE,
 				font: {fontFamily: 'AvenirNext-Regular',
 						fontSize: 16},
-				color: 'gray'
+				color: 'gray',
+				scrollable: false
 			});
 				
 				textArea.addEventListener('focus', function(e){
@@ -160,6 +177,7 @@ var card = Ti.UI.createView({
 	//Listen for the keyboard event
 	var animation1 = Ti.UI.createAnimation();
 	var animation2 = Ti.UI.createAnimation();
+	var animation3 = Ti.UI.createAnimation();
 			
 	Ti.App.addEventListener('keyboardframechanged', reactToKeyboard);
 		
@@ -169,6 +187,7 @@ var card = Ti.UI.createView({
 			{
 				animation1.bottom = 0;
 				animation2.bottom = createCommentHolder.size.height;
+				animation3.bottom = createCommentHolder.size.height + 5;
 				keyboardHeight = 0;
 				textAreaFocused = false;
 			}
@@ -180,14 +199,17 @@ var card = Ti.UI.createView({
 				{
 					commentsScrollView.scrollToBottom();
 				});
+				animation3.bottom = e.keyboardFrame.height + createCommentHolder.size.height + 5;
 				keyboardHeight = e.keyboardFrame.height;
 			}
 					
 				animation1.duration = e.animationDuration * 1000;
 				animation2.duration = e.animationDuration * 1000;	
-					
+				animation3.duration = e.animationDuration * 1000;
+
 			createCommentHolder.animate(animation1);
 			commentsScrollView.animate(animation2);
+			tunedDialog.animate(animation3);
 		}
 		
 			
@@ -197,17 +219,13 @@ var card = Ti.UI.createView({
 		textArea.blur();
 	});		
 	
-	var membersView = Ti.UI.createView({
-		width: '100%',
-		height: Ti.UI.SIZE,
-		backgroundColor: 'orange',
-		layout: 'vertical'
-	});
 	
 //Populate the UI skeleton	
 function cardPostLayoutCallback(e){
 	card.removeEventListener('postlayout', cardPostLayoutCallback);
-	
+	card.setViewShadowColor('black');
+	card.setViewShadowOffset({x: 0, y: 0});
+	card.setViewShadowRadius(6);
 	card.addEventListener('postlayout', function(e)
 	{
 		card.removeEventListener('postlayout', arguments.callee);
@@ -391,12 +409,37 @@ function cardPostLayoutCallback(e){
 	mainViewContainer.add(commentsScrollView);	
 	
 	//set up createCommentHolder
-		var chatProfilePic = Ti.UI.createImageView({
+		var stayTunedButton = Ti.UI.createImageView({
 			width: '80%',
-			height: '80%',
-			backgroundColor: 'black'
+			image: 'images/stay-tuned-button-icon'
 		});
-		leftTextAreaButton.add(chatProfilePic);
+		
+			stayTunedButton.addEventListener('click', function(){
+				stayTunedButton.setTouchEnabled(false);
+				if (tuned){
+					this.setImage('images/stay-tuned-button-icon');
+					tunedDialog.setImage('images/notTunedDialog');
+					tuned = false;
+				}else{
+					this.setImage('images/stay-tuned-button-icon-selected');
+					tunedDialog.setImage('images/stayTunedDialog');
+					tuned = true;
+				}
+				showTunedDialog();
+			});
+			
+			var dialogTime;
+			
+			function showTunedDialog()
+			{
+				tunedDialog.show();
+				var tunedTimer = setTimeout(function(){
+					tunedDialog.hide();
+					stayTunedButton.setTouchEnabled(true);				
+								}, 2700);
+			}
+			
+		leftTextAreaButton.add(stayTunedButton);
 		
 		var sendLabel = Ti.UI.createLabel({
 			text: 'Send',
@@ -552,6 +595,17 @@ var disappearingView = Ti.UI.createView({
 		membersViewArgs.users = cardArgs.userConversations;
 		//set up membersView
 		var membersView = new MembersView(membersViewArgs);
+		
+			var membersList = Ti.UI.createView({
+				width: '100%',
+				height: '100%',
+				backgroundColor: 'black'
+			});
+			
+			function flip()
+			{
+				
+			}
 	
 		disappearingView.add(membersView);
 					

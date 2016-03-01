@@ -200,6 +200,10 @@ function Populate (e)
 {
 	card.removeEventListener('postlayout', Populate);
 		
+	card.setViewShadowColor('black');
+	card.setViewShadowOffset({x: 0, y: 0});
+	card.setViewShadowRadius(6);
+	
 	var containerHeight = card.size.height;
 	var containerWidth =  card.size.width;
 		

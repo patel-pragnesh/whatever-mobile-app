@@ -47,7 +47,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		mask.setWidth(mask.size.height);
 		bubView.setBorderRadius(bubViewWidth / 2);
 		bubView.setViewShadowColor('#2f2f2f');
-		bubView.setViewShadowOffset({x:2, y:3});
 		bubView.fireEvent('startRotate');
 		
 		Ti.API.info(bubView.size.width + "    "  + bubView.size.height);
@@ -55,7 +54,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		
 		var time = setTimeout(function(){
 			bubView.animate({opacity: 1.0, duration: 400});
-			picture.add(bubShadeMask);
 			bubShadeMask.animate({opacity: 0.45, duration: 1000});
 		}, 500);
 		
@@ -127,6 +125,61 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				}
 			bubView.add(picture);
 			
+			var nameAndShadeView = Ti.UI.createView({
+				width: '98%'
+			});
+			
+			nameAndShadeView.addEventListener('postlayout', function(){
+				this.setHeight(this.size.width);
+				this.setBorderRadius(this.size.width / 2);
+			});
+				var bubShadeMask = Ti.UI.createImageView
+				({
+					backgroundColor: 'black',
+					opacity: 0.45,
+					width: Titanium.UI.FILL,
+					height: '35%',
+					bottom: 0
+				});
+			nameAndShadeView.add(bubShadeMask);
+			
+				var name = Ti.UI.createLabel({
+					color: 'white',
+					font: {fontSize: bubDiameter *  0.1,     //.094,
+						   fontFamily: 'AvenirNext-DemiBold'},
+					textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
+					bottom: '18%',
+					width: Ti.UI.SIZE, 
+					height: Ti.UI.SIZE,
+					zIndex: 3,
+					opacity: 1.0,
+				});
+			nameAndShadeView.add(name);
+					
+					var namePopulated = false;
+					if (createdBy == account.id)
+					{
+						name.setText('You');
+						namePopulated = true;
+					}else{
+						getCreator();
+					}
+			
+		bubView.add(nameAndShadeView);
+		
+				function getCreator()
+				{
+					var request = {userId: createdBy};
+					httpClient.doPost('/v1/getUser', request, function(success, response){
+						Ti.API.info(JSON.stringify(response));
+						if (success)
+						{
+							name.setText(response.firstName);
+							namePopulated = true;
+						}
+					});
+				}
+			
 			var mask = Ti.UI.createImageView({
 				image: 'images/mask',
 				width: Ti.UI.FILL,
@@ -142,6 +195,40 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				visible: false
 			});
 			bubView.add(spinMask);
+			
+			var happeningIndicator = Ti.UI.createView({
+				top: '20%',
+				left: 0,
+				height: '22%',
+				width: Ti.UI.SIZE,
+				layout: 'horizontal',
+				backgroundColor: 'white',
+				visible: false
+			});
+			
+				happeningIndicator.addEventListener('postlayout', function(){
+					this.removeEventListener('postlayout', arguments.callee);
+					this.setBorderRadius(this.size.height / 2);
+					timeLabel.setFont({fontFamily: 'AvenirNext-Regular',
+										fontSize: this.size.height * .4});
+				});
+			
+				var clock = Ti.UI.createImageView({
+					top: '10%',
+					bottom: '10%',
+					left: 3,
+					image: 'images/clock'
+				});
+				happeningIndicator.add(clock);
+				
+				var timeLabel = Ti.UI.createLabel({
+					left: 3,
+					bottom: '20%',
+					text: '2 days ',
+					color: 'black'
+				});
+				happeningIndicator.add(timeLabel);
+			bubView.add(happeningIndicator);
 			
 			if(status == "OPEN")
 			{
@@ -185,69 +272,22 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				spinMask.hide();
 				spin = false;
 				mask.show();
+				happeningIndicator.show();
 			}
 			
-			var bubShadeMask = Ti.UI.createImageView
-			({
-				backgroundColor: 'black',
-				opacity: 0.45,
-				width: Titanium.UI.FILL,
-				height: '35%',
-				bottom: 0
-			});
-			
-			var name = Ti.UI.createLabel({
-				color: 'white',
-				font: {fontSize: bubDiameter *  0.1,     //.094,
-					   fontFamily: 'AvenirNext-DemiBold'},
-				textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
-				bottom: '18%',
-				width: Ti.UI.SIZE, 
-				height: Ti.UI.SIZE,
-				zIndex: 3,
-				opacity: 1.0,
-			});
-				
-			picture.add(name);
-				
-				var namePopulated = false;
-				if (createdBy == account.id)
-				{
-					name.setText('You');
-					namePopulated = true;
-				}else{
-					getCreator();
-				}
-			
-				
-				function getCreator()
-				{
-					var request = {userId: createdBy};
-					httpClient.doPost('/v1/getUser', request, function(success, response){
-						Ti.API.info(JSON.stringify(response));
-						if (success)
-						{
-							name.setText(response.firstName);
-							namePopulated = true;
-						}
-					});
-				}
-			
 			var commentIndicator = Ti.UI.createImageView({
-				image: '/images/commentIndicatorBlue',
 				top: '2.5%',
 				right: '14%',
-				height: '25.5%',
-				width: Titanium.UI.SIZE,
-				zIndex: bubbleAttribute,
+				height: '22%',
+				image: '/images/commentIndicatorBlue',
+				zIndex: bubbleAttribute
 			});
 			bubView.add(commentIndicator);
 			
 			var inStatusIndicator = Ti.UI.createImageView({
 				top: '23%',
-				right: 0,
-				height: '25.5%',
-				width: Titanium.UI.SIZE,
+				right: -5,
+				height: '22%',
 				zIndex: bubbleAttribute
 			});
 				if(inStatus == "IN"){inStatusIndicator.setImage('images/imInIndicator');}
@@ -274,8 +314,8 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	function accelerometerCallback(e)
 	{
-		y = (e.y * 8) * -1;
-		x = e.x * 8;
+		y = (e.y * 7) * -1;
+		x = e.x * 7;
 		bubView.setViewShadowOffset({x: x ,y: y});
 	}
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){

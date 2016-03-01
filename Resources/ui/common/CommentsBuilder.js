@@ -42,8 +42,10 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				Ti.App.addEventListener('updateProfilePicture', getProfile);
 				
 				function getProfile(){
+					Ti.API.info(commentObject.userId + "  " + account.id + "  " + config.profileFile.exists());
 					if(commentObject.userId == account.id && config.profileFile.exists())
 					{
+						Ti.API.info('load local profile pic');
 						commentImage.setImage(config.profileFile.read());
 					}else if (commentObject.userId != account.id  && !commentImage.getImage()){
 						httpClient.doMediaGet('/v1/media/' + commentObject.userId + '/PROFILE/profilepic.jpeg', function(success, response){
