@@ -62,7 +62,6 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				}
 		commentView.add(commentImage);
 				
-	
 			var commentContent = Ti.UI.createView({
 				top: 4,
 				right: '14%',
@@ -78,24 +77,10 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					color: '#666666',
 					font: {fontSize: nameFontSize,
 							   fontFamily: 'AvenirNext-Medium'},
-					zIndex: 2
+					zIndex: 2,
+					text: commentObject.userFirstName + ' ' + commentObject.userLastName
 					});
 					commentContent.add(nameLabel);
-					
-						var namePopulated = false;
-						
-						function getCreator()
-						{
-							var request = {userId: commentObject.userId};
-							httpClient.doPost('/v1/getUser', request, function(success, response){
-								if (success)
-								{
-									nameLabel.setText(response.firstName + " " + response.lastName);
-									namePopulated = true;
-								}
-							});
-						}
-					getCreator();
 				
 				var commentText = Ti.UI.createTextArea({
 					left: -5,

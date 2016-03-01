@@ -117,20 +117,9 @@ function MemberView(user)
 			{
 				memberName.setText('You');
 			}
-			else if (!memberName.text)
+			else
 			{
-				var req = {userId: user.userId};
-								
-				httpClient.doPost('/v1/getUser', req, function(success, response){
-					if(success){
-						memberName.setText(response.firstName);
-					}else{
-						Ti.App.addEventListener('app:refresh', function(){
-							this.removeEventListener('app:refresh', arguments.callee);
-							getName();
-						});
-					}
-				});
+				memberName.setText(user.userFirstName);
 			}
 		}
 					

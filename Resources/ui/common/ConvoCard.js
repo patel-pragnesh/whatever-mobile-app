@@ -593,6 +593,7 @@ var disappearingView = Ti.UI.createView({
 		var membersViewArgs = {};
 		membersViewArgs.height = containerHeight * .11;
 		membersViewArgs.users = cardArgs.userConversations;
+		membersViewArgs.mainViewContainer = mainViewContainer;
 		//set up membersView
 		var membersView = new MembersView(membersViewArgs);
 		
@@ -601,11 +602,6 @@ var disappearingView = Ti.UI.createView({
 				height: '100%',
 				backgroundColor: 'black'
 			});
-			
-			function flip()
-			{
-				
-			}
 	
 		disappearingView.add(membersView);
 					

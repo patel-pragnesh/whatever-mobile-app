@@ -6,6 +6,7 @@ function MembersView(args)
 {
 	var httpClient = require('lib/HttpClient');
 	var MemberView = require('ui/common/MemberView');
+	var MembersListView = require('ui/common/MembersListView');
 	
 	var holder = Ti.UI.createView({
 		width: '92%',
@@ -28,6 +29,8 @@ function MembersView(args)
 				image: 'images/inviteButton'
 			});
 			inviteView.add(inviteButton);
+			
+			
 			
 			var inviteLabel = Ti.UI.createLabel({
 				top: '3%',
@@ -74,7 +77,15 @@ function MembersView(args)
 				var extrasLabel = Ti.UI.createLabel({
 					color: 'black'
 				});
-					
+		
+		extrasView.addEventListener('click', function(){
+				var membersListViewArgs = {};
+					membersListViewArgs.mainViewContainer = args.mainViewContainer;
+					membersListViewArgs.currentMembers = currentMembers;
+				var membersListView = new MembersListView(membersListViewArgs);
+				args.mainViewContainer.add(membersListView);
+		});
+				
 		extrasView.addEventListener('postlayout', function(){
 			extrasLabel.setFont({fontSize: this.size.width * .18,
 							fontFamily: 'AvenirNext-DemiBold'});
