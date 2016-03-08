@@ -317,7 +317,6 @@ function cardPostLayoutCallback(e){
 					});
 		}
 	
-	
 	var numberFriendsLabel = Ti.UI.createLabel({
 		text: "and 0 friends are in so far",
 		font: {fontSize: 15,
@@ -327,10 +326,8 @@ function cardPostLayoutCallback(e){
 		bottom: '3%'
 	});
 	
-	
 	profileLabelsView.add(numberFriendsLabel);
 	profileViewRow.add(profileLabelsView);
-	
 					
 	var closeButton = Ti.UI.createLabel({
 		width: Titanium.UI.SIZE,
@@ -393,19 +390,19 @@ function cardPostLayoutCallback(e){
 		var localComments = [];
 		
 		//this creates the comments views when the card is created
-			
-		for (i = 0; i < cardArgs.comments.length; i++)
+		if(cardArgs.comments)
 		{
-			var commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
-			localComments.push(1);
-			commentsScrollView.add(commentView);
+			for (i = 0; i < cardArgs.comments.length; i++)
+			{
+				var commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
+				localComments.push(1);
+				commentsScrollView.add(commentView);
+			}	
 		}	
-			
 		
 		commentsScrollView.addEventListener('touchstart', hideDisappearingView);
 		commentsScrollView.addEventListener('touchmove', hideDisappearingView);
 		commentsScrollView.addEventListener('dragstart', hideDisappearingView);
-		
 	mainViewContainer.add(commentsScrollView);	
 	
 	//set up createCommentHolder

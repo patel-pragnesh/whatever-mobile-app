@@ -150,7 +150,6 @@ function MainWindow() {
     var whateverButton = Ti.UI.createImageView
     ({
 		image: "/images/BTN",
-		//backgroundColor: 'green',
 		width: '21%',
 		bottom: '5%'
 	});
@@ -184,29 +183,34 @@ function MainWindow() {
 			this.setViewShadowOffset({x:2, y:3});
 		});
 		
-		//whatever button click event creates StartConvoCard view
+	//whatever button click event creates StartConvoCard view
+		var friends = [];
+		//friends.push({firstName: 'Joe', lastName: 'McMahon', userId: '206'});
+		//friends.push({firstName: 'Cole', lastName: 'Halverson', userId: '406'});
+		
+		getFriends();
+		Ti.App.addEventListener('app:refresh', getFriends);
+		
+		function getFriends(){
+			var req = {userId: account.id};
+			
+			httpClient.doPost('/v1/getFriendships', req, function(success, response){
+				if(success)
+				{
+					friends = response;
+				}
+			});
+		}
+	
 		whateverButton.addEventListener('click', function(e)
 		{
 			whateverButton.setTouchEnabled(false);
-			var cardArgs = {};
-			cardArgs.context = 'new';
 			
-				var startCard = new startConvoCard(win, cardArgs, mainContainerView.size.height);
-				
-				startCard.open();
-			
-				startCard.addEventListener('postlayout', function(e)
-				{
-					startCard.removeEventListener('postlayout', arguments.callee);
-					
-					var animation = Titanium.UI.createAnimation();
-							animation.top = '5%';
-							animation.duration = 250;
-								
-							startCard.animate(animation);
+			var startCard = new startConvoCard(win, mainContainerView.size.height, friends);
+			win.add(startCard);
+			startCard.animate({top: '5%', duration: 250});
 							
-							whateverButton.setTouchEnabled(true);
-				});	
+			whateverButton.setTouchEnabled(true);
 		});	
 
 	

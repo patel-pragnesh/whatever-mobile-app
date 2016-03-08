@@ -56,17 +56,16 @@
 	 * Launch the app
 	 */
 	
+	//make sure the local db for conversations exists
 	whateverDB.buildDB();
 	
 	if(_.isNull(Ti.App.Properties.getObject('account')))
 		{
 		var activateWindow = context.activate();
-		Ti.API.info('app.js context.activate');
 		}
 	else
 		{
 		var mainWindow = context.launch();
-		Ti.API.info('app.js context.launch');
 		}
 		
 	if(config.platform === config.platform_iphone)

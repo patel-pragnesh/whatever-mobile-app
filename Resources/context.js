@@ -18,7 +18,6 @@ exports.launch = function() {
 		
 	return mainWindow;
 	
-	Ti.API.info('context.launch');
 	};
 	
 exports.activate = function()

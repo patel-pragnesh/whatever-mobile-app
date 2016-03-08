@@ -9,6 +9,7 @@ exports.doPost = function(endpoint, request, callback)
         onload: function(e)
             {
             callback(true, JSON.parse(this.responseText));
+            Ti.API.info('onload called, readyState = '+this.readyState);
             },
         onerror: function(e)
             {
