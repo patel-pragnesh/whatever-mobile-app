@@ -1,5 +1,5 @@
 
-function AddFriends(parentView, friends) 
+function AddFriends(parentView, friends, callback) 
 {
 	var config = require('config');
 	var context = require('context');
@@ -28,8 +28,6 @@ function AddFriends(parentView, friends)
 		backgroundColor: 'white',
 		layout: 'vertical'
 	});
-	
-	
 	
 	// Create the List View Templates
 		var friendTemplate = 
@@ -274,11 +272,12 @@ function isAuthorized()
  
         	var fullName = peopleArray[i].fullName;
         	var firstName = peopleArray[i].firstName;
+        	var lastName = peopleArray[i].lastName;
         	
         		if (peopleArray[i].phone.iPhone > "")
         		{
         			mobile = peopleArray[i].phone.iPhone;
-        			person = {fullName: fullName, firstName:firstName, mobile: mobile};
+        			person = {fullName: fullName, firstName:firstName, lastName: lastName, mobile: mobile};
         			people.push(person); 
         		}else if (peopleArray[i].phone.mobile > ""){
         				mobile = peopleArray[i].phone.mobile;
@@ -286,16 +285,16 @@ function isAuthorized()
         				{
         					Ti.API.info('removed carrier contact');
         				}else{
-        					person = {fullName: fullName,firstName: firstName, mobile: mobile};
+        					person = {fullName: fullName,firstName: firstName, lastName: lastName, mobile: mobile};
         					people.push(person); 
         				}		
         		}else if(peopleArray[i].phone.main >""){
         				mobile = peopleArray[i].phone.main;
-        				person = {fullName: fullName,firstName: firstName, mobile: mobile};
+        				person = {fullName: fullName, firstName: firstName, lastName: lastName, mobile: mobile};
         				people.push(person); 
         		}else if(peopleArray[i].phone.home >""){
         				mobile = peopleArray[i].phone.home;
-        				person = {fullName: fullName,firstName: firstName, mobile: mobile};
+        				person = {fullName: fullName,firstName: firstName, lastName: lastName, mobile: mobile};
         				people.push(person);
         		}else{
         			Ti.API.info(peopleArray[i].fullName +  "no phone");	
@@ -421,7 +420,8 @@ function addContactsToListView()
 							itemId: people[i].identifier,
 							phone: people[i].mobile,
 							searchableText: people[i].fullName,
-							firstName: people[i].firstName
+							firstName: people[i].firstName,
+							lastName: people[i].lastName
 							},
 						template: 'contact',
 						selected: false
@@ -447,6 +447,7 @@ var finalOutput;		//A 'checked' contacts mobile phone number after removing non-
 var item;	
 var itemFullName;	
 var itemFirstName;
+var itemLastName;
 			
 function itemClickEvent(itemEvent)	
 {
@@ -461,16 +462,21 @@ function itemClickEvent(itemEvent)
 		Ti.API.info(JSON.stringify(item));
 		if(!item.selected){
 			finalOutput = item.contact.userId;
-			item.template = 'friendSelected';
-			item.properties.backgroundColor = '#f1f1f1';
 			
-			item.selected = true;
-			itemEvent.section.updateItemAt(itemEvent.itemIndex, item);
+			if(!checkIfIdAlreadySelected(finalOutput))
+			{
+				item.template = 'friendSelected';
+				item.properties.backgroundColor = '#f1f1f1';
+			
+				item.selected = true;
+				itemEvent.section.updateItemAt(itemEvent.itemIndex, item);
 		
-			itemFullName = item.contact.text;
-			itemFirstName = item.properties.firstName;
-		
-			addSelected(itemFullName, itemFirstName, finalOutput);	
+				itemFullName = item.contact.text;
+				itemFirstName = item.contact.firstName;
+				itemLastName = item.contact.lastName;
+				addSelected(itemFullName, itemFirstName, itemLastName, finalOutput);	
+			}
+			
 		}else{
 			
 			item.template = 'friend';
@@ -486,8 +492,9 @@ function itemClickEvent(itemEvent)
 		listView.removeEventListener('itemclick', itemClickEvent);
 			
 		var itemPhone = item.properties.phone.toString();
-		var itemFullName = item.contact.text;
-		var itemFirstName = item.properties.firstName;
+			itemFullName = item.contact.text;
+			itemFirstName = item.properties.firstName;
+			itemLastName = item.properties.lastName;
 			
 		if(itemPhone.length == 0)
 		{
@@ -515,11 +522,14 @@ function itemClickEvent(itemEvent)
 						}
 					
 						if(!item.selected){
-							item.properties.accessoryType = Titanium.UI.LIST_ACCESSORY_TYPE_CHECKMARK;
-							item.template = 'contactSelected';
-							item.properties.backgroundColor = '#f1f1f1';
-							item.selected = true;
-							addSelected(itemFullName, itemFirstName, finalOutput);			
+							if(!checkIfIdAlreadySelected(finalOutput))
+							{
+								item.properties.accessoryType = Titanium.UI.LIST_ACCESSORY_TYPE_CHECKMARK;
+								item.template = 'contactSelected';
+								item.properties.backgroundColor = '#f1f1f1';
+								item.selected = true;
+								addSelected(itemFullName, itemFirstName, itemLastName, finalOutput);	
+							}			
 						}else{
 							item.template = 'contact';
 							item.properties.backgroundColor = 'white';
@@ -541,32 +551,45 @@ function removeSelected(removeId)
 	var index = 0;
 	
 	for (o = 0; o < selectedPeople.length;o++){
-		if(selectedPeople[o].id == removeId)
+		if(selectedPeople[o].userId == removeId)
 		{
-			Ti.API.info(selectedPeople[o].fullName);
 			index = o;
 			break;
 		}
 	}
-	Ti.API.info(index);
+	
 	selectedPeople.splice(index, 1);
 	
 	displaySelectedPeople();
 }			
 
-
-function addSelected(fullName, firstName, id)
-{
+function addSelected(fullName, firstName, lastName, id)
+{	
 	var thisPerson = {
-		fullName: fullName,
-		firstName: firstName,
-		id: id
+		userFullName: fullName,
+		userFirstName: firstName,
+		userLastName: lastName,
+		userId: id
 	};
-	Ti.API.info(JSON.stringify(thisPerson));
+	
 	selectedPeople.push(thisPerson);
 	displaySelectedPeople();
+	
 }
-						
+
+function checkIfIdAlreadySelected(checkId){
+	var alreadySelected = false;
+	
+	for(b=0; b < selectedPeople.length; b++){
+		if(selectedPeople[b].userId == checkId)
+		{
+			alreadySelected = true;
+			alert('User with this phone number already selected.');
+		}
+	}
+	
+	return alreadySelected;
+}					
 function displaySelectedPeople()
 {
 	if (selectedPeople.length > 0)
@@ -575,9 +598,8 @@ function displaySelectedPeople()
 		
 		for (j = 0; j < selectedPeople.length; j++)
 		{
-			Ti.API.info(selectedPeople[j].fullName);
 			var nameLabel = Ti.UI.createLabel({
-				text: selectedPeople[j].fullName + ", ",
+				text: selectedPeople[j].userFullName + ", ",
 				color: 'white',
 				left: 0,
 				font: {fontSize: 18,
@@ -598,8 +620,8 @@ function displaySelectedPeople()
 //done button click handler
 doneButton.addEventListener('click', function(e)
 {
-	var args = {selectedPeople: selectedPeople};
-	parentView.fireEvent('returnFromAddFriends', args);
+	addViewHolder.setTouchEnabled(false);
+	callback(selectedPeople);
 });
 
 

@@ -57,7 +57,6 @@ function MemberView(user)
 			
 			setStatus(user.status);
 	
-			
 			function setStatus(status){
 				if(status == "IN"){
 					statusIcon.setImage('images/inDot');
@@ -84,8 +83,8 @@ function MemberView(user)
 					if(success){
 						picture.setImage(Ti.Utils.base64decode(response));
 					}else{
-						Ti.App.addEventListener('app:refresh', function(){
-							this.removeEventListener('app:refresh', arguments.callee);
+						Ti.App.addEventListener('app:refresh', function(e){
+							Ti.App.removeEventListener('app:refresh', arguments.callee);
 							getProfile();
 						});
 					}
@@ -93,8 +92,7 @@ function MemberView(user)
 			}
 		}
 					
-				
-				
+					
 	var memberName = Ti.UI.createLabel({
 		top: '4%',
 		width: '95%',
@@ -103,7 +101,7 @@ function MemberView(user)
 		ellipsize: Titanium.UI.TEXT_ELLIPSIZE_TRUNCATE_END
 	});
 				
-		memberName.addEventListener('postlayout', function(){
+		memberName.addEventListener('postlayout', function(e){
 			this.removeEventListener('postlayout', arguments.callee);
 			this.setFont({fontSize: view.size.width * .18,
 							fontFamily: 'AvenirNext-Medium'});
@@ -123,7 +121,6 @@ function MemberView(user)
 			}
 		}
 					
-		
 	return view;
 }
 

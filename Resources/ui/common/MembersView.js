@@ -2,11 +2,12 @@
  * @author Cole Halverson
  */
 
-function MembersView(args)
+function MembersView(args, callback)
 {
 	var httpClient = require('lib/HttpClient');
 	var MemberView = require('ui/common/MemberView');
 	var MembersListView = require('ui/common/MembersListView');
+	var AddFriends = require('ui/common/AddFriends');
 	
 	var holder = Ti.UI.createView({
 		width: '92%',
@@ -14,7 +15,6 @@ function MembersView(args)
 		top: 5
 	});
 	
-		
 		var inviteView = Ti.UI.createView({
 			left: 0,
 			top: 0,
@@ -30,8 +30,6 @@ function MembersView(args)
 			});
 			inviteView.add(inviteButton);
 			
-			
-			
 			var inviteLabel = Ti.UI.createLabel({
 				top: '3%',
 				text: 'Add More'
@@ -41,6 +39,10 @@ function MembersView(args)
 		inviteView.addEventListener('postlayout', function(){
 			inviteLabel.setFont({fontSize: inviteView.size.width * .18,
 									fontFamily: 'AvenirNext-Medium'});
+		});
+		
+		inviteView.addEventListener('click', function(){
+			callback();
 		});
 			
 		holder.add(inviteView);
@@ -59,14 +61,15 @@ function MembersView(args)
 			width: '20%',
 			height: Ti.UI.FILL,
 			right: 0,
-			zIndex: 1,
+			backgroundColor: 'white',
+			zIndex: 2,
 			visible: false
 		});
 		
-			var extrasCircle = Ti.UI.createView({
+			var extrasCircle = Ti.UI.createImageView({
 				top: 0,
 				width: '75%',
-				backgroundColor: '#d3d3d3'
+				image: 'images/blurry'
 			});
 			
 				extrasCircle.addEventListener('postlayout', function(e){
@@ -75,7 +78,7 @@ function MembersView(args)
 				});
 			
 				var extrasLabel = Ti.UI.createLabel({
-					color: 'black'
+					color: 'white',
 				});
 		
 		extrasView.addEventListener('click', function(){
@@ -87,8 +90,8 @@ function MembersView(args)
 		});
 				
 		extrasView.addEventListener('postlayout', function(){
-			extrasLabel.setFont({fontSize: this.size.width * .18,
-							fontFamily: 'AvenirNext-DemiBold'});
+			extrasLabel.setFont({fontSize: this.size.width * .20,
+							fontFamily: 'AvenirNext-Bold'});
 		});
 					
 			extrasCircle.add(extrasLabel);
@@ -122,12 +125,21 @@ function MembersView(args)
 		function createMembers(startIndex)
 		{
 				//Are there more than 4 members besides the creator?  If so, we will need the extrasView
-				if (currentMembers.length > 5)
+				//check if the use context is creating a new conversation.  In which case there is no "CREATOR" in args.users
+				var extras;
+				if (args.creatingConvo && currentMembers.length > 4)
 				{
-					var extras = true;
-				}else{
+					extras = true;
+				}
+				else if (currentMembers.length > 5)
+				{
+					extras = true;
+				}
+				else
+				{
 						extrasView.hide();
 				}
+				
 				
 				var count = (currentMembers.length > 5) ? 4 : currentMembers.length;
 				
@@ -137,7 +149,12 @@ function MembersView(args)
 						var memberView = new MemberView(currentMembers[i]);
 						if(i == 3 && extras)
 						{
-							extrasLabel.setText("+ " + (currentMembers.length - 4));
+							if(args.creatingConvo)  //Because there is no "CREATOR" in the currentMembers when creating
+							{
+								extrasLabel.setText("+ " + (currentMembers.length - 3));
+							}else{
+								extrasLabel.setText("+ " + (currentMembers.length - 4));
+							}
 							extrasView.show();
 						}
 						profiles.add(memberView);

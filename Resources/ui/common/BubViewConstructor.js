@@ -199,7 +199,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			var happeningIndicator = Ti.UI.createView({
 				top: '20%',
 				left: 0,
-				height: '22%',
+				height: '20%',
 				width: Ti.UI.SIZE,
 				layout: 'horizontal',
 				backgroundColor: 'white',
@@ -214,9 +214,9 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				});
 			
 				var clock = Ti.UI.createImageView({
-					top: '10%',
-					bottom: '10%',
-					left: 3,
+					top: '12%',
+					bottom: '12%',
+					left: 2,
 					image: 'images/clock'
 				});
 				happeningIndicator.add(clock);
@@ -278,7 +278,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			var commentIndicator = Ti.UI.createImageView({
 				top: '2.5%',
 				right: '14%',
-				height: '22%',
+				height: '20%',
 				image: '/images/commentIndicatorBlue',
 				zIndex: bubbleAttribute
 			});
@@ -287,7 +287,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			var inStatusIndicator = Ti.UI.createImageView({
 				top: '23%',
 				right: -5,
-				height: '22%',
+				height: '20%',
 				zIndex: bubbleAttribute
 			});
 				if(inStatus == "IN"){inStatusIndicator.setImage('images/imInIndicator');}

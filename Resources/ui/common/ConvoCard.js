@@ -51,6 +51,7 @@ var card = Ti.UI.createView({
 	backgroundColor: 'white',
 	layout: 'absolute',
 	borderRadius: 10,
+	zIndex: 2
 	});
 
  card.addEventListener('postlayout', cardPostLayoutCallback);
@@ -224,7 +225,7 @@ var card = Ti.UI.createView({
 function cardPostLayoutCallback(e){
 	card.removeEventListener('postlayout', cardPostLayoutCallback);
 	card.setViewShadowColor('black');
-	card.setViewShadowOffset({x: 0, y: 0});
+	card.setViewShadowOffset({x: 0, y: 3});
 	card.setViewShadowRadius(6);
 	card.addEventListener('postlayout', function(e)
 	{
@@ -362,6 +363,7 @@ function cardPostLayoutCallback(e){
 		textArea.blur();
 		card.animate(closeAnimation);		
 		cardIsRaised = false;
+		Ti.App.fireEvent('app:cardRaised', {raised: false});
 	});
 	
 		profileViewRow.addEventListener('swipe', function(e){
@@ -494,17 +496,21 @@ function cardPostLayoutCallback(e){
 	{
 		Ti.API.info('delete card recieved for ' + cardArgs.conversationId);
 		parentView.remove(card);
+		if(cardIsRaised){
+			Ti.App.fireEvent('app:cardRaised', {raised: false});
+		}
 	});
 	
 //eventListner to animate this up into view
 	Ti.App.addEventListener('app:raisecard:' + cardArgs.conversationId, function(e)
 	{	
-		Ti.API.info('card raise recieved by convo: ' + cardArgs.conversationId);
+		
 		commentsScrollView.setBottom('10%');
 		var animation = Titanium.UI.createAnimation();
 				animation.top = '5%';
 				animation.duration = 250;	
 		card.animate(animation);	
+		Ti.App.fireEvent('app:cardRaised', {raised: true});
 		cardIsRaised = true;
 	});	
 
@@ -587,18 +593,58 @@ var disappearingView = Ti.UI.createView({
 		 	}
 	});
 		
+		//set up membersView
+		
+		var friends = [];
+		
+		getFriends();
+		Ti.App.addEventListener('app:refresh', getFriends);
+		
+			function getFriends(){
+				var req = {userId: account.id};
+				
+				httpClient.doPost('/v1/getFriendships', req, function(success, response){
+					if(success)
+					{
+						friends = response;
+					}
+				});
+			}
+			
 		var membersViewArgs = {};
 		membersViewArgs.height = containerHeight * .11;
 		membersViewArgs.users = cardArgs.userConversations;
 		membersViewArgs.mainViewContainer = mainViewContainer;
-		//set up membersView
-		var membersView = new MembersView(membersViewArgs);
 		
-			var membersList = Ti.UI.createView({
-				width: '100%',
-				height: '100%',
-				backgroundColor: 'black'
-			});
+		var membersView = new MembersView(membersViewArgs, addMoreCallback);
+		
+			function addMoreCallback(){
+				addView = new AddFriends(card, friends, addedMoreCallback);
+				addView.setZIndex(4);
+				mainViewContainer.add(addView);
+				addView.animate({top: 0, duration: 250, delay: 200});
+			}
+			
+				function addedMoreCallback(addedPeople){
+					addView.setTouchEnabled(false);
+					var req = {};
+						req.adder = account.id;
+						req.conversationId = cardArgs.conversationId;
+						req.userIds = [];
+						for(i=0; i<addedPeople.length; i++)
+						{
+							req.userIds.push(addedPeople[i].userId);
+						}
+					httpClient.doPost('/v1/addUsersToConversation', req, function(success, response){
+						if(success)
+						{
+							Ti.App.fireEvent('app:refresh');
+						}
+					});
+					addView.animate({top: '101%', duration: 250, delay: 200}, function(){
+						mainViewContainer.remove(addView);
+					});
+				}
 	
 		disappearingView.add(membersView);
 					

@@ -17,6 +17,9 @@ function MembersListView(args)
 	});
 		view.addEventListener('postlayout', function(){
 			this.removeEventListener('postlayout', arguments.callee);
+			if(tableView.size.height < view.size.height){
+				tableView.setScrollable(false);
+			}
 			this.animate({left: 0, duration: 200});
 		});
 		
@@ -37,9 +40,7 @@ function MembersListView(args)
 		var rows = [];
 		
 		for (i = 0; i < args.currentMembers.length; i++)
-		{
-			Ti.API.info(JSON.stringify(args.currentMembers[i]));
-			
+		{	
 			if (args.currentMembers[i].type != 'CREATOR')
 			{
 				var row = Ti.UI.createTableViewRow({
@@ -124,8 +125,8 @@ function MembersListView(args)
 								if(success){
 									picture.setImage(Ti.Utils.base64decode(response));
 								}else{
-									Ti.App.addEventListener('app:refresh', function(){
-										this.removeEventListener('app:refresh', arguments.callee);
+									Ti.App.addEventListener('app:refresh', function(e){
+										Ti.App.removeEventListener('app:refresh', arguments.callee);
 										getProfile();
 									});
 								}

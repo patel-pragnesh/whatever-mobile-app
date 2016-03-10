@@ -55,10 +55,18 @@ function MainWindow() {
 		height: 50,
 		width: '100%'
 	});
-	
+
+	//avoid overclick when touching close icon on cardView
+	Ti.App.addEventListener('app:cardRaised', function(e){
+		if(e.raised)
+		{
+			topNavView.setTouchEnabled(false);
+		}else{
+			topNavView.setTouchEnabled(true);
+		}
+	});
 
 		//Add Whatever label upper-left and profile image and name button.  
-	    
 	    var labelView = Ti.UI.createImageView
 	    ({
 			height: '60.41%',
@@ -183,7 +191,7 @@ function MainWindow() {
 			this.setViewShadowOffset({x:2, y:3});
 		});
 		
-	//whatever button click event creates StartConvoCard view
+	
 		var friends = [];
 		//friends.push({firstName: 'Joe', lastName: 'McMahon', userId: '206'});
 		//friends.push({firstName: 'Cole', lastName: 'Halverson', userId: '406'});
@@ -202,6 +210,7 @@ function MainWindow() {
 			});
 		}
 	
+	    //whatever button click event creates StartConvoCard view
 		whateverButton.addEventListener('click', function(e)
 		{
 			whateverButton.setTouchEnabled(false);
@@ -209,7 +218,7 @@ function MainWindow() {
 			var startCard = new startConvoCard(win, mainContainerView.size.height, friends);
 			win.add(startCard);
 			startCard.animate({top: '5%', duration: 250});
-							
+			Ti.App.fireEvent('app:cardRaised', {raised: true});			
 			whateverButton.setTouchEnabled(true);
 		});	
 

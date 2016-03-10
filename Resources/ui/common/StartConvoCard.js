@@ -21,6 +21,7 @@ function CreateCard(parentView, mainContainerHeight, friends)
 	// The notification view has a zIndex that blocks the UI and provides an indicator
 	var notificationView = require('ui/common/NotificationView').create();
 	
+	var addView;
 	var account = Ti.App.properties.getObject('account');
 
 //set up the UI skeleton of the card	
@@ -32,7 +33,7 @@ var card = Ti.UI.createView({
 	layout: 'absolute',
 	borderRadius: 10,
 	viewShadowColor: 'black',
-	viewShadowOffset: {x: 0, y: 0},
+	viewShadowOffset: {x: 0, y: 3},
 	viewShadowRadius: 6,
 	zIndex: 1
 	});
@@ -43,6 +44,28 @@ var card = Ti.UI.createView({
  	var containerHeight = card.size.height;
 	var containerWidth =  card.size.width;
  });
+ 
+ var cardLowered = false;
+ 
+ card.addEventListener('swipe', lowerCard);
+ 
+ function lowerCard(e){
+ 	if(e.direction == 'down')
+ 	{
+ 		cardLowered = true;
+ 		textArea.blur();
+ 		
+ 		card.animate({top: '80%',duration: 250});
+ 		Ti.App.fireEvent('app:cardRaised', {raised: false});
+ 	}
+ 	if(e.direction == 'up' && cardLowered)
+ 	{
+ 		card.animate({top: '5%',duration: 250});
+ 		Ti.App.fireEvent('app:cardRaised', {raised: true});
+ 	}
+ }	
+ 	
+ card.add(notificationView);
 
 	var profileViewRow = Ti.UI.createView({
 		top: '1.5%',
@@ -154,7 +177,7 @@ var card = Ti.UI.createView({
 			font: ({fontFamily: 'AvenirNext-DemiBold',
 						fontSize: 16}),
 			color: 'black',
-			text: 'Start the conversation and make it happen!',
+			text: 'What are you trying to do?',
 			zIndex: 1
 		});
 		mainViewContainer.add(startLabel);
@@ -207,13 +230,13 @@ var card = Ti.UI.createView({
 				});
 					
 					textArea.addEventListener('change', function(e){
+						checkIfGo();
 						if(this.getValue() > ""){
 							hintLabel.hide();
-							checkIfGo();
+							
 						}else{
 							hintLabel.show();
 						}
-						
 					});
 					
 					var hintLabel = Ti.UI.createLabel({
@@ -221,9 +244,13 @@ var card = Ti.UI.createView({
 						font: {fontFamily: 'AvenirNext-Regular',
 								fontSize: 16},
 						color: 'gray',
-						text: "What are you trying to do?..."
+						text: "Start the conversation..."
 					});
 					textArea.add(hintLabel);
+					
+						hintLabel.addEventListener('click', function(){
+							textArea.focus();
+						});
 					
 					var rightTextAreaButton = Ti.UI.createButton({
 						left: 0,
@@ -236,7 +263,7 @@ var card = Ti.UI.createView({
 					
 						var goLabel = Ti.UI.createLabel({
 						text: "Go!",
-						color: 'gray',
+						color: '#D3D3D3',
 						font: {fontFamily: 'AvenirNext-Bold',
 									fontSize: 20}
 						});
@@ -305,13 +332,15 @@ mainViewContainer.add(createCommentHolder);
 			text: "Nevermind",
 			font: {fontSize: 13,
 					fontFamily: 'AvenirNext-Regular'},
-			color: purple,
+			color: 'gray',
 			top: 0,
 			right: 0,
 			verticalAlign: Titanium.UI.TEXT_ALIGNMENT_TOP
 		});
 		
 		closeButton.addEventListener('click', function(e){
+			Ti.App.fireEvent('app:cardRaised', {raised: false});
+			
 			var animation = Titanium.UI.createAnimation();
 				animation.top = '101%';
 				animation.duration = 250;
@@ -375,11 +404,13 @@ mainViewContainer.add(createCommentHolder);
 	
 	//Add friends button click
 	function addFriendsButtonHandler(){
-		addView = new AddFriends(card, friends);
+		textArea.blur();
+		card.removeEventListener('swipe', lowerCard);
+		addView = new AddFriends(card, friends, addFriendsInitialCallback);
 			var animation1 = Ti.UI.createAnimation({
 				top: 0,
 				duration: 250,
-				delay: 500
+				delay: 250
 			});
 				
 				animation1.addEventListener('complete', function(){
@@ -397,31 +428,90 @@ mainViewContainer.add(createCommentHolder);
 			numberFriendsLabel.text = e.count + ' friends';
 		});
 		
-		//listen for event fired by AddFriends 'done' button click
-		card.addEventListener('returnFromAddFriends', function(e)
-		{
-			
-			for (i = 0; i < e.selectedPeople.length; i++)
-			{
-				createConversationRequest.invitedUsers.push(e.selectedPeople[i]);
-			}
-			createCommentHolder.setZIndex(1);
-			
-			var selectedNames = e.selectedNames;	
-			
-			checkIfGo();
-			
-			var animation2 = Ti.UI.createAnimation({
-				top: '101%',
-				duration: 250
-			});
-			addView.animate(animation2);
-			
-			animation2.addEventListener('complete', function(e)
-			{
-				mainViewContainer.remove(addView);
-			});
+		var membersViewContainer = Ti.UI.createView({
+			width: Ti.UI.FILL,
+			top: 0,
+			height: Ti.UI.SIZE,
+			backgroundColor: 'white'
 		});
+		
+		var membersView;
+		var membersViewArgs = {};
+			membersViewArgs.creatingConvo = true;
+			membersViewArgs.height; card.size.height * .11;
+			membersViewArgs.mainViewContainer = mainViewContainer;
+			membersViewArgs.users = [];
+		
+		//callback from AddFriends 'done' button click
+		function addFriendsInitialCallback(selectedPeople)
+		{
+			if (selectedPeople.length > 0)
+			{
+				
+				for (i = 0; i < selectedPeople.length; i++)
+				{
+						createConversationRequest.invitedUsers.push(selectedPeople[i].userId);
+						Ti.API.info('addFriendsCallback: ' + JSON.stringify(selectedPeople[i]));
+				}
+				
+				mainViewContainer.remove(addFriendsButtonViewHolder);
+				
+				mainViewContainer.add(membersViewContainer);
+				
+				membersViewArgs.height = card.size.height * .11;
+				membersViewArgs.users = selectedPeople;
+				
+				membersView = new MembersView(membersViewArgs, addMoreCallback);
+				membersView.setBottom(10);
+				membersViewContainer.add(membersView);
+					
+				var line = Ti.UI.createView({
+					bottom: 0,
+					height: 1,
+					width: Ti.UI.FILL,
+					backgroundColor: 'gray'
+				});
+				membersViewContainer.add(line);
+				
+				checkIfGo();
+			}
+			addView.animate({top: '101%', duration: 250, delay: 250}, function(){
+					mainViewContainer.remove(addView);
+			});
+			card.addEventListener('swipe', lowerCard);
+		}
+		
+			function addMoreCallback()
+			{
+				addView = new AddFriends(card, friends, addedMoreCallback);
+				mainViewContainer.add(addView);
+				addView.animate({top: 0, duration: 250, delay: 250}, function(){
+					mainViewContainer.remove(membersView);
+				});
+			}
+		
+				function addedMoreCallback(addedPeople)
+				{
+					//check if addedPeople are already there.
+					for(a=0; a < addedPeople.length; a++)
+					{
+						var check = createConversationRequest.invitedUsers.indexOf(addedPeople[a].userId);
+						
+						if(check == -1)  //if userId doesn't already exist on request, add it.
+						{
+							createConversationRequest.invitedUsers.push(addedPeople[a].userId);
+							membersViewArgs.users.push(addedPeople[a]);
+						}
+					}	
+					Ti.API.info('args length = ' + membersViewArgs.users.length);
+					membersView = new MembersView(membersViewArgs, addMoreCallback);
+					membersView.setBottom(10);
+					membersViewContainer.add(membersView);
+						
+					addView.animate({top: '101%', duration: 250, delay: 250}, function(){
+							mainViewContainer.remove(addView);
+					});
+				}
 		
 	var animationSwitch = false;
 	
@@ -429,6 +519,8 @@ mainViewContainer.add(createCommentHolder);
 	{
 		if (createConversationRequest.invitedUsers.length > 0 && textArea.getValue() > "")
 		{
+			Ti.API.info('true');
+			Ti.API.info(textArea.getValue());
 			if (!animationSwitch)
 			{
 				rightTextAreaButton.setTouchEnabled(true);
@@ -462,9 +554,10 @@ mainViewContainer.add(createCommentHolder);
 				goLabel.animate(goAnimation);
 			}
 		}else{
+			Ti.API.info('false');
 			rightTextAreaButton.setTouchEnabled(false);
 			animationSwitch = false;
-			goLabel.setColor('gray');
+			goLabel.setColor('#D3D3D3');
 			goLabel.setOpacity(1.0);
 		}	
 	}			
