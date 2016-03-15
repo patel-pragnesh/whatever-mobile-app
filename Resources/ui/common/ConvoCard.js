@@ -14,6 +14,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 		
 	var purple = config.purple;
 	
+	var UserProfileWindow = require('ui/common/UserProfileWindow');
 	var AddFriends = require('ui/common/AddFriends');
 	var MembersView = require('ui/common/MembersView');
 	var TunedView = require('ui/common/TunedView');
@@ -257,6 +258,14 @@ function cardPostLayoutCallback(e){
 			creatorProfilePic.setBorderRadius(creatorProfilePic.size.height / 2);
 			getProfile();
 		});
+		
+		if(!userIsCreator)
+		{
+			creatorProfilePic.addEventListener('click', function(){
+				var userProfileWindow = new UserProfileWindow(cardArgs.userId);
+				userProfileWindow.open();
+			});
+		}
 		
 		Ti.App.addEventListener('updateProfilePicture', getProfile);
 		
@@ -525,11 +534,14 @@ function cardPostLayoutCallback(e){
 Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 {
 	Ti.API.info('cardUpdate e = ' + JSON.stringify(e));
+	
+	timeString = e.timeString;
+	happeningTime = e.happeningTime;
+	setTimeString();
+	
 	if (e.status == "IT_IS_ON" && itsHappening == false)
 	{
 		itsHappening = true;
-		timeString = e.timeString;
-		happeningTime = e.happeningTime;
 		setUpHappeningContext();
 	}else if(e.status == "OPEN" && itsHappening == true)
 	{
@@ -851,9 +863,12 @@ function setUpHappeningContext()
 
 function setTimeString()
 {
-	timeTextLabel.setText(cardViewUtility.buildTimeString(timeString, happeningTime));
-	timeDescriptionLabel.setText(timeString);
-	timeText.setHeight(Ti.UI.SIZE);
+	if(happeningTime)
+	{
+		timeTextLabel.setText(cardViewUtility.buildTimeString(timeString, happeningTime));
+		timeDescriptionLabel.setText(timeString);
+		timeText.setHeight(Ti.UI.SIZE);
+	}
 }
 
 function setUpInOutContext()
@@ -1002,7 +1017,16 @@ function happeningActionHandler(editing)
 			happeningView.setImage('images/happeningBar');
 			descriptionText.setTouchEnabled(true);
 			descriptionText.setMaxLength(150);
-			setTimeView.expand();
+			timeText.setHeight(0);
+			
+			var expandArgs = {};
+			if(editing)
+			{
+				expandArgs.editing = true;
+				expandArgs.happeningTime = happeningTime;
+				expandArgs.timeString = timeString;
+			}
+			setTimeView.expand(expandArgs);
 			setTimeView.setTouchEnabled(true);
 			
 			
@@ -1017,11 +1041,9 @@ function happeningActionHandler(editing)
 				buttonRowView.animate({opacity: 1.0, duration: 100});
 			});
 		});
-			
-		descriptionText.addEventListener('change', function()
-		{
-			checkConfirm();
-		});
+		
+		descriptionText.addEventListener('focus', checkConfirm);
+		descriptionText.addEventListener('change', checkConfirm);
 	
 	descriptionText.focus();
 	
@@ -1122,6 +1144,8 @@ function happeningActionHandler(editing)
 								btn1.setImage('images/btnEdit');
 								btn1.addEventListener('click', editButtonHandler);
 							}
+							
+							setTimeString();
 							
 							btn1.setOpacity(1.0);
 							btn1.setTouchEnabled(true);

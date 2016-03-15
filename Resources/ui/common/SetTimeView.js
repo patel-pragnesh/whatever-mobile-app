@@ -40,135 +40,156 @@ exports.createScroll = function(args, callback)
 		
 		var clock = Ti.UI.createImageView({
 			left: 0,
+			height: 27,
 			image: 'images/clock'
 		});
 		typeView.add(clock);
 		
-		var dash = Ti.UI.createLabel({
-			text: ' - ',
-			left: 3,
-			font: {fontFamily: 'AvenirNext-Regular',
-					fontSize: 20}
+		var timeStringLabel = Ti.UI.createLabel({
+			left: 5,
+			bottom: '10%',
+			font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 14}
 		});
-		typeView.add(dash);
+		typeView.add(timeStringLabel);
 		
 		var timeTextField = Ti.UI.createTextField({
-			left: 0,
+			left: 5,
 			height: Ti.UI.SIZE,
 			width: Ti.UI.FILL,
 			top: 5,
 			maxLength: 20,
 			suppressReturn: true,
 			horizontalWrap: false,
-			font: {fontSize: 17,
-					fontFamily: 'AvenirNext-Regular'}
+			font: {fontSize: 14,
+					fontFamily: 'AvenirNext-Regular'},
+			autocapitalization: Ti.UI.TEXT_AUTOCAPITALIZATION_NONE
 		});
 		typeView.add(timeTextField);
 		
 	holder.add(typeView);
 	
-function calculateTime()
-{
-	var views = [];
-	var options = [{label: 'When? -->'}];
-	
-	//populate appropriate labels
-	var now = moment();
-	
-	//if now is past 1am but before 4pm
-	if(now.hour() >= 1 && now.hour() <= 15)
-	{
-		options.push(
-			{label: 'Today', time: moment().hour(12).minute(0)}, 
-		
-			{label: 'Tonight', time: moment().hour(23).minute(59).second(0)}, 
-		
-			{label: 'Tomorrow', time: moment().add(1, 'd').hour(12).minute(0).second(0)}, 
-	
-			{label: 'Tomorrow Night', time: moment().add(1, 'd').hour(23).minute(59).second(0)}
-					);
-	}
-	else
-	{
-		options.push(
-			{label: 'Tonight', time: moment().hour(23).minute(59).second(0)}, 
-		
-			{label: 'Tomorrow', time: moment().add(1, 'd').hour(12).minute(0).second(0)}, 
-	
-			{label: 'Tomorrow Night', time: moment().add(1, 'd').hour(23).minute(59).second(0)}
-					);
-	}
-	
-	//add options for 3 more days beyond tomorrow
-	for (d = 2; d < 5; d++)	
-	{
-		var day = moment().add(d, 'd');
-		
-		options.push(
-			{label: day.format('dddd'), time: moment().add(d, 'd').hour(12).minute(0).second(0)}, 
-		
-			{label: day.format('dddd') + ' Night', time: moment().add(d, 'd').hour(23).minute(59).second(0)}
-					);
-	}
-	
-	for (i = 0; i < options.length; i++)
-	{
-		var view1 = Ti.UI.createView({
-			height: Ti.UI.FILL,
-			width: Ti.UI.FILL,
-			backgroundColor: purple,
-			canType: false,
-			showPicker: false,
-			
-		});
-			
-			var label = Ti.UI.createLabel({
-				text: options[i].label,
-				color: 'white',
-				font: {fontSize: 20,
-						fontFamily: 'AvenirNext-DemiBold'}
-			});
-			view1.add(label);
-			
-
-			if (i > 0)
-			{
-				view1.canType = true;
-				view1.time = options[i].time;
-			}
-			
-			
-		views.push(view1);	
-	}
-		
-	view.setViews(views);
-	
-	view.scrollToView(0);
-	holder.setHeight(Ti.UI.SIZE);
-	holder.animate({opacity: 1.0, duration: 200});
-}
-	
 	var time;
-	
-	view.addEventListener('scrollend', function(e){
-		if(e.view.canType)
-		{
-			typeView.setHeight(Ti.UI.SIZE);
-			timeTextField.focus();
-		}else{
-			typeView.setHeight(0);
-			timeTextField.blur();
-		}
-		if(e.view.time){
-			Ti.API.info('view time = ' + e.view.time.format("dddd, MMMM Do YYYY, h:mm:ss a"));
-			time = e.view.time;
-		}
-	});
-	
-	holder.expand = function()
+
+	holder.expand = function(expandArgs)
 	{
-		calculateTime();
+		var currentTimeViewIndex;
+		
+		var views = [];
+		var options = [{label: 'When? -->'}];
+		
+		//populate appropriate labels
+		var now = moment();
+		
+		//if now is past 1am but before 4pm
+		if(now.hour() >= 1 && now.hour() <= 15)
+		{
+			options.push(
+				{label: 'Today', time: moment().hour(12).minute(0)}, 
+			
+				{label: 'Tonight', time: moment().hour(23).minute(59).second(0)}, 
+			
+				{label: 'Tomorrow', time: moment().add(1, 'd').hour(12).minute(0).second(0)}, 
+		
+				{label: 'Tomorrow Night', time: moment().add(1, 'd').hour(23).minute(59).second(0)}
+						);
+		}
+		else
+		{
+			options.push(
+				{label: 'Tonight', time: moment().hour(23).minute(59).second(0)}, 
+			
+				{label: 'Tomorrow', time: moment().add(1, 'd').hour(12).minute(0).second(0)}, 
+		
+				{label: 'Tomorrow Night', time: moment().add(1, 'd').hour(23).minute(59).second(0)}
+						);
+		}
+		
+		//add options for 3 more days beyond tomorrow
+		for (d = 2; d < 5; d++)	
+		{
+			var day = moment().add(d, 'd');
+			
+			options.push(
+				{label: day.format('dddd'), time: moment().add(d, 'd').hour(12).minute(0).second(0)}, 
+			
+				{label: day.format('dddd') + ' Night', time: moment().add(d, 'd').hour(23).minute(59).second(0)}
+						);
+		}
+		
+		for (i = 0; i < options.length; i++)
+		{
+			var view1 = Ti.UI.createView({
+				height: Ti.UI.FILL,
+				width: Ti.UI.FILL,
+				backgroundColor: purple,
+				canType: false,
+				showPicker: false,
+				label: options[i].label
+			});
+				
+				var label = Ti.UI.createLabel({
+					text: options[i].label,
+					color: 'white',
+					font: {fontSize: 20,
+							fontFamily: 'AvenirNext-DemiBold'}
+				});
+				view1.add(label);
+				
+				if (i > 0)
+				{
+					view1.canType = true;
+					view1.time = options[i].time;
+				}
+				
+				
+				var thisTime = moment(options[i].time);
+				var currentHappeningTime = moment(expandArgs.happeningTime);
+				if(expandArgs.editing && thisTime.isSame(currentHappeningTime, 'hour'))
+				{
+					Ti.API.info('same!' + i);
+					currentTimeViewIndex = i;
+				}
+			views.push(view1);	
+		}
+			
+		view.setViews(views);
+		
+		view.addEventListener('scrollend', function(e){
+			if(e.view.canType)
+			{
+				timeStringLabel.setText(e.view.label);
+				typeView.setHeight(Ti.UI.SIZE);
+				timeTextField.focus();
+			}else{
+				typeView.setHeight(0);
+				timeTextField.blur();
+			}
+			if(e.view.time){
+				Ti.API.info('view time = ' + e.view.time.format("dddd, MMMM Do YYYY, h:mm:ss a"));
+				time = e.view.time;
+			}
+		});
+		
+		holder.setHeight(Ti.UI.SIZE);
+		
+		if(expandArgs.editing)
+		{
+			view.scrollToView(currentTimeViewIndex);
+			timeTextField.setValue(expandArgs.timeString);
+		}
+		else
+		{
+			view.scrollToView(0);
+		}
+		
+		holder.animate({opacity: 1.0, duration: 200, delay: 500});
 	};
+
+	
+	
+	
+	
 	
 	holder.collapse = function()
 	{

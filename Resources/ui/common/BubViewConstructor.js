@@ -25,7 +25,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var newInfo = conversation.new_info;
 			var inStatus = conversation.localUserStatus;
 			var status = conversation.status;
-			var happeningTime;
+			var happeningTime = conversation.happeningTime;
 			
 			var bubView = Ti.UI.createView({
 				width: bubViewWidth,
@@ -218,14 +218,14 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				var clock = Ti.UI.createImageView({
 					top: '12%',
 					bottom: '12%',
-					left: 2,
+					left: 1,
 					image: 'images/clock'
 				});
 				happeningIndicator.add(clock);
 				
 				var timeLabel = Ti.UI.createLabel({
 					left: 1,
-					bottom: '20%',
+					bottom: '22%',
 					color: 'black'
 				});
 				happeningIndicator.add(timeLabel);
@@ -238,7 +238,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 					var string = "";
 					
 					var localDate = moment(happeningTime);
-					Ti.API.info('local date = ' + localDate.format("dddd, MMMM Do YYYY, h:mm:ss a"));
 					
 					if(moment().isSame(localDate, 'day'))
 					{
@@ -253,8 +252,9 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 					{
 						if(localDate.isAfter(moment()))
 						{
-							var dayDiff = localDate.diff(moment(), 'days');
-							string = dayDiff + " " + dayDiff  > 1 ? 'days  ' : 'day  ';
+							var dayDiff = localDate.diff(moment(), 'd');
+							Ti.API.info('dayDiff = ' + dayDiff);
+							string = dayDiff + " " + (dayDiff  > 1 ? 'days  ' : 'day  ');
 						}
 					}
 					
@@ -359,6 +359,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		{
 			if(e.status == "IT_IS_ON")
 			{
+				happeningTime = e.happeningTime;
 				itsHappening();
 			}
 			else if (e.status == "OPEN")
