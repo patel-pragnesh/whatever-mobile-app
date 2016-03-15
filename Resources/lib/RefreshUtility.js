@@ -144,7 +144,8 @@ exports.updateDB = function(response)
 				db.close();
 				
 				//fire event to update card UI to match happening status and local user "in" status
-				Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, {status: thisConvo.status, localUserStatus: thisConvo.localUserStatus, userConversations: thisConvo.userConversations});
+				
+				Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, thisConvo);
 				//extract the comments and fire event to update
 				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
 				

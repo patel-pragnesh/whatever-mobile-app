@@ -3,11 +3,13 @@
  * 
  */
 
-	var config = require('config');
-	var moment = require('lib/Moment');
-	var purple = config.purple;
+	
 exports.createScroll = function(args, callback)
 {
+	var config = require('config');
+	var moment = require('lib/moment-with-locales');
+	var purple = config.purple;
+	
 	var holderHeight;
 	var typeViewHeight;
 	
@@ -20,7 +22,6 @@ exports.createScroll = function(args, callback)
 		opacity: 0.0
 	});
 	
-		
 	var view = Ti.UI.createScrollableView({
 		width: '100%',
 		height: 50,
@@ -51,7 +52,7 @@ exports.createScroll = function(args, callback)
 		});
 		typeView.add(dash);
 		
-		var timeText = Ti.UI.createTextField({
+		var timeTextField = Ti.UI.createTextField({
 			left: 0,
 			height: Ti.UI.SIZE,
 			width: Ti.UI.FILL,
@@ -62,85 +63,111 @@ exports.createScroll = function(args, callback)
 			font: {fontSize: 17,
 					fontFamily: 'AvenirNext-Regular'}
 		});
-		typeView.add(timeText);
+		typeView.add(timeTextField);
 		
-		var pickerView = Ti.UI.createView({
-			top: 0,
-			height: 0,
-			width: Ti.UI.FILL
-		});
-		
-			var timePicker = Ti.UI.createPicker({
-				width: Ti.UI.FILL,
-				type: Ti.UI.PICKER_TYPE_DATE_AND_TIME,
-				top: 0,
-				minuteInterval: 15
-			});
-		pickerView.add(timePicker);
-	holder.add(pickerView);
 	holder.add(typeView);
 	
+function calculateTime()
+{
 	var views = [];
-	var labels = ['When? >>>', 'Right Now!', 'Tonight', 'Tomorrow Morning', 'Tomorrow Afternoon', 'Tomorrow Night', 'Later Date'];
+	var options = [{label: 'When? -->'}];
 	
-	for (i = 0; i < labels.length; i++)
+	//populate appropriate labels
+	var now = moment();
+	
+	//if now is past 1am but before 4pm
+	if(now.hour() >= 1 && now.hour() <= 15)
+	{
+		options.push(
+			{label: 'Today', time: moment().hour(12).minute(0)}, 
+		
+			{label: 'Tonight', time: moment().hour(23).minute(59).second(0)}, 
+		
+			{label: 'Tomorrow', time: moment().add(1, 'd').hour(12).minute(0).second(0)}, 
+	
+			{label: 'Tomorrow Night', time: moment().add(1, 'd').hour(23).minute(59).second(0)}
+					);
+	}
+	else
+	{
+		options.push(
+			{label: 'Tonight', time: moment().hour(23).minute(59).second(0)}, 
+		
+			{label: 'Tomorrow', time: moment().add(1, 'd').hour(12).minute(0).second(0)}, 
+	
+			{label: 'Tomorrow Night', time: moment().add(1, 'd').hour(23).minute(59).second(0)}
+					);
+	}
+	
+	//add options for 3 more days beyond tomorrow
+	for (d = 2; d < 5; d++)	
+	{
+		var day = moment().add(d, 'd');
+		
+		options.push(
+			{label: day.format('dddd'), time: moment().add(d, 'd').hour(12).minute(0).second(0)}, 
+		
+			{label: day.format('dddd') + ' Night', time: moment().add(d, 'd').hour(23).minute(59).second(0)}
+					);
+	}
+	
+	for (i = 0; i < options.length; i++)
 	{
 		var view1 = Ti.UI.createView({
 			height: Ti.UI.FILL,
 			width: Ti.UI.FILL,
 			backgroundColor: purple,
 			canType: false,
-			showPicker: false
+			showPicker: false,
+			
 		});
 			
 			var label = Ti.UI.createLabel({
-				text: labels[i],
+				text: options[i].label,
 				color: 'white',
 				font: {fontSize: 20,
 						fontFamily: 'AvenirNext-DemiBold'}
 			});
 			view1.add(label);
 			
-			if(i > 1 && i < 6)
+
+			if (i > 0)
 			{
 				view1.canType = true;
+				view1.time = options[i].time;
 			}
 			
-			if (labels[i] == 'Later Date')
-			{
-				view1.showPicker = true;
-			}
 			
 		views.push(view1);	
 	}
 		
 	view.setViews(views);
 	
+	view.scrollToView(0);
+	holder.setHeight(Ti.UI.SIZE);
+	holder.animate({opacity: 1.0, duration: 200});
+}
+	
+	var time;
+	
 	view.addEventListener('scrollend', function(e){
 		if(e.view.canType)
 		{
 			typeView.setHeight(Ti.UI.SIZE);
-			timeText.focus();
+			timeTextField.focus();
 		}else{
 			typeView.setHeight(0);
-			timeText.blur();
+			timeTextField.blur();
 		}
-		
-		if(e.view.showPicker)
-		{
-			pickerView.setHeight(Ti.UI.SIZE);
-			holder.setBottom(0);
-		}
-		else{
-			pickerView.setHeight(0);
-			holder.setBottom(15);
+		if(e.view.time){
+			Ti.API.info('view time = ' + e.view.time.format("dddd, MMMM Do YYYY, h:mm:ss a"));
+			time = e.view.time;
 		}
 	});
 	
 	holder.expand = function()
 	{
-		holder.setHeight(Ti.UI.SIZE);
-		holder.animate({opacity: 1.0, duration: 200});
+		calculateTime();
 	};
 	
 	holder.collapse = function()
@@ -148,18 +175,33 @@ exports.createScroll = function(args, callback)
 		holder.animate({opacity: 0.0, duration: 200}, function(){
 			holder.setHeight(0);
 			view.scrollToView(0);
-			timeText.setValue("");
+			timeTextField.setValue("");
 		});
-	};
+	}; 
 	
 	holder.blur = function()
 	{
-		timeText.blur();
+		timeTextField.blur();
 	};
 	
 	holder.getCurrentPage = function()
 	{
 		return view.getCurrentPage();
+	};
+	
+	holder.getTime = function()
+	{
+		return time.valueOf();
+	};
+	
+	holder.getTimeString = function()
+	{
+		if(view.getCurrentPage() > 0)
+		{
+			return timeTextField.getValue();
+		}else{
+			return null;
+		}
 	};
 	
 	return holder;

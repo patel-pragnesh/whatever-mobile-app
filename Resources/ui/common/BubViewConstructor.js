@@ -25,6 +25,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var newInfo = conversation.new_info;
 			var inStatus = conversation.localUserStatus;
 			var status = conversation.status;
+			var happeningTime;
 			
 			var bubView = Ti.UI.createView({
 				width: bubViewWidth,
@@ -62,6 +63,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	//listener to tell the parent view to delete this
 	Ti.App.addEventListener('app:DeleteBubble:' + convoKey, function(e){
 		Ti.API.info('delete event recieved');
+		Ti.App.removeEventListener('app:refresh', setTimeLabel);
 		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
 		parentView.remove(bubView);
 	});
@@ -222,13 +224,42 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				happeningIndicator.add(clock);
 				
 				var timeLabel = Ti.UI.createLabel({
-					left: 3,
+					left: 1,
 					bottom: '20%',
-					text: '2 days ',
 					color: 'black'
 				});
 				happeningIndicator.add(timeLabel);
 			bubView.add(happeningIndicator);
+			
+				function setTimeLabel()
+				{
+					var moment = require("lib/moment-with-locales");
+	
+					var string = "";
+					
+					var localDate = moment(happeningTime);
+					Ti.API.info('local date = ' + localDate.format("dddd, MMMM Do YYYY, h:mm:ss a"));
+					
+					if(moment().isSame(localDate, 'day'))
+					{
+						if(localDate.hour() > 12)
+						{
+							string = "Tonight  ";
+						}else{
+							string = "Today  ";
+						}
+					}
+					else
+					{
+						if(localDate.isAfter(moment()))
+						{
+							var dayDiff = localDate.diff(moment(), 'days');
+							string = dayDiff + " " + dayDiff  > 1 ? 'days  ' : 'day  ';
+						}
+					}
+					
+					return string;
+				}
 			
 			if(status == "OPEN")
 			{
@@ -253,7 +284,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 						a.transform = t;
 						a.duration = 15;
 						
-						
 					if(spin)
 					{
 						a.addEventListener('complete', startRotate);
@@ -272,6 +302,10 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				spinMask.hide();
 				spin = false;
 				mask.show();
+				timeLabel.setText(setTimeLabel());
+				
+				Ti.App.addEventListener('app:refresh', setTimeLabel);
+				
 				happeningIndicator.show();
 			}
 			
@@ -318,6 +352,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		x = e.x * 7;
 		bubView.setViewShadowOffset({x: x ,y: y});
 	}
+	
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
 		//check if the happening status has changed
 		if (e.status > "" && e.status != status)
@@ -330,6 +365,13 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			{
 				itsOpen();
 			}
+		}
+		
+		//check if happeningTime has changed
+		if(e.happeningTime != happeningTime)
+		{
+			happeningTime = e.happeningTime;
+			setTimeLabel();
 		}
 		
 		if(e.localUserStatus > "" && e.localUserStatus != inStatus)
