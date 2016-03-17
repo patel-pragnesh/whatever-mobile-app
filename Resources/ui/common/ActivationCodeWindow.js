@@ -13,7 +13,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 	var purple = config.purple;
 	
 	var win = Ti.UI.createWindow({
-		backgroundColor: '#f5f5f5',
+		backgroundColor: purple,
 		width: '100%',
 		fullscreen: false,
 		orientationModes: [Ti.UI.PORTRAIT]

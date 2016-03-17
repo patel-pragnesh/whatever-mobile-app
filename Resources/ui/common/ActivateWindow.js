@@ -130,7 +130,7 @@ function ActivateWindow()
 		});
 		
 	var viewTitleLabel = Ti.UI.createLabel({
-		color: purple,
+		color: 'black',
 		font:
 			{
 			fontSize: 20,
@@ -160,7 +160,7 @@ function ActivateWindow()
 			fontSize: 20,
 			fontFamily: config.opensans_light
 			},
-		color: purple,
+		color: 'black',
 		hintText: L('phone_number_label'),
 		keyboardType: Ti.UI.KEYBOARD_NUMBER_PAD,
 		left: 5,

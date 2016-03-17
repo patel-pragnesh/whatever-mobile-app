@@ -160,11 +160,7 @@ function MembersView(args, callback)
 						profiles.add(memberView);
 						Ti.API.info('addMember');
 					}
-					
-					
 				}
-				
-			
 		}
 		
 	

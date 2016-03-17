@@ -143,7 +143,41 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 	
 	
 	return commentView;
+};
+
+exports.buildUserStatus = function(containerWidth, containerHeight, commentObject)
+{
+	var nameFontSize = containerWidth * .035;
+	var timeFontSize = containerWidth * .03;
+	var bodyFontSize = containerWidth * .04;
 	
+	var userStatusView = Ti.UI.createView({
+		top: 10,
+		bottom: 10,
+		//right: '2%',
+		width: Ti.UI.SIZE,
+		height: Ti.UI.SIZE,
+		layout: 'horizontal'
+	});
+	
+		var inlineImage = Ti.UI.createImageView({
+			image: '/images/greenCheckMarkForImInButtonNotClicked',
+			height: 12,
+			left: 0
+		});
+		userStatusView.add(inlineImage);
+		
+		var inlineLabel = Ti.UI.createLabel({
+			text: commentObject.userFirstName + " " + commentObject.userLastName + " " + commentObject.comment + ".",
+			font: {font: 'AvenirNext-Regular',
+					fontSize: nameFontSize},
+			left: 4,
+			color: 'black'
+		});
+		userStatusView.add(inlineLabel);
+		
+		
+	return userStatusView;
 };
 
 	

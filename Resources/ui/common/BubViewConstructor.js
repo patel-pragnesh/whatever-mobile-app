@@ -7,6 +7,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 {
 			var config = require('config');
 			var httpClient = require('/lib/HttpClient');
+			var moment = require('lib/moment-with-locales');
 			var purple = config.purple;
 			var account = Ti.App.properties.getObject('account');
 
@@ -26,37 +27,44 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var inStatus = conversation.localUserStatus;
 			var status = conversation.status;
 			var happeningTime = conversation.happeningTime;
+			var lastActivity = conversation.lastActivity;
 			
-			var bubView = Ti.UI.createView({
+			
+			var bubViewHolder = Ti.UI.createView({
 				width: bubViewWidth,
 				height: bubViewHeight,
 				top: bubViewTop,
-				bottom: 10,
-				bubConvoKey: convoKey,
 				opacity: 0.0,
-				//backgroundColor: 'orange',
 				clipMode: Titanium.UI.iOS.CLIP_MODE_DISABLED,
 				zIndex: 104 - conversation.row
 			});
+			
+			
+			var bubView = Ti.UI.createView({
+				width: Ti.UI.FILL,
+				height: Ti.UI.FILL,
+				bubConvoKey: convoKey,
+				opacity: 1.0,
+				clipMode: Titanium.UI.iOS.CLIP_MODE_DISABLED,
+				zIndex: 104 - conversation.row
+			});
+			bubViewHolder.add(bubView);
+			
 Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	//postlayout listener to tell mainWindow to create a card view for this conversation
-	bubView.addEventListener('postlayout', function(e){
+	bubViewHolder.addEventListener('postlayout', function(e){
 		this.removeEventListener('postlayout', arguments.callee);
-		//bubView.setHeight(bubView.size.width);
 		Ti.App.fireEvent('app:createcard', conversation);
 		mask.setWidth(mask.size.height);
 		bubView.setBorderRadius(bubViewWidth / 2);
 		bubView.setViewShadowColor('#2f2f2f');
 		bubView.fireEvent('startRotate');
 		
-		Ti.API.info(bubView.size.width + "    "  + bubView.size.height);
-		
-		
 		var time = setTimeout(function(){
-			bubView.animate({opacity: 1.0, duration: 400});
+			bubViewHolder.animate({opacity: 1.0, duration: 400});
 			bubShadeMask.animate({opacity: 0.45, duration: 1000});
-		}, 500);
+		}, 300);
 		
 	});
 	
@@ -65,7 +73,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		Ti.API.info('delete event recieved');
 		Ti.App.removeEventListener('app:refresh', setTimeLabel);
 		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
-		parentView.remove(bubView);
+		parentView.remove(bubViewHolder);
 	});
 	
 	
@@ -80,11 +88,11 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	//position the bubView
 	if (bubPosition == 'left')
 	{
-		bubView.left = '2%';
+		bubViewHolder.left = '2%';
 	}
 	else if (bubPosition == 'right')
 	{
-		bubView.right = '2%';
+		bubViewHolder.right = '2%';
 	}
 			
 			
@@ -272,6 +280,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 			function itsOpen()
 			{
+				bubView.setOpacity(getOpacityFromAge());
 				mask.hide();
 				spinMask.show();
 				spin = true;
@@ -299,6 +308,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 			function itsHappening()
 			{
+				bubView.setOpacity(1.0);
 				spinMask.hide();
 				spin = false;
 				mask.show();
@@ -353,6 +363,19 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		bubView.setViewShadowOffset({x: x ,y: y});
 	}
 	
+	function getOpacityFromAge()
+	{
+		var now = moment();
+		var thisLastActivity = moment(lastActivity);
+		
+		if(now.diff(thisLastActivity, 'hours') >= 15)
+		{
+			return 0.7;
+		}else{
+			return 1.0;
+		}
+	}
+	
 	Ti.App.addEventListener('app:UpdateBubble:' + convoKey, function(e){
 		//check if the happening status has changed
 		if (e.status > "" && e.status != status)
@@ -366,6 +389,13 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			{
 				itsOpen();
 			}
+		}
+		
+		lastActivity = e.lastActivity;
+		
+		if(e.status == "OPEN")
+		{
+			bubView.setOpacity(getOpacityFromAge());
 		}
 		
 		//check if happeningTime has changed
@@ -392,10 +422,9 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 		{
 			getCreator();
 		}
-		
 	});	
 		
-	return bubView;
+	return bubViewHolder;
 };
 	
 module.exports = BubViewConstructor;

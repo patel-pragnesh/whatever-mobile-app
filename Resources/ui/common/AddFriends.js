@@ -433,7 +433,13 @@ function addContactsToListView()
 						contactsSections.push(createSection(sectionTitle.toUpperCase(), data));
 						}
 	}//end of loop through people array for loop
-listView.insertSectionAt(1,contactsSections);
+	
+	if(friends.length > 0)
+	{
+		listView.insertSectionAt(1,contactsSections);
+	}else{
+		listView.insertSectionAt(0,contactsSections);
+	}
 }
 
 listView.addEventListener('itemclick', itemClickEvent);	

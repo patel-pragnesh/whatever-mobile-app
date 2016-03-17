@@ -580,7 +580,7 @@ mainViewContainer.add(createCommentHolder);
 			
 			if (success)
 			{   
-				var addCommentRequest = {conversationId: response.conversationId, userId: response.userId, comment: createConversationRequest.topic };
+				var addCommentRequest = {conversationId: response.conversationId, userId: response.userId, type: "USERCREATED",comment: createConversationRequest.topic };
 				httpClient.doPost('/v1/addUserComment', addCommentRequest, function(success, response)
 				{
 					Ti.API.info(JSON.stringify(response));

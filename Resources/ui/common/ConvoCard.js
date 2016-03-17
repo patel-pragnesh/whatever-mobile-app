@@ -138,7 +138,7 @@ var card = Ti.UI.createView({
 				height: 53,
 				top: 2,
 				bottom: 2,
-				width: '15%',
+				width: '12%',
 			});
 				
 			var textArea = Ti.UI.createTextArea({
@@ -147,20 +147,32 @@ var card = Ti.UI.createView({
 				height: Titanium.UI.SIZE,
 				font: {fontFamily: 'AvenirNext-Regular',
 						fontSize: 16},
-				color: 'gray',
+				color: 'black',
 				scrollable: false
 			});
 				
-				textArea.addEventListener('focus', function(e){
-					if (textArea.getColor() == 'gray')
-					{
-						textAreaFocused = true;
-						textArea.setValue('');
-						textArea.setFont({fontFamily: 'OpenSans-Regular',
-											fontSize: 16});
-						textArea.setColor('black');
-					}
+				var chatHintLabel = Ti.UI.createLabel({
+					width: Ti.UI.SIZE,
+					left: 3,
+					font: {fontFamily: 'AvenirNext-Regular',
+						fontSize: 16},
+					color: 'gray',
+					text: 'Chat about it...'
 				});
+				textArea.add(chatHintLabel);
+				
+				chatHintLabel.addEventListener('click', function(){
+					textArea.focus();
+				});
+				
+			textArea.addEventListener('change', function(e){
+				if(textArea.getValue() > "")
+				{
+					chatHintLabel.hide();
+				}else{
+					chatHintLabel.show();
+				}
+			});
 			
 			var rightTextAreaButton = Ti.UI.createButton({
 				left: 0,
@@ -407,7 +419,20 @@ function cardPostLayoutCallback(e){
 		{
 			for (i = 0; i < cardArgs.comments.length; i++)
 			{
-				var commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
+				var commentView;
+				if(cardArgs.comments[i].type == "USERCREATED")
+				{
+					commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
+				}
+				else if(cardArgs.comments[i].type == "CONVOSTATUS")
+				{
+					 	
+				}
+				else if(cardArgs.comments[i].type == "USERSTATUS")
+				{
+					commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, cardArgs.comments[i]); 	
+				}
+				
 				localComments.push(1);
 				commentsScrollView.add(commentView);
 			}	
@@ -421,6 +446,7 @@ function cardPostLayoutCallback(e){
 	//set up createCommentHolder
 		var stayTunedButton = Ti.UI.createImageView({
 			width: '80%',
+			left: '5%',
 			image: 'images/stay-tuned-button-icon'
 		});
 		
@@ -481,7 +507,8 @@ function cardPostLayoutCallback(e){
 		{
 			
 			var addCommentRequest = {};
-				addCommentRequest.comment = encoder.encode_utf8(textArea.getValue());;
+				addCommentRequest.type = "USERCREATED";
+				addCommentRequest.comment = encoder.encode_utf8(textArea.getValue());
 				addCommentRequest.conversationId = conversationId;
 				addCommentRequest.userId = account.id;
 				
@@ -570,7 +597,20 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 					
 				for(i = (e.comments.length - dif); i < e.comments.length; i++)
 				{
-						var commentView = new CommentView.buildComment(containerWidth, containerHeight, e.comments[i]);
+					var commentView;
+					 if(e.comments[i].type == "USERCREATED")
+					 {
+					 	commentView = new CommentView.buildComment(containerWidth, containerHeight, e.comments[i]);
+					 }
+					 else if(e.comments[i].type == "CONVOSTATUS")
+					 {
+					 	
+					 }
+					 else if(e.comments[i].type == "USERSTATUS")
+					 {
+					 	commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, e.comments[i]);
+					 }
+						
 						localComments.push(1);
 						
 						if (scrollToBottom)
