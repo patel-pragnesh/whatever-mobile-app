@@ -60,7 +60,6 @@ var card = Ti.UI.createView({
  card.addEventListener('postlayout', cardPostLayoutCallback);
  
  
-
 	var profileViewRow = Ti.UI.createView({
 		top: '1.5%',
 		height: '9%',
@@ -99,7 +98,7 @@ var card = Ti.UI.createView({
 						textArea.blur();
 				});
 				commentsScrollView.addEventListener('scrollstart', function(e){
-					textArea.blur();
+						textArea.blur();
 				});
 		
 		var tunedDialog = Ti.UI.createImageView({
@@ -438,9 +437,10 @@ function cardPostLayoutCallback(e){
 			}	
 		}	
 		
-		commentsScrollView.addEventListener('touchstart', hideDisappearingView);
+		commentsScrollView.addEventListener('swipe', hideDisappearingView);
 		commentsScrollView.addEventListener('touchmove', hideDisappearingView);
 		commentsScrollView.addEventListener('dragstart', hideDisappearingView);
+	
 	mainViewContainer.add(commentsScrollView);	
 	
 	//set up createCommentHolder
@@ -650,7 +650,7 @@ var disappearingView = Ti.UI.createView({
 		 	}
 		 	if(e.direction == 'up')
 		 	{
-		 		commentsScrollView.fireEvent('touchstart');
+		 		commentsScrollView.fireEvent('swipe');
 		 	}
 	});
 		
@@ -1146,6 +1146,7 @@ function happeningActionHandler(editing)
 						buttonRowView.setTouchEnabled(true);
 						buttonRowView.animate({opacity: 1.0, duration: 250});
 						card.animate({top: '5%', duration: 200});
+						Ti.App.addEventListener('keyboardframechanged', reactToKeyboard);
 					});
 				}else{
 					alert('error setting conversation status');

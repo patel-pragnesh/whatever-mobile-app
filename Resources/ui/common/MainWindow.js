@@ -19,7 +19,24 @@ function MainWindow() {
 	var topNavHeight;
 	var mainViewTop;
 	
-	//TODO use blurView module to blur scroll container when bubble is selected - except selected bubble
+	// Monitor silent push notifications
+	Ti.App.iOS.addEventListener('silentpush', function(e){
+		Ti.API.info(JSON.stringify(e));
+		Ti.App.fireEvent('app:refresh');
+		
+		var notifyDate = moment();
+			notifyDate.add(10, "s");
+			
+		Ti.App.iOS.scheduleLocalNotification({
+			alertBody: "Local Notification",
+			date: new Date(notifyDate.valueOf())
+		});
+		
+		setTimeout(function(){
+			Ti.App.iOS.endBackgroundHandler(e.handlerId);
+			Ti.API.info('background ended');
+		}, 10000);	
+	});
 	
 	// Create the main window
 	var win = Ti.UI.createWindow({
@@ -331,7 +348,7 @@ var button2Label = Ti.UI.createLabel({
 });
 
 testButton2.add(button2Label);
-//win.add(testButton2);
+win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){
@@ -339,6 +356,7 @@ testButton2.addEventListener('click', function(e){
 	Ti.API.info('remote notify enabled  = ' + JSON.stringify(Titanium.Network.getRemoteNotificationsEnabled()));
 	Ti.API.info('notify types = ' + JSON.stringify(Ti.Network.getRemoteNotificationTypes()));
 	Ti.API.info('uuid  =  ' + Ti.Network.getRemoteDeviceUUID());
+	Ti.API.info(Titanium.App.iOS.getCurrentUserNotificationSettings());
 	
 	var req = {};
 	req.message = "Hello World";

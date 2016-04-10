@@ -34,6 +34,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				width: bubViewWidth,
 				height: bubViewHeight,
 				top: bubViewTop,
+				bottom: 10,
 				opacity: 0.0,
 				clipMode: Titanium.UI.iOS.CLIP_MODE_DISABLED,
 				zIndex: 104 - conversation.row

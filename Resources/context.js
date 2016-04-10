@@ -82,6 +82,7 @@ exports.register = function() {
 			}
 		else
 			{
+				
 			Ti.App.iOS.registerUserNotificationSettings({
 				types: [Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT, Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND, Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE]
 				});
@@ -91,21 +92,14 @@ exports.register = function() {
 				error: deviceTokenError,
 				callback: receivePush
 				});
+			
 			}
 		
 		function receivePush(e)
 			{
-				Ti.API.info('recieved');
-				alert('received push');
-			// iOS
-			if(e.data && e.data.event)
-				{
-				
-				Ti.App.fireEvent(e.data.event);
-				
-				}
+				//alert('received push:' + JSON.stringify(e));
+				// iOS
 			}
-			
 				
 			
 		function deviceTokenSuccess(e)

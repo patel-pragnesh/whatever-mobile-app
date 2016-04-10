@@ -23,14 +23,15 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 			width: '100%',
 			height: Ti.UI.SIZE,
 			top: 7,
-			layout: 'horizontal'
+			layout: 'horizontal',
+			//horizontalWrap: false
 			});
 		
 			var commentImage = Ti.UI.createImageView({
 				backgroundColor: '#D3D3D3',
 				height: commentorImageSize,
 				top: 3,
-				left: '3%'
+				left: '2%'
 				});
 				
 				commentImage.addEventListener('postlayout', function(){
@@ -64,9 +65,9 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				
 			var commentContent = Ti.UI.createView({
 				top: 4,
-				right: '14%',
+				width: '70%',
 				height: Ti.UI.SIZE,
-				left: '5%',
+				left: '3%',
 				layout: 'vertical',
 			});
 			commentView.add(commentContent);
@@ -84,7 +85,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				
 				var commentText = Ti.UI.createTextArea({
 					left: -5,
-					top: -11,
+					top: -10,
 					right: 2,
 					font: {fontSize: bodyFontSize,
 							   fontFamily: 'AvenirNext-Regular'},		
@@ -106,41 +107,8 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					color: 'gray'
 					});
 					//commentContent.add(timeLabel);
-					
-//inlineNotificationStuff
-/**
-	var inline = Ti.UI.createView({
-		top: 0,
-		right: '2%',
-		width: Ti.UI.SIZE,
-		height: Ti.UI.SIZE,
-		layout: 'horizontal',
-		
-		
-	});
-	commentsView.add(inline);
-
-		var inlineLabel = Ti.UI.createLabel({
-			text: 'Cole Halverson is in.',
-			font: {font: 'OpenSans-Light',
-					fontSize: timeFontSize
-		},
-			left: 4,
-			color: 'black'
-		});
-		
-		
-		var inlineImage =Ti.UI.createImageView({
-			image: '/images/greenCheckMarkForImInButtonNotClicked',
-			height: 12,
-			left: 0
 			
-		});
-		inline.add(inlineImage);
-		inline.add(inlineLabel);
-	
-*/
-	
+	commentView.add(new LikeButton());
 	
 	return commentView;
 };
@@ -179,6 +147,23 @@ exports.buildUserStatus = function(containerWidth, containerHeight, commentObjec
 		
 	return userStatusView;
 };
+
+function LikeButton()
+{
+	var buttonView = Ti.UI.createImageView({
+		width: '5.5%',
+		top: 15,
+		left: '4.25%',
+		image: 'images/thumbsUpOutline',
+		zIndex: 20
+	});
+	
+		buttonView.addEventListener('click', function(){
+			buttonView.setImage('images/thumbsUpPurple');
+		});
+	
+	return buttonView;
+}
 
 	
 	

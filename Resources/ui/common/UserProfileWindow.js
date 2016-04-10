@@ -30,7 +30,7 @@ function UserProfileWindow(userId)
 		height: '85%',
 		width: '90%',
 		backgroundColor: 'white',
-		borderRadius: 40,
+		borderRadius: 10,
 		borderColor: 'gray',
 		borderWidth: 1,
 		layout: 'vertical'
@@ -41,7 +41,7 @@ function UserProfileWindow(userId)
 	
 		var pictureView = Ti.UI.createImageView({
 			top: '6%',
-			height: "45%",
+			height: "35%",
 			autorotate: false,
 			backgroundColor: '#D3D3D3',
 			borderWidth: 3,
@@ -87,6 +87,68 @@ function UserProfileWindow(userId)
 		});
 		
 	view.add(nameLabel);
+	
+	
+	var addFriendsButton = ({
+		left: 0,
+		width: '60%',
+		height: 30,
+		title: 'Call',
+		font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 20},
+		color: config.purple
+	});
+	
+	
+	var buttons = Ti.UI.createView({
+		top: '4%',
+		bottom: '10%',
+		width: '50%',
+		layout: 'vertical'
+	});
+		
+		var callButton = Ti.UI.createButton({
+			width: Ti.UI.FILL,
+			top: 0,
+			height: '30%',
+			title: 'Call',
+			font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 20},
+			color: config.purple
+		});
+		buttons.add(callButton);
+		
+			callButton.addEventListener('click', function(){
+				Ti.Platform.openURL('tel:' + userId);
+			});
+		
+		var textButton = Ti.UI.createButton({
+			width: Ti.UI.FILL,
+			top: '5%',
+			height: '30%',
+			title: 'Text',
+			font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 20},
+			color: config.purple
+		});
+		buttons.add(textButton);
+		
+		var addToFriends = Ti.UI.createButton({
+			width: Ti.UI.FILL,
+			top: '5%',
+			height: '30%',
+			title: 'Text',
+			font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 20},
+			color: config.purple
+		});
+		buttons.add(textButton);
+		
+			textButton.addEventListener('click', function(){
+				Ti.Platform.openURL('sms://' + userId);
+			});
+			
+	view.add(buttons);
 	
 	
 	function close(){
