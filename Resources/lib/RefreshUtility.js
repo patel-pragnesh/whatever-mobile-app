@@ -50,7 +50,8 @@ exports.checkDeletes = function(response, callback)
 						Ti.App.fireEvent('app:DeleteCard:' + localConvos.fieldByName('convo_key'));
 						
 						//then add it to array to be deleted from DB
-						toDelete.push(localConvos.fieldByName('rowid'));
+						toDelete.push({rowid: localConvos.fieldByName('rowid'), 
+										conversationId: localConvos.fieldByName('convo_key')});
 						Ti.API.info('deleting ' + localConvos.fieldByName('convo_key'));
 					}
 				
@@ -100,7 +101,7 @@ exports.updateDB = function(response)
 		//query the DB to see if this convesation from GAE is already present
 		var row = db.execute('SELECT rowid FROM V1_bubbles WHERE convo_key is (?)', thisConvo.conversationId.toString());
 		
-		//if not present, add it to the first vacant row
+		//if not present, add it to the first vacant row, and create a table for the chat
 		if (row.rowCount == 0)
 			{
 				var vacantRow = db.execute('SELECT rowid, position, top_y FROM V1_bubbles WHERE convo_key is null LIMIT 1');
@@ -114,16 +115,14 @@ exports.updateDB = function(response)
 				thisConvo.row = vacantRow.fieldByName('rowid');
 				vacantRow.close(); 
 				row.close();
+				
 				db.close();
 				
 				//Fire app event to tell BubblesView to create a bubble for this conversation
 				Ti.App.fireEvent('app:ConstructBubble', thisConvo);
-				
-				//local push notification gets fired here
-				
 			}
 		
-		//if present, update the DB row
+		//if present, update the DB convo row and convo chat table
 		else 
 			{
 				var localConvoState = db.execute('SELECT position, top_y, happening_status FROM V1_bubbles WHERE rowid = ?', row.fieldByName('rowid'));
@@ -134,22 +133,20 @@ exports.updateDB = function(response)
 					thisConvo.position = localConvoState.fieldByName('position');
 					thisConvo.top_y = localConvoState.fieldByName('top_y');
 					thisConvo.row = row.fieldByName('rowid');
+					
 					Ti.App.fireEvent('app:ConstructBubble', thisConvo);
 				}else{
 					Ti.App.fireEvent('app:UpdateBubble:' + thisConvo.conversationId , thisConvo);
+					//fire event to update card UI to match happening status and local user "in" status
+					Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, thisConvo);
+					//extract the comments and fire event to update
+					Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
 				}
 				
 				localConvoState.close();
 				row.close();
 				db.close();
-				
-				//fire event to update card UI to match happening status and local user "in" status
-				
-				Ti.App.fireEvent('app:UpdateCard' + thisConvo.conversationId, thisConvo);
-				//extract the comments and fire event to update
-				Ti.App.fireEvent('app:UpdateComments:' + thisConvo.conversationId, {comments: thisConvo.comments});
-				
-				//local push notifications fire here
+		
 			}
 	}
 	launching = false;
@@ -165,11 +162,10 @@ exports.doDeletesFromDB = function(toDelete)
 		
 		for(var i=0; i < toDelete.length; i++) 
 		{
-		var rowid = toDelete[i];
+		var rowid = toDelete[i].rowid;
 		Ti.API.info('final delete of ' + rowid);
 		db.execute('UPDATE V1_bubbles SET convo_key = null, creator = null, new_info = null, in_out = null, happening_status = null, happening_date = null, happening_description = null, active_status = null, last_activity = null WHERE rowid = ? ', rowid);
 		}
-	
 		db.execute('COMMIT'); //commit the transaction
 		db.close();
 	}

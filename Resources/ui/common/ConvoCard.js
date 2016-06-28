@@ -569,6 +569,7 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 	if (e.status == "IT_IS_ON" && itsHappening == false)
 	{
 		itsHappening = true;
+		cardArgs.whatsHappening = e.whatsHappening;
 		setUpHappeningContext();
 	}else if(e.status == "OPEN" && itsHappening == true)
 	{
@@ -630,7 +631,17 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 				{
 					Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {newComments: true});
 				}
+				
 			}
+			
+			//fire events to update comment likes here
+			//listener is on the commentView in comments builder
+			for(i = 0; i < e.comments.length; i++)
+			{
+				Ti.App.fireEvent('app:commentLikes:' + e.comments[i].commentId, {commentObject: e.comments[i]});
+			}
+			
+			
 		});
 	
 //Set up the disappearingView which is holds the conversation info and slides in and out of view over the comments	
@@ -873,6 +884,7 @@ function setUpHappeningContext()
 		//set up descriptionText
 		descriptionHintLabel.hide();
 		descriptionText.setValue(cardArgs.whatsHappening);
+		descriptionText.setHeight(Ti.UI.SIZE);
 		setTimeString();
 		happeningView.setImage('images/happeningBar');
 		buttonRowView.setTop(-10);
@@ -1117,6 +1129,7 @@ function happeningActionHandler(editing)
 			changeStatusRequest.whatsHappening = descriptionText.getValue();
 			changeStatusRequest.happeningTime = setTimeView.getTime();
 			changeStatusRequest.timeString = setTimeView.getTimeString();
+			changeStatusRequest.userId = account.id;
 			descriptionText.blur();
 			setTimeView.blur();
 			

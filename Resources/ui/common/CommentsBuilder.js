@@ -13,16 +13,24 @@ var account = Ti.App.properties.getObject('account');
 
 exports.buildComment = function(containerWidth, containerHeight, commentObject)
 {
+	var theComment = commentObject;
+	
 	var commentorImageSize = containerWidth * .101;
 	var commentorImageRadius = commentorImageSize / 2;
 	var nameFontSize = containerWidth * .035;
 	var timeFontSize = containerWidth * .03;
 	var bodyFontSize = containerWidth * .04;
 
+	var commentHolderView = Ti.UI.createView({
+		layout: 'vertical',
+		height: Ti.UI.SIZE,
+		width: Ti.UI.FILL,
+		top: 7
+	});
 		var commentView = Ti.UI.createView({
 			width: '100%',
 			height: Ti.UI.SIZE,
-			top: 7,
+			top: 0,
 			layout: 'horizontal',
 			//horizontalWrap: false
 			});
@@ -108,9 +116,128 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					});
 					//commentContent.add(timeLabel);
 			
-	commentView.add(new LikeButton());
+	var likeButtonView = Ti.UI.createImageView({
+		width: '5.5%',
+		top: 15,
+		left: '4.25%',
+		image: 'images/thumbsUpOutline',
+		zIndex: 20
+	});
 	
-	return commentView;
+		likeButtonView.addEventListener('click', function(){
+			var req = {};
+				req.commentId = commentObject.commentId;
+				req.userId = account.id;
+				
+			Ti.API.info(JSON.stringify(req));
+			
+			httpClient.doPost('/v1/addCommentLike', req, function(success, response){
+				if(success)
+				{
+					Ti.App.fireEvent('app:refresh');
+				}
+			});
+			
+			
+			likeButtonView.setImage('images/thumbsUpPurple');
+		});
+	
+	var likesLabel = Ti.UI.createLabel({
+		left: 3,
+		top: 25,
+		font: {fontSize: nameFontSize,
+				fontFamily: 'AvenirNext-Light'},
+		color: "#666666"
+	});
+	
+	commentView.add(likeButtonView);
+	commentView.add(likesLabel);
+	
+	
+	
+	//Listen for app event fire to update this comments likes
+	
+	Ti.App.addEventListener('app:commentLikes:' + commentObject.commentId, function(e)
+	{
+		theComment = e.commentObject;
+		
+		setLikeContext();
+	});
+	
+	function setLikeContext()
+	{
+		if(theComment.likes.length > 0)	
+		{
+			likesLabel.setText(theComment.likes.length);
+			
+			likeButtonView.setImage('images/thumbsUpLight');
+			
+			for(var i = 0; i < theComment.likes.length; i++)
+			{
+				if(theComment.likes[i].userId == account.id)
+				{
+					likeButtonView.setImage('images/thumbsUpPurple');
+				}
+			}
+		}
+	}
+	
+	commentHolderView.add(commentView);
+	
+	setLikeContext();
+	
+	var likesList = Ti.UI.createView({
+		layout: 'horizontal',
+		right: 15,
+		height: 0,
+		width: Ti.UI.SIZE,
+		top: 0
+	});
+	
+	commentView.addEventListener('click', function(){
+		if (likesList.getHeight() == 30)
+		{
+			likesList.setHeight(0);
+			likesList.removeAllChildren();
+		}else{
+			likesList.setHeight(30);
+			displayLikeNames();
+		}
+	});
+	
+	function displayLikeNames()
+	{
+	
+		
+		
+		for(i=0; i < theComment.likes.length; i++)
+		{
+			var likeNameLabel = Ti.UI.createLabel({
+			right: 0,
+			height: '100%',
+			width: Ti.UI.SIZE,
+			font: {fontSize: bodyFontSize,
+					fontFamily: 'AvenirNext-Regular'}
+			});
+		
+			var nameString = "";
+			
+			if(i > 0 )
+			{
+				nameString = nameString + ", ";
+			}
+			
+			nameString = nameString + theComment.likes[i].firstName + " " + theComment.likes[i].lastName.charAt(0);
+			
+			likeNameLabel.setText(nameString);
+			
+			likesList.add(likeNameLabel);
+		}
+	}
+	
+	commentHolderView.add(likesList);
+	
+	return commentHolderView;
 };
 
 exports.buildUserStatus = function(containerWidth, containerHeight, commentObject)
@@ -148,22 +275,6 @@ exports.buildUserStatus = function(containerWidth, containerHeight, commentObjec
 	return userStatusView;
 };
 
-function LikeButton()
-{
-	var buttonView = Ti.UI.createImageView({
-		width: '5.5%',
-		top: 15,
-		left: '4.25%',
-		image: 'images/thumbsUpOutline',
-		zIndex: 20
-	});
-	
-		buttonView.addEventListener('click', function(){
-			buttonView.setImage('images/thumbsUpPurple');
-		});
-	
-	return buttonView;
-}
 
 	
 	

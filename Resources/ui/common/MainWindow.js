@@ -19,24 +19,7 @@ function MainWindow() {
 	var topNavHeight;
 	var mainViewTop;
 	
-	// Monitor silent push notifications
-	Ti.App.iOS.addEventListener('silentpush', function(e){
-		Ti.API.info(JSON.stringify(e));
-		Ti.App.fireEvent('app:refresh');
-		
-		var notifyDate = moment();
-			notifyDate.add(10, "s");
-			
-		Ti.App.iOS.scheduleLocalNotification({
-			alertBody: "Local Notification",
-			date: new Date(notifyDate.valueOf())
-		});
-		
-		setTimeout(function(){
-			Ti.App.iOS.endBackgroundHandler(e.handlerId);
-			Ti.API.info('background ended');
-		}, 10000);	
-	});
+	
 	
 	// Create the main window
 	var win = Ti.UI.createWindow({
@@ -348,7 +331,7 @@ var button2Label = Ti.UI.createLabel({
 });
 
 testButton2.add(button2Label);
-win.add(testButton2);
+//win.add(testButton2);
 
 
 testButton2.addEventListener('click', function(e){

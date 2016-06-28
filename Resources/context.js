@@ -92,13 +92,13 @@ exports.register = function() {
 				error: deviceTokenError,
 				callback: receivePush
 				});
-			
 			}
 		
 		function receivePush(e)
 			{
+				Ti.API.info('push!!!!!');
 				//alert('received push:' + JSON.stringify(e));
-				// iOS
+				Ti.App.fireEvent('app:refresh');
 			}
 				
 			
