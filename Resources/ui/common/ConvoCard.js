@@ -144,7 +144,7 @@ var card = Ti.UI.createView({
 				left: 0,
 				width: '67%',
 				height: Titanium.UI.SIZE,
-				font: {fontFamily: 'AvenirNext-Regular',
+				font: {fontFamily: config.avenir_next_regular,
 						fontSize: 16},
 				color: 'black',
 				scrollable: false
@@ -153,7 +153,7 @@ var card = Ti.UI.createView({
 				var chatHintLabel = Ti.UI.createLabel({
 					width: Ti.UI.SIZE,
 					left: 3,
-					font: {fontFamily: 'AvenirNext-Regular',
+					font: {fontFamily: config.avenir_next_regular,
 						fontSize: 16},
 					color: 'gray',
 					text: 'Chat about it...'
@@ -304,7 +304,7 @@ function cardPostLayoutCallback(e){
 		left: '2%',
 		top: '3%',
 		font: {fontSize: 21,
-				fontFamily: 'AvenirNext-Medium'},
+				fontFamily: config.avenir_next_medium},
 		color: 'black'
 	});
 		
@@ -343,7 +343,7 @@ function cardPostLayoutCallback(e){
 	var numberFriendsLabel = Ti.UI.createLabel({
 		text: "and 0 friends are in so far",
 		font: {fontSize: 15,
-				fontFamily: 'AvenirNext-Regular'},
+				fontFamily: config.avenir_next_regular},
 		color: 'black',
 		left: '4%',
 		bottom: '3%'
@@ -479,7 +479,7 @@ function cardPostLayoutCallback(e){
 		
 		var sendLabel = Ti.UI.createLabel({
 			text: 'Send',
-			font: {fontFamily: 'AvenirNext-Regular',
+			font: {fontFamily: config.avenir_next_regular,
 					fontSize: 12},
 			color: 'black'
 		});
@@ -505,6 +505,16 @@ function cardPostLayoutCallback(e){
 		//click event listener for the send button
 		rightTextAreaButton.addEventListener('click', function(e)
 		{
+			//create the commentView to append
+			var localCommentObject = {};
+				localCommentObject.comment = encoder.encode_utf8(textArea.getValue());
+				localCommentObject.conversationId = conversationId;
+				localCommentObject.userId = account.id;
+				localCommentObject.userFirstName = account.first_name;
+				localCommentObject.userLastName = account.last_name;
+				
+				
+			var localCommentView = new CommentView.buildComment(containerWidth, containerHeight, localCommentObject);
 			
 			var addCommentRequest = {};
 				addCommentRequest.type = "USERCREATED";
@@ -512,17 +522,22 @@ function cardPostLayoutCallback(e){
 				addCommentRequest.conversationId = conversationId;
 				addCommentRequest.userId = account.id;
 				
+			textArea.setValue("");
+			rightTextAreaButton.setTouchEnabled(false);
+			sendLabel.hide();
+			
+			commentsScrollView.add(localCommentView);
+			
+			setTimeout(commentsScrollView.scrollToBottom, 500);
+			
+				
 				httpClient.doPost('/v1/addUserComment', addCommentRequest, function(success, response)
 					{
 						Ti.API.info(JSON.stringify(response));
 						if(success)
 						{
-							textArea.setValue("");
-							rightTextAreaButton.setTouchEnabled(false);
-							sendLabel.hide();
-							scrollToBottom = true;
-							Ti.App.fireEvent('app:refresh');
-							commentsScrollView.scrollToBottom();
+							// Tell commentView it was created.  Pass it it's commentId and set up likes functionality
+							localCommentView.backendCallback(response.commentId);
 						}else{
 							Ti.API.info('error adding comment - ' + JSON.stringify(response));
 						}
@@ -598,39 +613,46 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 					
 				for(i = (e.comments.length - dif); i < e.comments.length; i++)
 				{
-					var commentView;
-					 if(e.comments[i].type == "USERCREATED")
-					 {
-					 	commentView = new CommentView.buildComment(containerWidth, containerHeight, e.comments[i]);
-					 }
-					 else if(e.comments[i].type == "CONVOSTATUS")
-					 {
-					 	
-					 }
-					 else if(e.comments[i].type == "USERSTATUS")
-					 {
-					 	commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, e.comments[i]);
-					 }
-						
-						localComments.push(1);
-						
-						if (scrollToBottom)
+					//only build non-local user comments...they are already there from when the local user created it.
+					if(e.comments[i].userId != account.id)
+					{
+						var commentView;
+						 if(e.comments[i].type == "USERCREATED")
+						 {
+						 	commentView = new CommentView.buildComment(containerWidth, containerHeight, e.comments[i]);
+						 }
+						 else if(e.comments[i].type == "CONVOSTATUS")
+						 {
+						 	
+						 }
+						 else if(e.comments[i].type == "USERSTATUS")
+						 {
+						 	commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, e.comments[i]);
+						 }
+							
+							localComments.push(1);
+							
+							if (scrollToBottom)
+							{
+								commentView.addEventListener('postlayout', function(e){
+									Ti.API.info('scroll to bottom called');
+									commentView.removeEventListener('postlayout', arguments.callee);
+									commentsScrollView.scrollToBottom();
+								});
+								scrollToBottom = false;
+								commentsScrollView.add(commentView);
+							}else{
+								commentsScrollView.add(commentView);
+							}	
+					
+						if(!cardIsRaised)
 						{
-							commentView.addEventListener('postlayout', function(e){
-								Ti.API.info('scroll to bottom called');
-								commentView.removeEventListener('postlayout', arguments.callee);
-								commentsScrollView.scrollToBottom();
-							});
-							scrollToBottom = false;
-							commentsScrollView.add(commentView);
-						}else{
-							commentsScrollView.add(commentView);
-						}	
-				}
-				if(!cardIsRaised)
-				{
-					Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {newComments: true});
-				}
+							Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {newComments: true});
+						}
+					
+					}
+						
+				}		
 				
 			}
 			
@@ -734,7 +756,7 @@ var disappearingView = Ti.UI.createView({
 			right: '4%',
 			color: 'black'	,
 			backgroundColor: 'white',
-			font: {fontFamily: 'AvenirNext-Regular',
+			font: {fontFamily: config.avenir_next_regular,
 						fontSize: card.size.width * 0.0494},
 			touchEnabled: false,
 			scrollable: false,
@@ -754,7 +776,7 @@ var disappearingView = Ti.UI.createView({
 				width: Ti.UI.SIZE,
 				text: 'What did you decide on?...',
 				color: 'gray',
-				font: {fontFamily: 'AvenirNext-Regular',
+				font: {fontFamily: config.avenir_next_regular,
 						fontSize: card.size.width * 0.0494},
 				visible: true
 			});
@@ -782,7 +804,7 @@ var disappearingView = Ti.UI.createView({
 				left: 5,
 				width: Ti.UI.SIZE,
 				height: Ti.UI.SIZE,
-				font: {fontFamily: 'AvenirNext-DemiBold',
+				font: {fontFamily: config.avenir_next_demibold,
 						fontSize: card.size.width * 0.040},
 				color: 'black'
 			});
@@ -792,7 +814,7 @@ var disappearingView = Ti.UI.createView({
 				left: 5,
 				width: Ti.UI.SIZE,
 				height: Ti.UI.SIZE,
-				font: {fontFamily: 'AvenirNext-Regular',
+				font: {fontFamily: config.avenir_next_regular,
 						fontSize: card.size.width * 0.040},
 				color: 'black'
 			});

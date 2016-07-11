@@ -219,7 +219,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 		});
 		
 	var receiveCodeLabel = Ti.UI.createLabel({
-		color: '#656565',
+		color: 'white',
 		left: 0,
 		font:
 			{
@@ -453,7 +453,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 		{
 		var actionButton = Ti.UI.createButton({
 		    title: parameters.title,
-		    color: '#1763A6',
+		    color: 'white',                        
 		    backgroundImage: null,
 		    backgroundSelectedImage: null,
 			backgroundDisabledImage: null,

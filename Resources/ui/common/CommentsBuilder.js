@@ -15,6 +15,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 {
 	var theComment = commentObject;
 	
+		
 	var commentorImageSize = containerWidth * .101;
 	var commentorImageRadius = commentorImageSize / 2;
 	var nameFontSize = containerWidth * .035;
@@ -31,8 +32,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 			width: '100%',
 			height: Ti.UI.SIZE,
 			top: 0,
-			layout: 'horizontal',
-			//horizontalWrap: false
+			layout: 'horizontal'
 			});
 		
 			var commentImage = Ti.UI.createImageView({
@@ -51,7 +51,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				Ti.App.addEventListener('updateProfilePicture', getProfile);
 				
 				function getProfile(){
-					Ti.API.info(commentObject.userId + "  " + account.id + "  " + config.profileFile.exists());
+					//Ti.API.info(commentObject.userId + "  " + account.id + "  " + config.profileFile.exists());
 					if(commentObject.userId == account.id && config.profileFile.exists())
 					{
 						Ti.API.info('load local profile pic');
@@ -78,14 +78,14 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				left: '3%',
 				layout: 'vertical',
 			});
-			commentView.add(commentContent);
+			
 				
 				var nameLabel = Ti.UI.createLabel({
 					left: 0,
 					top: -2,
 					color: '#666666',
 					font: {fontSize: nameFontSize,
-							   fontFamily: 'AvenirNext-Medium'},
+							   fontFamily: config.avenir_next_medium},
 					zIndex: 2,
 					text: commentObject.userFirstName + ' ' + commentObject.userLastName
 					});
@@ -96,7 +96,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					top: -10,
 					right: 2,
 					font: {fontSize: bodyFontSize,
-							   fontFamily: 'AvenirNext-Regular'},		
+							   fontFamily: config.avenir_next_regular},		
 					value: encoder.decode_utf8(commentObject.comment),
 					editable: false,
 					color: 'black',
@@ -111,131 +111,158 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					top: -4,
 					text: '24 minutes ago',
 					font: {fontSize: timeFontSize,
-							   fontFamily: 'AvenirNext-Light'},
+							   fontFamily: config.avenir_next_light},
 					color: 'gray'
 					});
 					//commentContent.add(timeLabel);
-			
-	var likeButtonView = Ti.UI.createImageView({
-		width: '5.5%',
-		top: 15,
-		left: '4.25%',
-		image: 'images/thumbsUpOutline',
-		zIndex: 20
-	});
-	
-		likeButtonView.addEventListener('click', function(){
-			var req = {};
-				req.commentId = commentObject.commentId;
-				req.userId = account.id;
-				
-			Ti.API.info(JSON.stringify(req));
-			
-			httpClient.doPost('/v1/addCommentLike', req, function(success, response){
-				if(success)
-				{
-					Ti.App.fireEvent('app:refresh');
-				}
-			});
-			
-			
-			likeButtonView.setImage('images/thumbsUpPurple');
-		});
-	
-	var likesLabel = Ti.UI.createLabel({
-		left: 3,
-		top: 25,
-		font: {fontSize: nameFontSize,
-				fontFamily: 'AvenirNext-Light'},
-		color: "#666666"
-	});
-	
-	commentView.add(likeButtonView);
-	commentView.add(likesLabel);
-	
-	
-	
-	//Listen for app event fire to update this comments likes
-	
-	Ti.App.addEventListener('app:commentLikes:' + commentObject.commentId, function(e)
-	{
-		theComment = e.commentObject;
-		
-		setLikeContext();
-	});
-	
-	function setLikeContext()
-	{
-		if(theComment.likes.length > 0)	
-		{
-			likesLabel.setText(theComment.likes.length);
-			
-			likeButtonView.setImage('images/thumbsUpLight');
-			
-			for(var i = 0; i < theComment.likes.length; i++)
-			{
-				if(theComment.likes[i].userId == account.id)
-				{
-					likeButtonView.setImage('images/thumbsUpPurple');
-				}
-			}
-		}
-	}
+					
+			commentView.add(commentContent);
 	
 	commentHolderView.add(commentView);
 	
-	setLikeContext();
-	
-	var likesList = Ti.UI.createView({
-		layout: 'horizontal',
-		right: 15,
-		height: 0,
-		width: Ti.UI.SIZE,
-		top: 0
-	});
-	
-	commentView.addEventListener('click', function(){
-		if (likesList.getHeight() == 30)
-		{
-			likesList.setHeight(0);
-			likesList.removeAllChildren();
-		}else{
-			likesList.setHeight(30);
-			displayLikeNames();
-		}
-	});
-	
-	function displayLikeNames()
+	// Make sure this commentObject exists on the back-end before enabling likes functionality
+	if(commentObject.commentId)
 	{
-	
-		
-		
-		for(i=0; i < theComment.likes.length; i++)
-		{
-			var likeNameLabel = Ti.UI.createLabel({
-			right: 0,
-			height: '100%',
-			width: Ti.UI.SIZE,
-			font: {fontSize: bodyFontSize,
-					fontFamily: 'AvenirNext-Regular'}
-			});
-		
-			var nameString = "";
-			
-			if(i > 0 )
-			{
-				nameString = nameString + ", ";
-			}
-			
-			nameString = nameString + theComment.likes[i].firstName + " " + theComment.likes[i].lastName.charAt(0);
-			
-			likeNameLabel.setText(nameString);
-			
-			likesList.add(likeNameLabel);
-		}
+		enableLikes();
 	}
 	
-	commentHolderView.add(likesList);
+	//Called by ConvoCard after local user comment has been successfully created on the back-end to enable likes functionality
+	commentHolderView.backendCallback = function(commentId)
+	{
+		commentObject.commentId = commentId;
+		commentObject.likes = [];
+		enableLikes();
+	};
+	
+	function enableLikes()
+	{
+			var likeButtonView = Ti.UI.createImageView({
+				width: '5.5%',
+				top: 15,
+				left: '4.25%',
+				image: 'images/thumbsUpOutline',
+				zIndex: 20
+			});
+		
+			likeButtonView.addEventListener('click', function(){
+				var req = {};
+					req.commentId = commentObject.commentId;
+					req.userId = account.id;
+					
+				Ti.API.info(JSON.stringify(req));
+				
+				httpClient.doPost('/v1/addCommentLike', req, function(success, response){
+					if(success)
+					{
+						Ti.App.fireEvent('app:refresh');
+					}
+				});
+				
+				
+				likeButtonView.setImage('images/thumbsUpPurple');
+			});
+		
+		var likesLabel = Ti.UI.createLabel({
+			left: 3,
+			top: 25,
+			font: {fontSize: nameFontSize,
+					fontFamily: config.avenir_next_light},
+			color: "#666666"
+		});
+		
+		commentView.add(likeButtonView);
+		commentView.add(likesLabel);
+		
+		
+		
+		//Listen for app event fire to update this comments likes
+		
+		Ti.App.addEventListener('app:commentLikes:' + commentObject.commentId, function(e)
+		{
+			theComment = e.commentObject;
+			
+			setLikeContext();
+		});
+		
+		
+		var likesList = Ti.UI.createView({
+					layout: 'horizontal',
+					right: 15,
+					height: 0,
+					width: Ti.UI.SIZE,
+					top: 0
+		});
+		
+		
+		function setLikeContext()
+		{
+			if(theComment.likes.length > 0)	
+			{
+				likesLabel.setText(theComment.likes.length);
+				
+				likeButtonView.setImage('images/thumbsUpLight');
+				
+				for(var i = 0; i < theComment.likes.length; i++)
+				{
+					if(theComment.likes[i].userId == account.id)
+					{
+						likeButtonView.setImage('images/thumbsUpPurple');
+					}
+				}
+		
+				commentView.addEventListener('click', function(){
+					if (likesList.getHeight() == 30)
+					{
+						likesList.setHeight(0);
+						likesList.removeAllChildren();
+					}else{
+						likesList.setHeight(30);
+						displayLikeNames();
+					}
+				});
+				
+				commentHolderView.add(likesList);
+			}
+		}
+		
+		
+		
+		setLikeContext();
+		
+		
+		
+		function displayLikeNames()
+		{
+		
+			
+			for(i=0; i < theComment.likes.length; i++)
+			{
+				var likeNameLabel = Ti.UI.createLabel({
+				right: 0,
+				height: '100%',
+				width: Ti.UI.SIZE,
+				font: {fontSize: bodyFontSize,
+						fontFamily: config.avenir_next_regular}
+				});
+			
+				var nameString = "";
+				
+				if(i > 0 )
+				{
+					nameString = nameString + ", ";
+				}
+				
+				nameString = nameString + theComment.likes[i].firstName + " " + theComment.likes[i].lastName.charAt(0);
+				
+				likeNameLabel.setText(nameString);
+				
+				likesList.add(likeNameLabel);
+			}
+		}
+		
+		
+	}	
+	
 	
 	return commentHolderView;
 };
@@ -264,7 +291,7 @@ exports.buildUserStatus = function(containerWidth, containerHeight, commentObjec
 		
 		var inlineLabel = Ti.UI.createLabel({
 			text: commentObject.userFirstName + " " + commentObject.userLastName + " " + commentObject.comment + ".",
-			font: {font: 'AvenirNext-Regular',
+			font: {font: config.avenir_next_regular,
 					fontSize: nameFontSize},
 			left: 4,
 			color: 'black'

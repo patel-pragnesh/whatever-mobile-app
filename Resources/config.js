@@ -77,10 +77,10 @@ exports.setDimensions = function(winHeight, winWidth)
 
 	
 // Export the font names
-exports.opensans_bold = 'OpenSans-Bold';
-exports.opensans_extrabold = 'OpenSans-ExtraBold';
-exports.opensans_light = 'OpenSans-Light';
-exports.opensans_regular = 'OpenSans-Regular';
+exports.avenir_next_light = 'AvenirNext-Light';
+exports.avenir_next_medium = 'AvenirNext-Medium';
+exports.avenir_next_regular = 'AvenirNext-Regular';
+exports.avenir_next_demibold = 'AvenirNext-DemiBold';
 exports.opensans_semibold = 'OpenSans-Semibold';
 exports.ptserif_regular = 'PTSerif-Regular';
 
