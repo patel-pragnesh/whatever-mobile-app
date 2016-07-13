@@ -100,6 +100,8 @@ var card = Ti.UI.createView({
 				commentsScrollView.addEventListener('scrollstart', function(e){
 						textArea.blur();
 				});
+				
+				
 		
 		var tunedDialog = Ti.UI.createImageView({
 			width: '50%',
@@ -400,8 +402,13 @@ function cardPostLayoutCallback(e){
 	//set up comments view
 	var CommentView = require('ui/common/CommentsBuilder');
 	
-		//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
-		var scrollToBottom = false;
+	commentsScrollView.addEventListener('swipe', hideDisappearingView);
+	commentsScrollView.addEventListener('touchmove', hideDisappearingView);
+	commentsScrollView.addEventListener('dragstart', hideDisappearingView);
+	
+			//TODO remove this
+			//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
+			var scrollToBottom = false;
 		
 		//add spacer to top of commentsScrollView
 		var spacer = Ti.UI.createView({
@@ -413,33 +420,58 @@ function cardPostLayoutCallback(e){
 		
 		var localComments = [];
 		
+		
+		//Override function for adding views to CommentsScrollView to add time stamps if necessary
+			var lastTimeStamp = 0;
+				
+			commentsScrollView.addItem = function(theItem)
+			{
+					                                       //15 mins
+				if((theItem.created - lastTimeStamp) > 900000)
+				{
+					var timeStamp = Ti.UI.createLabel({
+						top: 5,
+						width: Ti.UI.SIZE,
+						height: Ti.UI.SIZE,
+						text: (theItem.created / 1000),
+						color: 'gray',
+						font: {fontSize: containerWidth * .03}
+					});
+					
+					commentsScrollView.add(timeStamp);
+					
+					lastTimeStamp = theItem.created;
+				}
+				
+				var commentView;
+				
+				if(theItem.type == "USERCREATED")
+				{
+					commentView = new CommentView.buildComment(containerWidth, containerHeight, theItem);
+				}
+				else if(theItem.type == "CONVOSTATUS")
+				{
+					 	
+				}
+				else if(theItem.type == "USERSTATUS")
+				{
+					commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, theItem); 	
+				}
+					
+				commentsScrollView.add(commentView);
+			};
+				
+		
 		//this creates the comments views when the card is created
 		if(cardArgs.comments)
 		{
 			for (i = 0; i < cardArgs.comments.length; i++)
 			{
-				var commentView;
-				if(cardArgs.comments[i].type == "USERCREATED")
-				{
-					commentView = new CommentView.buildComment(containerWidth, containerHeight, cardArgs.comments[i]);
-				}
-				else if(cardArgs.comments[i].type == "CONVOSTATUS")
-				{
-					 	
-				}
-				else if(cardArgs.comments[i].type == "USERSTATUS")
-				{
-					commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, cardArgs.comments[i]); 	
-				}
+				commentsScrollView.addItem(cardArgs.comments[i]);
 				
 				localComments.push(1);
-				commentsScrollView.add(commentView);
 			}	
 		}	
-		
-		commentsScrollView.addEventListener('swipe', hideDisappearingView);
-		commentsScrollView.addEventListener('touchmove', hideDisappearingView);
-		commentsScrollView.addEventListener('dragstart', hideDisappearingView);
 	
 	mainViewContainer.add(commentsScrollView);	
 	
@@ -512,6 +544,7 @@ function cardPostLayoutCallback(e){
 				localCommentObject.userId = account.id;
 				localCommentObject.userFirstName = account.first_name;
 				localCommentObject.userLastName = account.last_name;
+				localCommentObject.type = "USERCREATED";
 				
 				
 			var localCommentView = new CommentView.buildComment(containerWidth, containerHeight, localCommentObject);
@@ -526,7 +559,7 @@ function cardPostLayoutCallback(e){
 			rightTextAreaButton.setTouchEnabled(false);
 			sendLabel.hide();
 			
-			commentsScrollView.add(localCommentView);
+			commentsScrollView.addItem(localCommentView);
 			
 			setTimeout(commentsScrollView.scrollToBottom, 500);
 			
@@ -616,40 +649,14 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 					//only build non-local user comments...they are already there from when the local user created it.
 					if(e.comments[i].userId != account.id)
 					{
-						var commentView;
-						 if(e.comments[i].type == "USERCREATED")
-						 {
-						 	commentView = new CommentView.buildComment(containerWidth, containerHeight, e.comments[i]);
-						 }
-						 else if(e.comments[i].type == "CONVOSTATUS")
-						 {
-						 	
-						 }
-						 else if(e.comments[i].type == "USERSTATUS")
-						 {
-						 	commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, e.comments[i]);
-						 }
-							
-							localComments.push(1);
-							
-							if (scrollToBottom)
-							{
-								commentView.addEventListener('postlayout', function(e){
-									Ti.API.info('scroll to bottom called');
-									commentView.removeEventListener('postlayout', arguments.callee);
-									commentsScrollView.scrollToBottom();
-								});
-								scrollToBottom = false;
-								commentsScrollView.add(commentView);
-							}else{
-								commentsScrollView.add(commentView);
-							}	
+						
+						commentsScrollView.addItem(e.comments[i]);	
+						localComments.push(1);
 					
 						if(!cardIsRaised)
 						{
 							Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {newComments: true});
 						}
-					
 					}
 						
 				}		
