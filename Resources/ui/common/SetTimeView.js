@@ -7,7 +7,7 @@
 exports.createScroll = function(args, callback)
 {
 	var config = require('config');
-	var moment = require('lib/moment-with-locales');
+	var moment = require('lib/Moment');
 	var purple = config.purple;
 	
 	var holderHeight;

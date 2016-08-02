@@ -7,7 +7,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 {
 			var config = require('config');
 			var httpClient = require('/lib/HttpClient');
-			var moment = require('lib/moment-with-locales');
+			var moment = require('lib/Moment');
 			var purple = config.purple;
 			var account = Ti.App.properties.getObject('account');
 
@@ -242,8 +242,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 				function setTimeLabel()
 				{
-					var moment = require("lib/moment-with-locales");
-	
 					var string = "";
 					
 					var localDate = moment(happeningTime);

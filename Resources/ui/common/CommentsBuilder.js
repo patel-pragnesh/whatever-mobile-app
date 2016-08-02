@@ -5,6 +5,9 @@
  * @param {Object} callback
  */
 
+
+
+
 var config = require('config');
 var encoder = require('lib/EncoderUtility');
 var httpClient = require('lib/HttpClient');
@@ -51,10 +54,9 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				Ti.App.addEventListener('updateProfilePicture', getProfile);
 				
 				function getProfile(){
-					//Ti.API.info(commentObject.userId + "  " + account.id + "  " + config.profileFile.exists());
+					
 					if(commentObject.userId == account.id && config.profileFile.exists())
 					{
-						Ti.API.info('load local profile pic');
 						commentImage.setImage(config.profileFile.read());
 					}else if (commentObject.userId != account.id  && !commentImage.getImage()){
 						httpClient.doMediaGet('/v1/media/' + commentObject.userId + '/PROFILE/profilepic.jpeg', function(success, response){
@@ -148,8 +150,6 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				var req = {};
 					req.commentId = commentObject.commentId;
 					req.userId = account.id;
-					
-				Ti.API.info(JSON.stringify(req));
 				
 				httpClient.doPost('/v1/addCommentLike', req, function(success, response){
 					if(success)
@@ -221,6 +221,14 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					}
 				});
 				
+				//listener to hide likesList when commentsScrollView is scrolled
+				Ti.App.addEventListener('app:hidelikelists', function(){
+					if(likesList.getHeight() > 0)
+					{
+						likesList.setHeight(0);
+					}
+				});
+				
 				commentHolderView.add(likesList);
 			}
 		}
@@ -259,6 +267,8 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				likesList.add(likeNameLabel);
 			}
 		}
+		
+		
 		
 		
 	}	

@@ -11,6 +11,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var config = require('config');
 	var cardViewUtility = require('lib/CardViewUtility');
 	var moment = require('lib/Moment');
+	var timeUtil = require('lib/TimeUtility');
 		
 	var purple = config.purple;
 	
@@ -167,6 +168,15 @@ var card = Ti.UI.createView({
 				});
 				
 			textArea.addEventListener('change', function(e){
+				if(textArea.getValue() > "")
+				{
+					chatHintLabel.hide();
+				}else{
+					chatHintLabel.show();
+				}
+			});
+			
+			textArea.addEventListener('blur', function(e){
 				if(textArea.getValue() > "")
 				{
 					chatHintLabel.hide();
@@ -406,6 +416,10 @@ function cardPostLayoutCallback(e){
 	commentsScrollView.addEventListener('touchmove', hideDisappearingView);
 	commentsScrollView.addEventListener('dragstart', hideDisappearingView);
 	
+	commentsScrollView.addEventListener('dragstart', function(){
+		Ti.App.fireEvent('app:hidelikelists');
+	});
+	
 			//TODO remove this
 			//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
 			var scrollToBottom = false;
@@ -423,25 +437,36 @@ function cardPostLayoutCallback(e){
 		
 		//Override function for adding views to CommentsScrollView to add time stamps if necessary
 			var lastTimeStamp = 0;
-				
-			commentsScrollView.addItem = function(theItem)
+			
+			commentsScrollView.checkIfTimestampNeeded = function(itemCreated)
 			{
-					                                       //15 mins
-				if((theItem.created - lastTimeStamp) > 900000)
+					                                 //15 mins
+				if((itemCreated - lastTimeStamp) > 900000)
 				{
 					var timeStamp = Ti.UI.createLabel({
 						top: 5,
 						width: Ti.UI.SIZE,
 						height: Ti.UI.SIZE,
-						text: (theItem.created / 1000),
+						text: moment(itemCreated).fromNow(),
 						color: 'gray',
 						font: {fontSize: containerWidth * .03}
 					});
 					
 					commentsScrollView.add(timeStamp);
 					
-					lastTimeStamp = theItem.created;
+					lastTimeStamp = itemCreated;
+					
+					//listener to adjust the timestamp relative to the current time
+					Ti.App.addEventListener("app:refresh", function(){
+						timeStamp.text = moment(itemCreated).fromNow();
+					});
+					
 				}
+			};
+				
+			commentsScrollView.addItem = function(theItem)
+			{
+				commentsScrollView.checkIfTimestampNeeded(theItem.created);
 				
 				var commentView;
 				
@@ -559,12 +584,13 @@ function cardPostLayoutCallback(e){
 			rightTextAreaButton.setTouchEnabled(false);
 			sendLabel.hide();
 			
-			commentsScrollView.addItem(localCommentView);
+			commentsScrollView.checkIfTimestampNeeded(moment());
+			
+			commentsScrollView.add(localCommentView);
 			
 			setTimeout(commentsScrollView.scrollToBottom, 500);
 			
-				
-				httpClient.doPost('/v1/addUserComment', addCommentRequest, function(success, response)
+				httpClient.doPost('/v1/addUserComment', localCommentObject, function(success, response)
 					{
 						Ti.API.info(JSON.stringify(response));
 						if(success)

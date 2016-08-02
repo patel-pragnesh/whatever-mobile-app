@@ -49,7 +49,7 @@ exports.doPost = function(endpoint, request, callback)
 exports.doGet = function(endpoint, callback)
 	{
 	var url = config.services_base_url + endpoint;
-	Ti.API.info('url = ' + url);
+	
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
@@ -91,7 +91,7 @@ exports.doGet = function(endpoint, callback)
 exports.doMediaGet = function(endpoint, callback)
 	{
 	var url = config.services_base_url + endpoint;
-	Ti.API.info('url = ' + url);
+	
 	var xhr = Ti.Network.createHTTPClient({
         onload: function(e)
             {
