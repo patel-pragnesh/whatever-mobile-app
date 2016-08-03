@@ -4,7 +4,7 @@
 
 exports.buildTimeString = function(timeString, happeningTime)
 {
-	var moment = require("lib/moment-with-locales");
+	var moment = require("lib/Moment");
 	
 	var string = "";
 	

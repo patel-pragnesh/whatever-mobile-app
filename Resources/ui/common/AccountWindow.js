@@ -9,7 +9,7 @@ function AccountWindow(verificationCode, phoneNumber)
 	var windowWidth = null;
 	
 	var win = Ti.UI.createWindow({
-		backgroundColor: '#f5f5f5',
+		backgroundColor: config.purple,
 		width: '100%',
 		fullscreen: false,
 		orientationModes: [Ti.UI.PORTRAIT]
@@ -81,7 +81,7 @@ function AccountWindow(verificationCode, phoneNumber)
 			fontSize: 20,
 			fontFamily: config.opensans_light
 			},
-		color: '#1763A6',
+		color: 'black',
 		left: 15,
 		right: 15,
 		height: 45,
@@ -103,14 +103,14 @@ function AccountWindow(verificationCode, phoneNumber)
 	accountViewContainer.add(lastNameTextField);
 	
 	var continueButton = Ti.UI.createButton({
-		backgroundColor: '#F2AE30',
-		borderColor: '#F2AE30',
+		backgroundColor: 'white',
+		borderColor: 'white',
 		borderWidth: 1,
-		color: 'white',
+		color: config.purple,
 		font:
 			{
 			fontSize: 18,
-			fontFamily: config.opensans_light
+			fontFamily: config.avenir_next_light
 			},
 		title: L('create_account'),
 		height: 45,
@@ -122,8 +122,22 @@ function AccountWindow(verificationCode, phoneNumber)
 		
 	if(config.platform === config.platform_android)
 		{
-		continueButton.backgroundSelectedColor = '#d9971d';
+		continueButton.backgroundSelectedColor = config.purple;
 		}
+		
+	continueButton.setSelected = function()
+	{
+		continueButton.setBackgroundColor(config.purple);
+		continueButton.setBorderColor('white');
+		continueButton.setColor('white');
+	};
+	
+	continueButton.unSelect = function()
+	{
+		continueButton.setBackgroundColor('white');
+		continueButton.setBorderColor(config.purple);
+		continueButton.setColor(config.purple);
+	};
 		
 	accountViewContainer.add(continueButton);
 	
@@ -131,18 +145,22 @@ function AccountWindow(verificationCode, phoneNumber)
 		{
 		continueButton.removeEventListener('click', continueButtonHandler);
 		
+		continueButton.setSelected();
+		
 		var createAccount = true;
 		
 		if(firstNameTextField.value.trim().length == 0)
 			{
 			createAccount = false;
 			alert(L('first_name_required'));
+			continueButton.unSelect();
 			}
 			
 		if(lastNameTextField.value.trim().length == 0)
 			{
 			createAccount = false;
 			alert(L('last_name_required'));
+			continueButton.unSelect();
 			}
 		
 		if(createAccount)
@@ -191,6 +209,8 @@ function AccountWindow(verificationCode, phoneNumber)
 					{
 					notificationView.hideIndicator();
 					
+					continueButton.unSelect();
+					
 					if(response.error)
 						{
 						if(response.error == 'invalid_request')
@@ -212,6 +232,8 @@ function AccountWindow(verificationCode, phoneNumber)
 							ok: L('okay')
 							}).show();
 							}
+							
+						
 						}
 						
 					continueButton.addEventListener('click', continueButtonHandler);
@@ -221,6 +243,7 @@ function AccountWindow(verificationCode, phoneNumber)
 		else
 			{
 			continueButton.addEventListener('click', continueButtonHandler);
+			continueButton.unSelect();
 			}
 		}
 		

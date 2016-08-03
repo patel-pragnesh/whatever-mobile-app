@@ -11,7 +11,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var config = require('config');
 	var cardViewUtility = require('lib/CardViewUtility');
 	var moment = require('lib/Moment');
-	var timeUtil = require('lib/TimeUtility');
+	
 		
 	var purple = config.purple;
 	
