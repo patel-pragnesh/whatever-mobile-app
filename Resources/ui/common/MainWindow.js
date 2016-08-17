@@ -11,7 +11,7 @@ function MainWindow() {
 	var bubblesView = require('ui/common/BubblesView');
 	var startConvoCard = require('ui/common/StartConvoCard');
 	var convoCard = require('ui/common/ConvoCard');
-	var localUserProfileWindow = require('ui/common/LocalUserProfileWindow');
+	var localUserProfileWindow = require('ui/common/localUserProfileWindow');
 	
 	var purple = config.purple;
 	var account = Ti.App.properties.getObject('account');

@@ -866,7 +866,6 @@ var disappearingView = Ti.UI.createView({
 	var btnWidth = containerWidth * .41;
 	
 	var buttonRowView = Ti.UI.createView({
-		//top: containerHeight * .015,
 		top: 0,
 		bottom: 5,
 		height: Ti.UI.SIZE,
@@ -984,25 +983,19 @@ function setUpInOutContext()
 	{
 		if(inStatus == "NEUTRAL")
 		{
-			btn1.setImage('images/btnIn');
+			btn1.setImage('images/btnUntuned');
 			btn1.addEventListener('click', setUserStatusIn);
-			btn2.setImage('images/btnOut');
+			btn2.setImage('images/btnIn');
 			btn2.addEventListener('click', setUserStatusOut);
-		}
-		else if(inStatus == "OUT")
-		{
-			btn1.setImage('images/btnIn');
-			btn1.addEventListener('click', setUserStatusNeutral);
-			btn2.setImage('images/btnOutSelected');
-			btn2.addEventListener('click', setUserStatusNeutral);
 		}
 		else if(inStatus == "IN")
 		{
-			btn1.setImage('images/btnInSelected');
+			btn1.setImage('images/btnTuned');
 			btn1.addEventListener('click', setUserStatusNeutral);
-			btn2.setImage('images/btnOut');
+			btn2.setImage('images/btnInSelected');
 			btn2.addEventListener('click', setUserStatusNeutral);
 		}
+		
 		buttonRowView.setTouchEnabled(true);
 		Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {localUserStatus: inStatus});
 	}
@@ -1012,7 +1005,7 @@ var setUserStatusOut = function()
 {
 	Ti.API.info('set user out');
 	buttonRowView.setTouchEnabled(false);
-	btn2.setImage('images/btnOutSelected');
+	btn2.setImage('images/BTN TUNED');
 	btn1.removeEventListener('click', setUserStatusIn);
 	btn2.removeEventListener('click', setUserStatusOut);
 	var changeStatusRequest = {userConversationId: userConversationId, status: "OUT"};
@@ -1060,7 +1053,7 @@ var setUserStatusNeutral = function()
 	Ti.API.info('set user neutral');
 	buttonRowView.setTouchEnabled(false);
 	btn1.setImage('images/btnIn');
-	btn2.setImage('images/btnOut');
+	btn2.setImage('images/BTN UNTUNED');
 	btn1.removeEventListener('click', setUserStatusNeutral);
 	btn2.removeEventListener('click', setUserStatusNeutral);
 	var changeStatusRequest = {userConversationId: userConversationId, status: "NEUTRAL"};
