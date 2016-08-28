@@ -24,7 +24,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var account = Ti.App.properties.getObject('account');
 	
 	var inStatus = cardArgs.localUserStatus;
-	var tuned;
+	var tunedStatus = cardArgs.tunedStatus;
 	var userConversationId = cardArgs.localUserConversationId;
 	var timeString = cardArgs.timeString;
 	var happeningTime = cardArgs.happeningTime;
@@ -387,12 +387,13 @@ function cardPostLayoutCallback(e){
 			top: '101%',
 			duration: 250
 		});
+			/*
 			closeAnimation.addEventListener('complete', function(e){
-					unCollapseView.fireEvent('click');
-					commentsScrollView.setTop(disappearingView.size.height);
-					commentsScrollView.setBottom('10%');
-					spacer.setHeight(10);
-				});
+								unCollapseView.fireEvent('click');
+								commentsScrollView.setTop(disappearingView.size.height);
+								commentsScrollView.setBottom('10%');
+								spacer.setHeight(10);
+							});*/
 				
 		textArea.blur();
 		card.animate(closeAnimation);		
@@ -435,7 +436,7 @@ function cardPostLayoutCallback(e){
 		var localComments = [];
 		
 		
-		//Override function for adding views to CommentsScrollView to add time stamps if necessary
+			//Override function for adding views to CommentsScrollView to add time stamps if necessary
 			var lastTimeStamp = 0;
 			
 			commentsScrollView.checkIfTimestampNeeded = function(itemCreated)
@@ -501,6 +502,12 @@ function cardPostLayoutCallback(e){
 	mainViewContainer.add(commentsScrollView);	
 	
 	//set up createCommentHolder
+	
+	var whateverIcon = Ti.UI.createImageView({
+		width: '80%',
+		image: 'images/whateverIcon.png'
+	});
+/*
 		var stayTunedButton = Ti.UI.createImageView({
 			width: '80%',
 			left: '5%',
@@ -532,7 +539,9 @@ function cardPostLayoutCallback(e){
 								}, 2700);
 			}
 			
-		leftTextAreaButton.add(stayTunedButton);
+		
+*/
+		leftTextAreaButton.add(whateverIcon);
 		
 		var sendLabel = Ti.UI.createLabel({
 			text: 'Send',
@@ -673,7 +682,7 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 				for(i = (e.comments.length - dif); i < e.comments.length; i++)
 				{
 					//only build non-local user comments...they are already there from when the local user created it.
-					if(e.comments[i].userId != account.id)
+					if(e.comments[i].userId != account.id || e.comments[i].type != "USERCREATED")
 					{
 						
 						commentsScrollView.addItem(e.comments[i]);	
@@ -983,38 +992,67 @@ function setUpInOutContext()
 	{
 		if(inStatus == "NEUTRAL")
 		{
-			btn1.setImage('images/btnUntuned');
-			btn1.addEventListener('click', setUserStatusIn);
 			btn2.setImage('images/btnIn');
-			btn2.addEventListener('click', setUserStatusOut);
+			btn2.addEventListener('click', setUserStatusIn);
 		}
 		else if(inStatus == "IN")
 		{
-			btn1.setImage('images/btnTuned');
-			btn1.addEventListener('click', setUserStatusNeutral);
 			btn2.setImage('images/btnInSelected');
 			btn2.addEventListener('click', setUserStatusNeutral);
 		}
 		
+		if(tunedStatus == "UNTUNED")
+		{
+			btn1.setImage('images/btnUntuned');
+			btn1.addEventListener('click', setUserTuned);
+		}
+		else if(tunedStatus == "TUNED")
+		{
+			btn1.setImage('images/btnTuned');
+			btn1.addEventListener('click', setUserUnTuned);
+		}
+		
 		buttonRowView.setTouchEnabled(true);
 		Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {localUserStatus: inStatus});
+		Ti.App.fireEvent('app:UpdateBubble:' + conversationId, {localUserTunedStatus: tunedStatus});
 	}
 }
 
-var setUserStatusOut = function()
+var setUserTuned = function()
 {
-	Ti.API.info('set user out');
 	buttonRowView.setTouchEnabled(false);
-	btn2.setImage('images/BTN TUNED');
-	btn1.removeEventListener('click', setUserStatusIn);
-	btn2.removeEventListener('click', setUserStatusOut);
-	var changeStatusRequest = {userConversationId: userConversationId, status: "OUT"};
+	btn1.setImage('images/btnTuned');
+	btn1.removeEventListener('click', setUserTuned);
 	
-	httpClient.doPost('/v1/changeUserInStatus', changeStatusRequest, function(success, response)
+	var changeTunedStatusRequest = {userConversationId: userConversationId, status: "TUNED"};
+	
+	httpClient.doPost('/v1/changeUserTunedStatus', changeTunedStatusRequest, function(success, response)
 	{
 		if(success)
 		{
-			inStatus = "OUT";
+			tunedStatus = "TUNED";
+			setUpInOutContext();
+			Ti.App.fireEvent('app:refresh');
+		}else{
+			alert('error setting user in status');
+			setUpInOutContext();
+		}
+	});
+};
+
+var setUserUnTuned = function()
+{
+	buttonRowView.setTouchEnabled(false);
+	btn1.setImage('images/btnUntuned');
+	btn1.removeEventListener('click', setUserUnTuned);
+	
+	var changeTunedStatusRequest = {userConversationId: userConversationId, status: "UNTUNED"};
+	
+	httpClient.doPost('/v1/changeUserTunedStatus', changeTunedStatusRequest, function(success, response)
+	{
+		if(success)
+		{
+			tunedStatus = "UNTUNED";
 			setUpInOutContext();
 			Ti.App.fireEvent('app:refresh');
 		}else{
@@ -1028,9 +1066,8 @@ var setUserStatusIn = function()
 {
 	Ti.API.info('set user in');
 	buttonRowView.setTouchEnabled(false);
-	btn1.setImage('images/btnInSelected');
-	btn1.removeEventListener('click', setUserStatusIn);
-	btn2.removeEventListener('click', setUserStatusOut);
+	btn2.setImage('images/btnInSelected');
+	btn2.removeEventListener('click', setUserStatusIn);
 	
 	var changeStatusRequest = {userConversationId: userConversationId, status: "IN"};
 	
@@ -1052,10 +1089,9 @@ var setUserStatusNeutral = function()
 {
 	Ti.API.info('set user neutral');
 	buttonRowView.setTouchEnabled(false);
-	btn1.setImage('images/btnIn');
-	btn2.setImage('images/BTN UNTUNED');
-	btn1.removeEventListener('click', setUserStatusNeutral);
+	btn2.setImage('images/btnIn');
 	btn2.removeEventListener('click', setUserStatusNeutral);
+	
 	var changeStatusRequest = {userConversationId: userConversationId, status: "NEUTRAL"};
 	
 	httpClient.doPost('/v1/changeUserInStatus', changeStatusRequest, function(success, response)

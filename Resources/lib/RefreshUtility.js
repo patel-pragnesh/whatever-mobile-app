@@ -91,7 +91,8 @@ exports.updateDB = function(response)
 			if(thisConvo.userConversations[j].userId == account.id)
 			{
 				thisConvo.localUserConversationId = thisConvo.userConversations[j].userConversationId;
-				thisConvo.localUserStatus = thisConvo.userConversations[j].status;
+				thisConvo.localUserStatus = thisConvo.userConversations[j].inStatus;
+				thisConvo.tunedStatus = thisConvo.userConversations[j].tunedStatus;
 				break;
 			}
 		}

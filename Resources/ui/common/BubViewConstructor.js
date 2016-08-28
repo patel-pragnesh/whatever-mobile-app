@@ -192,7 +192,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				}
 			
 			var mask = Ti.UI.createImageView({
-				image: 'images/mask',
+				image: 'images/Mask',
 				width: Ti.UI.FILL,
 				height: Ti.UI.SIZE,
 				visible: false

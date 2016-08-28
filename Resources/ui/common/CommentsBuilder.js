@@ -143,7 +143,8 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				top: 15,
 				left: '4.25%',
 				image: 'images/thumbsUpOutline',
-				zIndex: 20
+				zIndex: 20,
+				bubbleParent: false
 			});
 		
 			likeButtonView.addEventListener('click', function(){
@@ -193,6 +194,8 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					top: 0
 		});
 		
+		//Only add listeners for click to display likes and app listener to update likes once
+		var listenersAdded = false;
 		
 		function setLikeContext()
 		{
@@ -210,26 +213,32 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					}
 				}
 		
-				commentView.addEventListener('click', function(){
-					if (likesList.getHeight() == 30)
-					{
-						likesList.setHeight(0);
-						likesList.removeAllChildren();
-					}else{
-						likesList.setHeight(30);
-						displayLikeNames();
-					}
-				});
+				if(!listenersAdded)
+				{
+					commentView.addEventListener('click', function(){
+						if (likesList.getHeight() == 30)
+						{
+							likesList.setHeight(0);
+							likesList.removeAllChildren();
+						}else{
+							likesList.setHeight(30);
+							displayLikeNames();
+						}
+					});
+					
+					//listener to hide likesList when commentsScrollView is scrolled
+					Ti.App.addEventListener('app:hidelikelists', function(){
+						if(likesList.getHeight() > 0)
+						{
+							likesList.setHeight(0);
+						}
+					});
+					
+					commentHolderView.add(likesList);
+					
+					listenersAdded = true;
+				}
 				
-				//listener to hide likesList when commentsScrollView is scrolled
-				Ti.App.addEventListener('app:hidelikelists', function(){
-					if(likesList.getHeight() > 0)
-					{
-						likesList.setHeight(0);
-					}
-				});
-				
-				commentHolderView.add(likesList);
 			}
 		}
 		
@@ -293,10 +302,16 @@ exports.buildUserStatus = function(containerWidth, containerHeight, commentObjec
 	});
 	
 		var inlineImage = Ti.UI.createImageView({
-			image: '/images/greenCheckMarkForImInButtonNotClicked',
 			height: 12,
 			left: 0
 		});
+		
+		if(commentObject.status == "INtoNEUTRAL"){
+			inlineImage.setHeight(20);
+			inlineImage.setImage('/images/bailFace');
+		}else if(commentObject.status == "NEUTRALtoIN"){
+			inlineImage.setImage('/images/greenCheckMarkForImInButtonNotClicked');
+		}
 		userStatusView.add(inlineImage);
 		
 		var inlineLabel = Ti.UI.createLabel({
