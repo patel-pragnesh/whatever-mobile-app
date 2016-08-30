@@ -22,7 +22,6 @@ var db;
  */
 exports.buildDB = function()
 {
-	Ti.API.info('buildDB');
 	
 	//open db.  Creates it if not exist.
 	db = Ti.Database.open(dbName);
@@ -36,11 +35,9 @@ exports.buildDB = function()
 	//see if it has been populated with rows yet
 	var rows = db.execute('SELECT rowid from V1_bubbles');
 	
-	Ti.API.info('rowCount = ' + rows.rowCount);
 	
 	if (rows.rowCount != 103)     // this is the best way I could find to check if the DB is as the app expects it to be
 	{
-		Ti.API.info('loading database');
 		//Load arrays with coordinates to be added to rows of the db
 		var positionArray = ['center', 'left', 'right', 'center'];
 	 	
@@ -93,13 +90,11 @@ function displayDB()  //simply writes all 103 DB rows to the console
 	db = Ti.Database.open(dbName);
 	
 	var rows = db.execute('SELECT rowid, position, top_y, convo_key, creator, new_info, in_out, happening_status, happening_date, happening_description, active_status, last_activity from V1_bubbles');
-	       
-	
-	Ti.API.info('SELECT results = ' + rows.rowCount);           
+	                  
 	
 	while (rows.isValidRow())
 	{
-		Ti.API.info(   'Bubble ---> ROWID: ' + rows.fieldByName('rowid') + ' position: ' + rows.fieldByName('position') + ' top_y: ' + rows.fieldByName('top_y') + ' convo_key: ' + rows.fieldByName("convo_key") + ' creator: ' + rows.fieldByName("creator") + ' new_info: ' + rows.fieldByName('new_info') + ' in_out: ' + rows.fieldByName("in_out") +  ' happening_status: ' + rows.fieldByName("happening_status") + ' happening_date: ' + rows.fieldByName("happening_date") + ' happening_description: ' + rows.fieldByName("happening_description") + ' active_status: ' + rows.fieldByName("active_status") + ' last_activity: ' + rows.fieldByName("last_activity"));
+		//Ti.API.info(   'Bubble ---> ROWID: ' + rows.fieldByName('rowid') + ' position: ' + rows.fieldByName('position') + ' top_y: ' + rows.fieldByName('top_y') + ' convo_key: ' + rows.fieldByName("convo_key") + ' creator: ' + rows.fieldByName("creator") + ' new_info: ' + rows.fieldByName('new_info') + ' in_out: ' + rows.fieldByName("in_out") +  ' happening_status: ' + rows.fieldByName("happening_status") + ' happening_date: ' + rows.fieldByName("happening_date") + ' happening_description: ' + rows.fieldByName("happening_description") + ' active_status: ' + rows.fieldByName("active_status") + ' last_activity: ' + rows.fieldByName("last_activity"));
 		rows.next();
 	}
 	db.close();

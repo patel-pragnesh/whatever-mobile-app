@@ -2,14 +2,13 @@
  * Utility to handle the app's CardView.  Mostly to handle things happening in the disappearing view - i.e. the main buttons and thier functions.  
  */
 
-exports.buildTimeString = function(timeString, happeningTime)
+exports.buildTimeString = function(timeString, happeningTime, abbreviate)
 {
 	var moment = require("lib/Moment");
 	
 	var string = "";
 	
 	var localDate = moment(happeningTime);
-	Ti.API.info('local date = ' + localDate.format("dddd, MMMM Do YYYY, h:mm:ss a"));
 	
 	if(moment().isSame(localDate, 'day'))
 	{
@@ -24,14 +23,24 @@ exports.buildTimeString = function(timeString, happeningTime)
 	{
 		if(localDate.hour() > 12)
 		{
-			string = string + "Tomorrow Night";
+			if(abbreviate)
+			{
+				string = string + "Tom. Night";
+			}else{
+				string = string + "Tomorrow Night";
+			}
+			
 		}else{
 			string = string + "Tomorrow";
 		}
 	}
 	else
 	{
-		string = string + localDate.format('dddd');
+		if(abbreviate){
+			string = string + localDate.format('dddd').substring(0,3) + ".";
+		}else{
+			string = string + localDate.format('dddd');
+		}
 		
 		if(localDate.hour() > 12)
 		{

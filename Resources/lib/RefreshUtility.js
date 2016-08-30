@@ -52,7 +52,7 @@ exports.checkDeletes = function(response, callback)
 						//then add it to array to be deleted from DB
 						toDelete.push({rowid: localConvos.fieldByName('rowid'), 
 										conversationId: localConvos.fieldByName('convo_key')});
-						Ti.API.info('deleting ' + localConvos.fieldByName('convo_key'));
+						
 					}
 				
 				localConvos.next();
@@ -96,9 +96,7 @@ exports.updateDB = function(response)
 				break;
 			}
 		}
-		
-		Ti.API.info('thisConvo = ' + JSON.stringify(thisConvo));
-		
+				
 		//query the DB to see if this convesation from GAE is already present
 		var row = db.execute('SELECT rowid FROM V1_bubbles WHERE convo_key is (?)', thisConvo.conversationId.toString());
 		
@@ -164,7 +162,7 @@ exports.doDeletesFromDB = function(toDelete)
 		for(var i=0; i < toDelete.length; i++) 
 		{
 		var rowid = toDelete[i].rowid;
-		Ti.API.info('final delete of ' + rowid);
+		
 		db.execute('UPDATE V1_bubbles SET convo_key = null, creator = null, new_info = null, in_out = null, happening_status = null, happening_date = null, happening_description = null, active_status = null, last_activity = null WHERE rowid = ? ', rowid);
 		}
 		db.execute('COMMIT'); //commit the transaction
