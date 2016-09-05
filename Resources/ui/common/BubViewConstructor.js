@@ -8,6 +8,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			var config = require('config');
 			var httpClient = require('/lib/HttpClient');
 			var moment = require('lib/Moment');
+			var cardViewUtil = require('/lib/CardViewUtility');
 			var purple = config.purple;
 			var account = Ti.App.properties.getObject('account');
 
@@ -51,7 +52,6 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			});
 			bubViewHolder.add(bubView);
 			
-Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	//postlayout listener to tell mainWindow to create a card view for this conversation
 	bubViewHolder.addEventListener('postlayout', function(e){
@@ -71,7 +71,6 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 	
 	//listener to tell the parent view to delete this
 	Ti.App.addEventListener('app:DeleteBubble:' + convoKey, function(e){
-		Ti.API.info('delete event recieved');
 		Ti.App.removeEventListener('app:refresh', setTimeLabel);
 		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
 		parentView.remove(bubViewHolder);
@@ -182,7 +181,7 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 				{
 					var request = {userId: createdBy};
 					httpClient.doPost('/v1/getUser', request, function(success, response){
-						Ti.API.info(JSON.stringify(response));
+					
 						if (success)
 						{
 							name.setText(response.firstName);
@@ -242,28 +241,8 @@ Ti.API.info('conversation:  ' + JSON.stringify(conversation));
 			
 				function setTimeLabel()
 				{
-					var string = "";
-					
-					var localDate = moment(happeningTime);
-					
-					if(moment().isSame(localDate, 'day'))
-					{
-						if(localDate.hour() > 12)
-						{
-							string = "Tonight  ";
-						}else{
-							string = "Today  ";
-						}
-					}
-					else
-					{
-						if(localDate.isAfter(moment()))
-						{
-							var dayDiff = localDate.diff(moment(), 'd');
-							Ti.API.info('dayDiff = ' + dayDiff);
-							string = dayDiff + " " + (dayDiff  > 1 ? 'days  ' : 'day  ');
-						}
-					}
+					var blankString = "";
+					var string = cardViewUtil.buildTimeString(blankString, happeningTime, true) + "  ";
 					
 					return string;
 				}

@@ -97,7 +97,7 @@ exports.register = function() {
 		function receivePush(e)
 			{
 				Ti.API.info('push!!!!!');
-				//alert('received push:' + JSON.stringify(e));
+				alert('received push:' + JSON.stringify(e));
 				Ti.App.fireEvent('app:refresh');
 			}
 				

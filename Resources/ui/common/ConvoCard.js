@@ -601,13 +601,12 @@ function cardPostLayoutCallback(e){
 			
 				httpClient.doPost('/v1/addUserComment', localCommentObject, function(success, response)
 					{
-						Ti.API.info(JSON.stringify(response));
 						if(success)
 						{
 							// Tell commentView it was created.  Pass it it's commentId and set up likes functionality
 							localCommentView.backendCallback(response.commentId);
 						}else{
-							Ti.API.info('error adding comment - ' + JSON.stringify(response));
+							alert('error adding comment');
 						}
 					});
 		});
@@ -615,7 +614,6 @@ function cardPostLayoutCallback(e){
 //eventListener to tell parent to remove this card
 	Ti.App.addEventListener('app:DeleteCard:' + cardArgs.conversationId, function(e)
 	{
-		Ti.API.info('delete card recieved for ' + cardArgs.conversationId);
 		parentView.remove(card);
 		if(cardIsRaised){
 			Ti.App.fireEvent('app:cardRaised', {raised: false});
@@ -643,8 +641,6 @@ function cardPostLayoutCallback(e){
 //eventLestner to update the card UI
 Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 {
-	Ti.API.info('cardUpdate e = ' + JSON.stringify(e));
-	
 	timeString = e.timeString;
 	happeningTime = e.happeningTime;
 	setTimeString();
@@ -980,7 +976,7 @@ function setTimeString()
 {
 	if(happeningTime)
 	{
-		timeTextLabel.setText(cardViewUtility.buildTimeString(timeString, happeningTime));
+		timeTextLabel.setText(cardViewUtility.buildTimeString(timeString, happeningTime, false));
 		timeDescriptionLabel.setText(timeString);
 		timeText.setHeight(Ti.UI.SIZE);
 	}
@@ -1064,7 +1060,6 @@ var setUserUnTuned = function()
 
 var setUserStatusIn = function()
 {
-	Ti.API.info('set user in');
 	buttonRowView.setTouchEnabled(false);
 	btn2.setImage('images/btnInSelected');
 	btn2.removeEventListener('click', setUserStatusIn);
@@ -1087,7 +1082,6 @@ var setUserStatusIn = function()
 
 var setUserStatusNeutral = function()
 {
-	Ti.API.info('set user neutral');
 	buttonRowView.setTouchEnabled(false);
 	btn2.setImage('images/btnIn');
 	btn2.removeEventListener('click', setUserStatusNeutral);
@@ -1217,11 +1211,8 @@ function happeningActionHandler(editing)
 			descriptionText.blur();
 			setTimeView.blur();
 			
-			Ti.API.info('changeStatusRequest = ' + JSON.stringify(changeStatusRequest));
-			
 			httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
 			{
-				Ti.API.info(JSON.stringify(response));
 				if(success)
 				{
 					Ti.App.fireEvent('app:refresh');
@@ -1306,14 +1297,12 @@ function happeningActionHandler(editing)
 
 function setConversationStatusNevermind(e)
 {
-	Ti.API.info('setting to nevermind');
 	btn2.removeEventListener('click', setConversationStatusNevermind);
 	btn2.setImage('images/btnNevermindSelected');
 	var changeStatusRequest = {status: "CLOSED", conversationId: conversationId};
 	
 	httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
 	{
-		Ti.API.info(JSON.stringify(response));
 		if(success)
 		{
 			Ti.App.fireEvent('app:refresh');

@@ -11,6 +11,13 @@ function BubblesView(winHeight, winWidth)
 	
 	var purple = config.purple;
 	
+	var bubblesViewHolder = Ti.UI.createView({
+		layout: 'vertical',
+		width: '100%',
+		height: Ti.UI.SIZE,
+		top: 0
+	});
+	
 	var bubblesView = Ti.UI.createView
 	({
 			layout: 'absolute',
@@ -45,9 +52,9 @@ function BubblesView(winHeight, winWidth)
 	{
 		if (success)
 		{
-			Ti.API.info(response);
+			
 			var deletes = [];
-			Ti.API.info('bubbles View checkDeletes');
+			
 			refreshUtility.checkDeletes(response, function(deletesExist, toDelete)
 			{
 				if(deletesExist)
@@ -62,8 +69,7 @@ function BubblesView(winHeight, winWidth)
 		}
 		else
 		{
-			Ti.API.info('error doGet for userConversations');
-			Ti.API.info(JSON.stringify(response));
+			alert(error);
 		}
 	});		
 	
@@ -78,8 +84,16 @@ function BubblesView(winHeight, winWidth)
 		
 	});
 	
+	var bottomPadding = Ti.UI.createView({
+		top: 0,
+		width: '100%',
+		height: 150,
+		backgroundColor: purple
+	});
 	
-	return bubblesView;
+	bubblesViewHolder.add(bubblesView);
+	bubblesViewHolder.add(bottomPadding);
+	return bubblesViewHolder;
 };
 
 module.exports = BubblesView;
