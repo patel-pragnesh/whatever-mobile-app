@@ -193,6 +193,8 @@ function MainWindow() {
 		
 	
 		var friends = [];
+		//friends.push({firstName: 'Joe', lastName: 'McMahon', userId: '206'});
+		//friends.push({firstName: 'Cole', lastName: 'Halverson', userId: '406'});
 		
 		getFriends();
 		Ti.App.addEventListener('app:refresh', getFriends);
@@ -229,7 +231,13 @@ function MainWindow() {
 		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE, 
 	});
 	tableData.push(row);
-	
+	var bottomPadding = Ti.UI.createTableViewRow({
+		width: '100%',
+		height: 150,
+		backgroundColor: purple,
+		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
+	});
+	tableData.push(bottomPadding);
 		row.addEventListener('postlayout', function(e){
 			
 			if(row.size.height > 1500)
@@ -257,6 +265,7 @@ function MainWindow() {
 	});
 	
 	control.addEventListener('refreshstart', function(e){
+		Ti.API.info('refreshstart');
 		Ti.App.fireEvent('app:refresh');
 		setTimeout(function(){
 			control.endRefreshing();
@@ -293,7 +302,6 @@ win.addEventListener('postlayout', function(e){
 	var bubbleView = new bubblesView(winHeight, winWidth);
 	
 	row.add(bubbleView);
-	
 	tableView.setData(tableData);
 });
 
@@ -304,6 +312,51 @@ Ti.App.addEventListener('app:createcard', function(e)
 	win.add(conversationCard);
 });
 
+
+	
+// /////////    testing buttons   ///////////////////
+
+var testButton2 = Ti.UI.createView({
+	height: 50,
+	width: 100,
+	bottom: 150,
+	right: 50,
+	backgroundColor: 'green',
+	zIndex: 10
+});
+
+var button2Label = Ti.UI.createLabel({
+	text: 'Refresh',
+	color: 'black'
+});
+
+testButton2.add(button2Label);
+//win.add(testButton2);
+
+
+testButton2.addEventListener('click', function(e){
+	
+	Ti.API.info('remote notify enabled  = ' + JSON.stringify(Titanium.Network.getRemoteNotificationsEnabled()));
+	Ti.API.info('notify types = ' + JSON.stringify(Ti.Network.getRemoteNotificationTypes()));
+	Ti.API.info('uuid  =  ' + Ti.Network.getRemoteDeviceUUID());
+	Ti.API.info(Titanium.App.iOS.getCurrentUserNotificationSettings());
+	
+	var req = {};
+	req.message = "Hello World";
+	req.payload = {};
+	req.payload ["event"] = "payload event";
+	req.user_ids = ["14066974685"];
+	req.callback = "receivePush";
+	
+	
+	httpClient.doPost('/v1/sendPushNotification', req, function(success, response){
+		Ti.API.info(JSON.stringify(response));
+	});
+});
+
+
+///////// end test buttons   //////////////	
+	
 
 	
 return win;

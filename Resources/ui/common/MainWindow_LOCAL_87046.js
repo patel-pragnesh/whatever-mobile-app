@@ -304,7 +304,20 @@ Ti.App.addEventListener('app:createcard', function(e)
 	win.add(conversationCard);
 });
 
+//test button
+var testBtn = Ti.UI.createButton({
+	backgroundColor: 'orange',
+	top: 40,
+	height: 30,
+	width: 50
+});
 
+testBtn.addEventListener('click', function(e){
+	Ti.API.info('click');
+	Ti.App.Properties.setString('device_token', "");
+});
+
+win.add(testBtn);
 	
 return win;
 }
