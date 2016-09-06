@@ -63,10 +63,12 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 							if(success){
 								commentImage.setImage(Ti.Utils.base64decode(response));
 							}else{
+								/*
 								Ti.App.addEventListener('app:refresh', function(){
-									this.removeEventListener('app:refresh', arguments.callee);
-									getProfile();
-								});
+																	this.removeEventListener('app:refresh', arguments.callee);
+																	getProfile();
+																});*/
+								
 							}
 						});
 					}

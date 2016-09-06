@@ -15,10 +15,6 @@
     <ios>
         <plist>
             <dict>
-                <key>UIBackgroundModes</key>
-                <array>
-                    <string>remote-notification</string>
-                </array>
                 <key>UISupportedInterfaceOrientations~iphone</key>
                 <array>
                     <string>UIInterfaceOrientationPortrait</string>
