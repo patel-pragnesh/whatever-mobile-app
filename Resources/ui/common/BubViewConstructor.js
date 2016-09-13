@@ -50,6 +50,11 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				clipMode: Titanium.UI.iOS.CLIP_MODE_DISABLED,
 				zIndex: 104 - conversation.row
 			});
+				
+				function bubViewClick(e){
+					Ti.App.fireEvent('app:raisecard:' + convoKey);
+					commentIndicator.hide();
+				}
 			bubViewHolder.add(bubView);
 			
 	
@@ -76,14 +81,18 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		parentView.remove(bubViewHolder);
 	});
 	
-	
-	
+	//listener to hide the commentIndicator, for non-user 'clicks'
+	Ti.App.addEventListener('app:hideCommentIndicator' + convoKey,function(){
+		commentIndicator.hide();
+	});
+		
+
 	//listener to tell appropriate cardView to rise when this is clicked	
 	bubView.addEventListener('click', function(e)
 	{
-		Ti.App.fireEvent('app:raisecard:' + convoKey);
-		commentIndicator.hide();
+		bubViewClick(e);
 	});
+	
 			
 	//position the bubView
 	if (bubPosition == 'left')

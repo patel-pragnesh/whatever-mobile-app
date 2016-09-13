@@ -607,7 +607,20 @@ function cardPostLayoutCallback(e){
 		}
 	});
 	
-//event listener to lower or raise this card when the app is resumed from a notification
+//event listener to lower, raise, or leave alone this card when the app is resumed from a notification
+	Ti.App.addEventListener('app:reactToPush', function(e){
+		Ti.API.info(e.conversationId);
+		if(e.conversationId != cardArgs.conversationId && cardIsRaised)
+		{
+			closeButton.fireEvent('click');
+		}else if(e.conversationId == cardArgs.conversationId && !cardIsRaised){
+			setTimeout(function(){
+				Ti.App.fireEvent('app:raisecard:' + cardArgs.conversationId);
+				Ti.App.fireEvent('app:hideCommentIndicator' + cardArgs.conversationId);
+			}, 500);
+		}
+	});
+
 
 	
 //eventListner to animate this up into view

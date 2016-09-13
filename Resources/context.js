@@ -10,9 +10,6 @@ var whateverDB = require('lib/WhateverDB');
 var MainWindow = require('ui/common/MainWindow');
 var ActivateWindow = require('ui/common/ActivateWindow');
 
-//bool context to know how to handle a recieved notification
-var notificationInForeground = true;
-
 // Main launch function
 exports.launch = function() {
 		
@@ -99,29 +96,15 @@ exports.register = function() {
 				});
 			}
 		
-		Ti.App.addEventListener('pause', function(){
-			notificationInForeground = false;
-		});
-		Ti.App.addEventListener('paused', function(){
-			notificationInForeground = false;
-		});
-		Ti.App.addEventListener('resume', function(){
-			setTimeout(function(){notificationInForeground = true;}, 1500);
-		});
-		Ti.App.addEventListener('resumed', function(){
-			setTimeout(function(){notificationInForeground = true;}, 1500);
-		});
-		
 		
 		function receivePush(e)
-			{
-			//need some context here, was the app opened from the notification?
-				//if notification is resuming the app, display the proper convo card
-				if( ! notificationInForeground)
-				{
-					alert('background');
+			{	
+				Ti.API.info(e);
+				
+				if(e.inBackground){
+					Ti.App.fireEvent('app:reactToPush', {conversationId: e.data.conversationId});
 				}else{
-					alert('foreground');
+					Ti.App.fireEvent('app:refresh');
 				}
 			}
 				
