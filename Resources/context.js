@@ -106,28 +106,23 @@ exports.register = function() {
 			notificationInForeground = false;
 		});
 		Ti.App.addEventListener('resume', function(){
-			notificationInForeground = true;
+			setTimeout(function(){notificationInForeground = true;}, 1500);
 		});
 		Ti.App.addEventListener('resumed', function(){
-			notificationInForeground = true;
+			setTimeout(function(){notificationInForeground = true;}, 1500);
 		});
 		
 		
 		function receivePush(e)
 			{
-				Ti.API.info(JSON.stringify(e));
-				Ti.API.info('push');
 			//need some context here, was the app opened from the notification?
 				//if notification is resuming the app, display the proper convo card
 				if( ! notificationInForeground)
 				{
-					
-					Ti.API.info('background');
-					
+					alert('background');
 				}else{
-					Ti.API.info('background');
+					alert('foreground');
 				}
-				Ti.App.fireEvent('app:refresh');
 			}
 				
 			
