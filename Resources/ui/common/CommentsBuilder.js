@@ -6,8 +6,6 @@
  */
 
 
-
-
 var config = require('config');
 var encoder = require('lib/EncoderUtility');
 var httpClient = require('lib/HttpClient');
@@ -308,10 +306,10 @@ exports.buildUserStatus = function(containerWidth, containerHeight, commentObjec
 			left: 0
 		});
 		
-		if(commentObject.status == "INtoNEUTRAL"){
+		if(commentObject.status == "INTONEUTRAL"){
 			inlineImage.setHeight(20);
 			inlineImage.setImage('/images/bailFace');
-		}else if(commentObject.status == "NEUTRALtoIN"){
+		}else if(commentObject.status == "NEUTRALTOIN"){
 			inlineImage.setImage('/images/greenCheckMarkForImInButtonNotClicked');
 		}
 		userStatusView.add(inlineImage);

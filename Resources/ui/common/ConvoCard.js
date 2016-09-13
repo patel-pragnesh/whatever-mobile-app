@@ -28,6 +28,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var userConversationId = cardArgs.localUserConversationId;
 	var timeString = cardArgs.timeString;
 	var happeningTime = cardArgs.happeningTime;
+	var convoCreator = cardArgs.userId;
 	
 	//see if the local user created this conversation
 	var userIsCreator = false;
@@ -361,6 +362,25 @@ function cardPostLayoutCallback(e){
 		bottom: '3%'
 	});
 	
+		numberFriendsLabel.update = function(userConversations)
+		{
+			//update numbers of friends in
+			var number = 0;
+	
+			for(var f = 0; f < userConversations.length; f++)
+			{
+				var curr = userConversations[f];
+				if(curr.inStatus == "IN"  && curr.userId != convoCreator)
+				{
+					number++;
+				}
+			}
+			
+			this.setText("and " + number + " friends are in so far.");
+		};
+		
+	numberFriendsLabel.update(cardArgs.userConversations);
+	
 	profileLabelsView.add(numberFriendsLabel);
 	profileViewRow.add(profileLabelsView);
 					
@@ -507,40 +527,7 @@ function cardPostLayoutCallback(e){
 		width: '80%',
 		image: 'images/whateverIcon.png'
 	});
-/*
-		var stayTunedButton = Ti.UI.createImageView({
-			width: '80%',
-			left: '5%',
-			image: 'images/stay-tuned-button-icon'
-		});
-		
-			stayTunedButton.addEventListener('click', function(){
-				stayTunedButton.setTouchEnabled(false);
-				if (tuned){
-					this.setImage('images/stay-tuned-button-icon');
-					tunedDialog.setImage('images/notTunedDialog');
-					tuned = false;
-				}else{
-					this.setImage('images/stay-tuned-button-icon-selected');
-					tunedDialog.setImage('images/stayTunedDialog');
-					tuned = true;
-				}
-				showTunedDialog();
-			});
-			
-			var dialogTime;
-			
-			function showTunedDialog()
-			{
-				tunedDialog.show();
-				var tunedTimer = setTimeout(function(){
-					tunedDialog.hide();
-					stayTunedButton.setTouchEnabled(true);				
-								}, 2700);
-			}
-			
-		
-*/
+
 		leftTextAreaButton.add(whateverIcon);
 		
 		var sendLabel = Ti.UI.createLabel({
@@ -620,6 +607,9 @@ function cardPostLayoutCallback(e){
 		}
 	});
 	
+//event listener to lower or raise this card when the app is resumed from a notification
+
+	
 //eventListner to animate this up into view
 	Ti.App.addEventListener('app:raisecard:' + cardArgs.conversationId, function(e)
 	{	
@@ -661,6 +651,9 @@ Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 		getCreator();
 	}
 	
+	numberFriendsLabel.update(e.userConversations);
+	
+	//update list of members and thier status
 	membersView.fireEvent('updateMembers', {users: e.userConversations});
 });
 
