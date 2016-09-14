@@ -52,8 +52,23 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			});
 				
 				function bubViewClick(e){
-					Ti.App.fireEvent('app:raisecard:' + convoKey);
-					commentIndicator.hide();
+					var matrix = Ti.UI.create2DMatrix();
+					matrix = matrix.scale(0.9, 0.9);
+					
+					var bubViewAnimation = Ti.UI.createAnimation({
+						transform: matrix,
+						duration: 100,
+						autoreverse: true
+					});
+					
+					bubViewAnimation.addEventListener("complete", function(){
+						Ti.App.fireEvent('app:raisecard:' + convoKey);
+						setTimeout(function(){
+							commentIndicator.hide();
+						}, 1000);
+						
+					});
+					bubView.animate(bubViewAnimation);
 				}
 			bubViewHolder.add(bubView);
 			

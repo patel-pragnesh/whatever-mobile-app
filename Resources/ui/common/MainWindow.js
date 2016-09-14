@@ -215,9 +215,22 @@ function MainWindow() {
 			
 			var startCard = new startConvoCard(win, mainContainerView.size.height, friends);
 			win.add(startCard);
-			startCard.animate({top: '5%', duration: 250});
-			Ti.App.fireEvent('app:cardRaised', {raised: true});			
-			whateverButton.setTouchEnabled(true);
+			
+			var matrix = Ti.UI.create2DMatrix();
+				matrix = matrix.scale(0.9, 0.9);
+					
+			var whateverButtonAnimation = Ti.UI.createAnimation({
+				transform: matrix,
+				duration: 100,
+				autoreverse: true
+			});
+					
+			whateverButtonAnimation.addEventListener("complete", function(){
+				startCard.animate({top: '5%', duration: 250});
+				Ti.App.fireEvent('app:cardRaised', {raised: true});
+				whateverButton.setTouchEnabled(true);	
+			});
+			whateverButton.animate(whateverButtonAnimation);
 		});	
 
 	
