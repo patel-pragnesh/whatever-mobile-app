@@ -27,19 +27,19 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 		layout: 'vertical',
 		height: Ti.UI.SIZE,
 		width: Ti.UI.FILL,
-		top: 7
+		top: 3
 	});
 		var commentView = Ti.UI.createView({
 			width: '100%',
 			height: Ti.UI.SIZE,
 			top: 0,
 			layout: 'horizontal'
-			});
+		});
 		
 			var commentImage = Ti.UI.createImageView({
 				backgroundColor: '#D3D3D3',
 				height: commentorImageSize,
-				top: 3,
+				top: 7,
 				left: '2%'
 				});
 				
@@ -63,9 +63,9 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 							}else{
 								/*
 								Ti.App.addEventListener('app:refresh', function(){
-																	this.removeEventListener('app:refresh', arguments.callee);
-																	getProfile();
-																});*/
+									this.removeEventListener('app:refresh', arguments.callee);
+									getProfile();
+								});*/
 								
 							}
 						});
@@ -74,7 +74,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 		commentView.add(commentImage);
 				
 			var commentContent = Ti.UI.createView({
-				top: 4,
+				top: 8,
 				width: '70%',
 				height: Ti.UI.SIZE,
 				left: '3%',
@@ -102,7 +102,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					value: encoder.decode_utf8(commentObject.comment),
 					editable: false,
 					color: 'black',
-					backgroundColor: '#F7F5FA',
+					//backgroundColor: '#F7F5FA',
 					touchEnabled: false
 					});
 					commentContent.add(commentText);
@@ -119,6 +119,12 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 					//commentContent.add(timeLabel);
 					
 			commentView.add(commentContent);
+	
+	if(commentObject.userId == account.id)
+	{
+		commentView.setBackgroundColor('#e4d9ee');
+		commentText.setBackgroundColor('#e4d9ee');
+	}
 	
 	commentHolderView.add(commentView);
 	
@@ -147,7 +153,9 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				bubbleParent: false
 			});
 		
-			likeButtonView.addEventListener('click', function(){
+			likeButtonView.addEventListener('click', addLike);
+			
+			function addLike(e){
 				var req = {};
 					req.commentId = commentObject.commentId;
 					req.userId = account.id;
@@ -155,13 +163,14 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				httpClient.doPost('/v1/addCommentLike', req, function(success, response){
 					if(success)
 					{
+						likeButtonView.removeEventListener('click', addLike);
 						Ti.App.fireEvent('app:refresh');
+						
 					}
 				});
 				
-				
-				likeButtonView.setImage('images/thumbsUpPurple');
-			});
+				likeButtonView.setImage('images/thumbsUpPurple');	
+			}
 		
 		var likesLabel = Ti.UI.createLabel({
 			left: 3,

@@ -103,9 +103,9 @@ exports.register = function() {
 				
 				if(e.inBackground){
 					Ti.App.fireEvent('app:reactToPush', {conversationId: e.data.conversationId});
-				}else{
-					Ti.App.fireEvent('app:refresh');
 				}
+				
+				Ti.App.fireEvent('app:refresh');
 			}
 				
 			

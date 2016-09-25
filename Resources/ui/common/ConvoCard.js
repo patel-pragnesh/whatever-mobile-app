@@ -91,7 +91,7 @@ var card = Ti.UI.createView({
 				top: 0,
 				bottom: '10%',
 				width: '100%',
-				backgroundColor: '#F7F5FA',        
+				backgroundColor:  'white',  //'#F7F5FA',        
 				layout: 'vertical'
 				});
 				
@@ -103,16 +103,24 @@ var card = Ti.UI.createView({
 						textArea.blur();
 				});
 				
+				var scrollToBottom = false;
 				
-		
-		var tunedDialog = Ti.UI.createImageView({
-			width: '50%',
-			left: '1%',
-			visible: false,
-			zIndex: 3
-		});
-		
-		mainViewContainer.add(tunedDialog);
+				commentsScrollView.addEventListener('scroll', function(e){
+					Ti.API.info(e);
+					Ti.API.info(commentsScrollView.size.height * 1.1);
+					Ti.API.info(e.contentSize.height - e.y);
+					//can the user see the bottom? If yes, scroll to bottom after adding new comment
+					if((e.contentSize.height - e.y)  <= (commentsScrollView.size.height * 1.1)){
+						scrollToBottom = true;
+						Ti.API.info('scroll true');
+					}else{
+						scrollToBottom = false;
+					}
+					
+				});
+				
+				
+				
 		
 		var createCommentHolder = Ti.UI.createView({
 			height: Titanium.UI.SIZE,
@@ -122,10 +130,6 @@ var card = Ti.UI.createView({
 			zIndex: 1
 		});
 		
-			createCommentHolder.addEventListener('postlayout', function(){
-					this.removeEventListener('postlayout', arguments.callee);
-					tunedDialog.setBottom(this.size.height + 5);
-			});
 		
 		var createCommentView = Ti.UI.createView({
 			top: 1,
@@ -234,10 +238,13 @@ var card = Ti.UI.createView({
 				animation1.duration = e.animationDuration * 1000;
 				animation2.duration = e.animationDuration * 1000;	
 				animation3.duration = e.animationDuration * 1000;
-
+				
+				animation1.addEventListener('complete', function(){
+					commentsScrollView.animate(animation2);
+				});
+				
 			createCommentHolder.animate(animation1);
 			commentsScrollView.animate(animation2);
-			tunedDialog.animate(animation3);
 		}
 		
 			
@@ -440,10 +447,6 @@ function cardPostLayoutCallback(e){
 	commentsScrollView.addEventListener('dragstart', function(){
 		Ti.App.fireEvent('app:hidelikelists');
 	});
-	
-			//TODO remove this
-			//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
-			var scrollToBottom = false;
 		
 		//add spacer to top of commentsScrollView
 		var spacer = Ti.UI.createView({
@@ -505,6 +508,14 @@ function cardPostLayoutCallback(e){
 				}
 					
 				commentsScrollView.add(commentView);
+				
+				setTimeout(function(){
+					if(scrollToBottom){
+						Ti.API.info('scrolling');
+						commentsScrollView.scrollToBottom();
+					}
+				}, 500);
+				
 			};
 				
 		
@@ -1242,6 +1253,8 @@ function happeningActionHandler(editing)
 						card.animate({top: '5%', duration: 200});
 						Ti.App.addEventListener('keyboardframechanged', reactToKeyboard);
 					});
+				
+					
 				}else{
 					alert('error setting conversation status');
 				}
@@ -1323,8 +1336,11 @@ function setConversationStatusNevermind(e)
 			
 function showDisappearingView(e)
 {
+	var matrix = Ti.UI.create2DMatrix();
+		matrix = matrix.translate(0, 0);
+	
 	var unCollapseAnimation = Ti.UI.createAnimation({
-		top: 0,
+		transform: matrix,
 		duration: 250
 	});
 	
@@ -1341,20 +1357,38 @@ function showDisappearingView(e)
 				
 function hideDisappearingView(e)
 {
+	var matrix = Ti.UI.create2DMatrix();
+		matrix = matrix.translate(0, disappearingView.size.height * -1);
+	
 	var collapseAnimation = Ti.UI.createAnimation({
-		top: disappearingView.size.height * -1,
+		transform: matrix,
 		duration: 251
 	});
-					
-	collapseAnimation.addEventListener('complete', function(e)
-	{
-		commentsScrollView.setTop(0);
-		spacer.setHeight(50);
-		unCollapseView.visible = true;	
-		if(textAreaFocused){commentsScrollView.scrollToBottom();}
-	});
-					
-	disappearingView.animate(collapseAnimation);		
+	
+	
+		collapseAnimation.addEventListener('start', function(e)
+		{
+			spacer.setHeight(50);
+			unCollapseView.visible = true;
+			
+			if(commentsScrollView.getTop() != 0){
+				var scrollViewAnimation = Ti.UI.createAnimation({
+					top: 0,
+					duration:250
+				});
+				
+				scrollViewAnimation.addEventListener('complete', function(){
+					commentsScrollView.setTop(0);
+					if(textAreaFocused){commentsScrollView.scrollToBottom();}
+				});
+				
+				commentsScrollView.animate(scrollViewAnimation);
+			}	
+			
+		});
+						
+		disappearingView.animate(collapseAnimation);				
+		
 }
 	
 	
