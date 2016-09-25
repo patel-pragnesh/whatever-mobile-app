@@ -88,12 +88,13 @@ function MembersListView(args)
 							zIndex: 2
 						});
 					
-						var status = args.currentMembers[i].status;
-							if(status == "IN"){
+						var inStatus = args.currentMembers[i].inStatus;
+						var tunedStatus = args.currentMembers[i].tunedStatus;
+							if(inStatus == "IN"){
 								statusIcon.setImage('images/inDot');
 								statusIcon.show();
-							}else if (status == "OUT"){
-								statusIcon.setImage('images/outDot');
+							}else if (tunedStatus == "TUNED"){
+								statusIcon.setImage('images/tunedDot');
 								statusIcon.show();
 							}else{
 								statusIcon.hide();

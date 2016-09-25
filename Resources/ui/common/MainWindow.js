@@ -308,6 +308,15 @@ win.addEventListener('postlayout', function(e){
 	row.add(bubbleView);
 	
 	tableView.setData(tableData);
+	
+	//register app for push notifications on first launch
+	if(_.isNull(Ti.App.Properties.getString('device_token'))){
+		if(!_.isNull(Ti.App.Properties.getObject("account")))
+		{
+			context.register();
+		}
+	}
+							
 });
 
 //Event listener to create a card for a conversation.  These views persist for the lifespan of its conversation

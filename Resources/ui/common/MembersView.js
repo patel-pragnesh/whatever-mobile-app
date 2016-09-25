@@ -116,7 +116,8 @@ function MembersView(args, callback)
 				//Listener for this is in each MemberView to update the icon.  Cant find a better way to do this without making a separate httpRequest
 				for (j = 0; j < currentMembers.length; j++)
 				{
-					Ti.App.fireEvent('app:UpdateUserConversation' + currentMembers[j].userConversationId, {status: currentMembers[j].status});
+					Ti.API.info(currentMembers[j]);
+					Ti.App.fireEvent('app:UpdateUserConversation' + currentMembers[j].userConversationId, {inStatus: currentMembers[j].inStatus, tunedStatus: currentMembers[j].tunedStatus});
 				}
 			}
 		});

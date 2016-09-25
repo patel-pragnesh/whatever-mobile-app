@@ -30,7 +30,7 @@ function UserProfileWindow(userId)
 		height: '85%',
 		width: '90%',
 		backgroundColor: 'white',
-		borderRadius: 10,
+		borderRadius: 20,
 		borderColor: 'gray',
 		borderWidth: 1,
 		layout: 'vertical'

@@ -28,6 +28,8 @@
 	function resumed()
 		{
 
+		Titanium.UI.iOS.setAppBadge(0);
+		
 		var pause = setTimeout(function()
 			{
 			if(!_.isNull(Ti.App.Properties.getString('device_token')))

@@ -100,7 +100,15 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 	Ti.App.addEventListener('app:hideCommentIndicator' + convoKey,function(){
 		commentIndicator.hide();
 	});
-		
+	
+	
+	Ti.App.addEventListener('app:reactToPush', function(e){
+		if(e.conversationId == convoKey){
+			setTimeout(function(){
+				bubViewClick();
+			}, 2250);
+		}
+	});
 
 	//listener to tell appropriate cardView to rise when this is clicked	
 	bubView.addEventListener('click', function(e)

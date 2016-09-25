@@ -55,14 +55,14 @@ function MemberView(user)
 			zIndex: 2
 		});
 			
-			setStatus(user.status);
+			setStatus(user.inStatus, user.tunedStatus);
 	
-			function setStatus(status){
-				if(status == "IN"){
+			function setStatus(inStatus, tunedStatus){
+				if(inStatus == "IN"){
 					statusIcon.setImage('images/inDot');
 					statusIcon.show();
-				}else if (status == "OUT"){
-					statusIcon.setImage('images/outDot');
+				}else if (tunedStatus == "TUNED"){
+					statusIcon.setImage('images/tunedDot');
 					statusIcon.show();
 				}else{
 					statusIcon.hide();
@@ -73,7 +73,8 @@ function MemberView(user)
 			
 			//App listener to update this members status.  Not ideal, but I cant find a better way at the moment
 			Ti.App.addEventListener('app:UpdateUserConversation' + user.userConversationId, function(e){
-				setStatus(e.status);
+				Ti.API.info("status = " + JSON.stringify(e));
+				setStatus(e.inStatus, e.tunedStatus);
 			});
 			
 		function getProfile()

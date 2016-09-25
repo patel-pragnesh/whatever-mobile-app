@@ -33,7 +33,7 @@ function LocalUserProfileWindow()
 		height: '85%',
 		width: '90%',
 		backgroundColor: 'white',
-		borderRadius: 40,
+		borderRadius: 20,
 		borderColor: 'gray',
 		borderWidth: 1,
 		layout: 'vertical'

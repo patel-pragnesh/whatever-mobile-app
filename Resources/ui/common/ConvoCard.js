@@ -106,20 +106,14 @@ var card = Ti.UI.createView({
 				var scrollToBottom = false;
 				
 				commentsScrollView.addEventListener('scroll', function(e){
-					Ti.API.info(e);
-					Ti.API.info(commentsScrollView.size.height * 1.1);
-					Ti.API.info(e.contentSize.height - e.y);
 					//can the user see the bottom? If yes, scroll to bottom after adding new comment
 					if((e.contentSize.height - e.y)  <= (commentsScrollView.size.height * 1.1)){
 						scrollToBottom = true;
-						Ti.API.info('scroll true');
 					}else{
 						scrollToBottom = false;
 					}
 					
 				});
-				
-				
 				
 		
 		var createCommentHolder = Ti.UI.createView({
@@ -309,8 +303,8 @@ function cardPostLayoutCallback(e){
 							if(success){
 								creatorProfilePic.setImage(Ti.Utils.base64decode(response));
 							}else{
-								Ti.App.addEventListener('app:refresh', function(){
-									this.removeEventListener('app:refresh', arguments.callee);
+								Ti.App.addEventListener('app:refresh', function func(){
+									Ti.App.removeEventListener('app:refresh', func);
 									getProfile();
 								});
 							}
@@ -620,15 +614,9 @@ function cardPostLayoutCallback(e){
 	
 //event listener to lower, raise, or leave alone this card when the app is resumed from a notification
 	Ti.App.addEventListener('app:reactToPush', function(e){
-		Ti.API.info(e.conversationId);
 		if(e.conversationId != cardArgs.conversationId && cardIsRaised)
 		{
 			closeButton.fireEvent('click');
-		}else if(e.conversationId == cardArgs.conversationId && !cardIsRaised){
-			setTimeout(function(){
-				Ti.App.fireEvent('app:raisecard:' + cardArgs.conversationId);
-				Ti.App.fireEvent('app:hideCommentIndicator' + cardArgs.conversationId);
-			}, 500);
 		}
 	});
 
@@ -1088,6 +1076,7 @@ var setUserStatusIn = function()
 		if(success)
 		{
 			inStatus = "IN";
+			tunedStatus = "TUNED";
 			setUpInOutContext();
 			Ti.App.fireEvent('app:refresh');
 		}else{
