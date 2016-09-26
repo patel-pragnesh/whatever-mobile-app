@@ -1219,14 +1219,14 @@ function happeningActionHandler(editing)
 			
 			httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
 			{
-				if(success)
-				{
+				
 					Ti.App.fireEvent('app:refresh');
 					setTimeView.removeEventListener('scrollend', checkConfirm);
 					setTimeView.collapse();
 					descriptionText.setTouchEnabled(false);
 					membersView.setHeight(membersViewHeight);
 					membersView.setOpacity(1.0);
+					membersView.setTouchEnabled(true);
 					buttonRowView.animate({opacity: 0.0, duration: 200}, function(){
 						btn1.setWidth('44%');
 						btn1.setOpacity(1.0);
@@ -1243,10 +1243,6 @@ function happeningActionHandler(editing)
 						Ti.App.addEventListener('keyboardframechanged', reactToKeyboard);
 					});
 				
-					
-				}else{
-					alert('error setting conversation status');
-				}
 			});
 		};
 		
