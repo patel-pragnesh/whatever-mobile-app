@@ -336,6 +336,48 @@ exports.buildUserStatus = function(containerWidth, containerHeight, commentObjec
 	return userStatusView;
 };
 
+exports.buildConvoStatus = function(containerWidth, containerHeight, commentObject)
+{
+	var headerFontSize = containerWidth * .045;
+	var bodyFontSize = containerWidth * .04;
+	
+	var convoStatusView = Ti.UI.createView({
+		top: 10,
+		bottom: 10,
+		width: '80%',
+		height: Ti.UI.SIZE,
+		layout: 'vertical'
+	});
+	
+		var header = Ti.UI.createLabel({
+			top: 0,
+			text: "IT'S HAPPENING!",
+			font: {font: config.avenir_next_regular,
+					fontSize: headerFontSize},
+			color: 'black',
+			zIndex: 1
+		});
+		convoStatusView.add(header);
+		
+		Ti.API.info(commentObject);
+		var commentText = Ti.UI.createTextArea({
+			top: -6,
+			width: Ti.UI.FILL,
+			height:Ti.UI.SIZE,  
+			font: {fontSize: bodyFontSize,
+					   fontFamily: config.avenir_next_regular},		
+			value: encoder.decode_utf8(commentObject.comment),
+			editable: false,
+			color: 'black',
+			touchEnabled: false,
+			zIndex: 0,
+			textAlign: Titanium.UI.TEXT_ALIGNMENT_CENTER
+		});
+		convoStatusView.add(commentText);
+	
+	return convoStatusView;
+};
+
 
 	
 	

@@ -494,7 +494,7 @@ function cardPostLayoutCallback(e){
 				}
 				else if(theItem.type == "CONVOSTATUS")
 				{
-					 	
+					 	commentView = new CommentView.buildConvoStatus(containerWidth, containerHeight, theItem);
 				}
 				else if(theItem.type == "USERSTATUS")
 				{

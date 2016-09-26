@@ -9,6 +9,7 @@ function UserProfileWindow(userId)
 	var config = require('config');
 	var account = Ti.App.properties.getObject('account');
 	var httpClient = require('lib/HttpClient');
+	var account = Ti.App.Properties.getObject("account");
 	
 	
 	var profileWindow = Ti.UI.createWindow({
@@ -89,27 +90,39 @@ function UserProfileWindow(userId)
 	view.add(nameLabel);
 	
 	
-	var addFriendsButton = ({
-		left: 0,
-		width: '60%',
-		height: 30,
-		title: 'Call',
-		font: {fontFamily: 'AvenirNext-DemiBold',
-					fontSize: 20},
-		color: config.purple
-	});
-	
-	
 	var buttons = Ti.UI.createView({
 		top: '4%',
 		bottom: '10%',
-		width: '50%',
+		width: '75%',
 		layout: 'vertical'
 	});
 		
-		var callButton = Ti.UI.createButton({
+		var addToFriends = Ti.UI.createButton({
 			width: Ti.UI.FILL,
 			top: 0,
+			height: '30%',
+			title: 'Add to Friends List',
+			font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 20},
+			color: config.purple
+		});
+		buttons.add(addToFriends);
+		
+			addToFriends.addEventListener('click', function(){
+				var friendshipReq = {
+					friender: account.id,
+					friendee: userId 
+				};
+				httpClient.doPost('/v1/createfriendship', friendshipReq, function(success, response){
+					if(success){
+						Ti.API.info('success friendship');
+					}
+				});
+			});
+		
+		var callButton = Ti.UI.createButton({
+			width: Ti.UI.FILL,
+			top: '5%',
 			height: '30%',
 			title: 'Call',
 			font: {fontFamily: 'AvenirNext-DemiBold',
@@ -133,20 +146,9 @@ function UserProfileWindow(userId)
 		});
 		buttons.add(textButton);
 		
-		var addToFriends = Ti.UI.createButton({
-			width: Ti.UI.FILL,
-			top: '5%',
-			height: '30%',
-			title: 'Text',
-			font: {fontFamily: 'AvenirNext-DemiBold',
-					fontSize: 20},
-			color: config.purple
-		});
-		buttons.add(textButton);
-		
-			textButton.addEventListener('click', function(){
+		textButton.addEventListener('click', function(){
 				Ti.Platform.openURL('sms://' + userId);
-			});
+		});		
 			
 	view.add(buttons);
 	
