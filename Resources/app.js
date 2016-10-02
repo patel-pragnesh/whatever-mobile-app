@@ -30,6 +30,8 @@
 
 		Titanium.UI.iOS.setAppBadge(0);
 		
+		Ti.App.fireEvent('app:refresh');
+		
 		var pause = setTimeout(function()
 			{
 			if(!_.isNull(Ti.App.Properties.getString('device_token')))
