@@ -481,34 +481,40 @@ function cardPostLayoutCallback(e){
 					
 				}
 			};
-				
+			
+			var commentIdArray = [];
+			
 			commentsScrollView.addItem = function(theItem)
 			{
-				commentsScrollView.checkIfTimestampNeeded(theItem.created);
+				if (commentIdArray.indexOf(theItem.commentId) == -1)
+				{
+					commentsScrollView.checkIfTimestampNeeded(theItem.created);
 				
-				var commentView;
-				
-				if(theItem.type == "USERCREATED")
-				{
-					commentView = new CommentView.buildComment(containerWidth, containerHeight, theItem);
-				}
-				else if(theItem.type == "CONVOSTATUS")
-				{
-					 	commentView = new CommentView.buildConvoStatus(containerWidth, containerHeight, theItem);
-				}
-				else if(theItem.type == "USERSTATUS")
-				{
-					commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, theItem); 	
-				}
+					var commentView;
 					
-				commentsScrollView.add(commentView);
-				
-				setTimeout(function(){
-					if(scrollToBottom){
-						Ti.API.info('scrolling');
-						commentsScrollView.scrollToBottom();
+					if(theItem.type == "USERCREATED")
+					{
+						commentView = new CommentView.buildComment(containerWidth, containerHeight, theItem);
 					}
-				}, 500);
+					else if(theItem.type == "CONVOSTATUS")
+					{
+						 	commentView = new CommentView.buildConvoStatus(containerWidth, containerHeight, theItem);
+					}
+					else if(theItem.type == "USERSTATUS")
+					{
+						commentView = new CommentView.buildUserStatus(containerWidth, containerHeight, theItem); 	
+					}
+						
+					commentsScrollView.add(commentView);
+					
+					commentIdArray.push(theItem.commentId);
+					
+					setTimeout(function(){
+						if(scrollToBottom){
+							commentsScrollView.scrollToBottom();
+						}
+					}, 500);
+				}
 				
 			};
 				

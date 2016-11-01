@@ -40,6 +40,18 @@ function UserProfileWindow(userId)
 	
 	profileWindow.add(view);
 	
+		var closeButton = Ti.UI.createLabel({
+			top: '1%',
+			right: '6%',
+			height: '6%',
+			width: Ti.UI.SIZE,
+			text: 'close',
+			font: {fontFamily: config.avenir_next_light,
+					fontSize: 15}
+		});
+			closeButton.addEventListener('click', close);
+		view.add(closeButton);
+	
 		var pictureView = Ti.UI.createImageView({
 			top: '6%',
 			height: "35%",
@@ -49,7 +61,6 @@ function UserProfileWindow(userId)
 			borderColor: config.purple,
 			opacity: 0.0
 		});
-		
 		
 			pictureView.addEventListener('postlayout', function(e){
 				pictureView.setWidth(pictureView.size.height);
