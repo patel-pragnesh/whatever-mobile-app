@@ -373,6 +373,46 @@ function ActivateWindow()
 	continueButton.addEventListener('click', continueButtonHandler);
 		
 	activationViewContainer.add(continueButton);
+	
+	var terms = Ti.UI.createLabel({
+		top: 50,
+		width: '90%',
+		height: Ti.UI.SIZE,
+		color: 'white',
+		text: 'By creating an account, you agree to our',
+		font: {fontFamily: config.avenir_next_regular,
+				fontSize: 16}
+	});
+	activationViewContainer.add(terms);
+	
+	var conditionsString = 'Terms and Conditions';
+	var attr = Ti.UI.createAttributedString({
+		text: conditionsString,
+		attributes: [
+			{
+				type: Titanium.UI.ATTRIBUTE_UNDERLINES_STYLE,
+				value: Ti.UI.ATTRIBUTE_UNDERLINE_STYLE_SINGLE,
+				range: [0, conditionsString.length]
+			}
+		]
+	});
+	
+	var conditions = Ti.UI.createLabel({
+		top: 5,
+		width: Ti.UI.SIZE,
+		height: Ti.UI.SIZE,
+		color: 'white',
+		attributedString: attr,
+		font: {fontFamily: config.avenir_next_medium,
+				fontSize: 18}
+	});
+		var TermsOfService = require('ui/common/TermsOfService');
+		conditions.addEventListener('click', function(e){
+			var termsOfService = new TermsOfService(win);
+			
+			win.add(termsOfService);
+		});
+	activationViewContainer.add(conditions);
 		
 	mainContainerView.add(activationViewContainer);
 	
