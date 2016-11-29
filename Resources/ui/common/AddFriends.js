@@ -16,11 +16,11 @@ function AddFriends(parentView, friends, callback)
 		zIndex: 2
 	});
 		
-		addViewHolder.addEventListener('postlayout', function(){
-			this.removeEventListener('postlayout', arguments.callee);
-			//getFriends();
+		function addViewHolderPostlayout(e){
+			addViewHolder.removeEventListener('postlayout', addViewHolderPostlayout);
 			handleContacts();
-		});
+		}
+		addViewHolder.addEventListener('postlayout', addViewHolderPostlayout);
 		
 	var addView = Ti.UI.createView({
 		width: '100%',
@@ -247,15 +247,23 @@ addViewHolder.add(selectedLabelsViewHolder);
 
 
 function handleContacts(){
-		Ti.Contacts.requestAuthorization(function(e)
-		{
-			if(e.success == 1)
+		Ti.API.info('handle contacts');
+		
+		if (Ti.Contacts.hasContactsPermissions()) {
+    		isAuthorized();
+		}else{
+			Ti.Contacts.requestContactsPermissions(function(e)
 			{
-				isAuthorized();
-			}else{
-				contactsAuth = false;
-			}
-		});
+				Ti.API.info(e);
+				if(e.success == 1)
+				{
+					isAuthorized();
+				}else{
+					contactsAuth = false;
+				}
+			});
+		}
+		
 }
 
 var people = [];

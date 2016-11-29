@@ -27,6 +27,12 @@
                 <false/>
                 <key>UIStatusBarStyle</key>
                 <string>UIStatusBarStyleLightContent</string>
+                <key>NSContactsUsageDescription</key>
+	            <string>It's how you connect with your friends in Whatever</string>
+	            <key>NSCameraUsageDescription</key>
+	            <string>Can we use your camera?</string>
+	            <key>NSPhotoLibraryUsageDescription</key>
+	            <string>So you can find that perfect profile pic.</string>
             </dict>
         </plist>
     </ios>

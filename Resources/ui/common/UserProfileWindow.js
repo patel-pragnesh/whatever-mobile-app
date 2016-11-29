@@ -58,8 +58,7 @@ function UserProfileWindow(userId)
 			autorotate: false,
 			backgroundColor: '#D3D3D3',
 			borderWidth: 3,
-			borderColor: config.purple,
-			opacity: 0.0
+			borderColor: config.purple
 		});
 		
 			pictureView.addEventListener('postlayout', function(e){
@@ -71,7 +70,6 @@ function UserProfileWindow(userId)
 					if(success)
 					{
 						pictureView.setImage(Ti.Utils.base64decode(response));
-						pictureView.animate({opacity: 1.0, duration: 200});
 					}
 				});
 			});
@@ -103,7 +101,7 @@ function UserProfileWindow(userId)
 	
 	var buttons = Ti.UI.createView({
 		top: '4%',
-		bottom: '10%',
+		bottom: '5%',
 		width: '75%',
 		layout: 'vertical'
 	});
@@ -111,7 +109,7 @@ function UserProfileWindow(userId)
 		var addToFriends = Ti.UI.createButton({
 			width: Ti.UI.FILL,
 			top: 0,
-			height: '30%',
+			height: '20%',
 			title: 'Add to Friends List',
 			font: {fontFamily: 'AvenirNext-DemiBold',
 					fontSize: 20},
@@ -134,7 +132,7 @@ function UserProfileWindow(userId)
 		var callButton = Ti.UI.createButton({
 			width: Ti.UI.FILL,
 			top: '5%',
-			height: '30%',
+			height: '20%',
 			title: 'Call',
 			font: {fontFamily: 'AvenirNext-DemiBold',
 					fontSize: 20},
@@ -149,7 +147,7 @@ function UserProfileWindow(userId)
 		var textButton = Ti.UI.createButton({
 			width: Ti.UI.FILL,
 			top: '5%',
-			height: '30%',
+			height: '20%',
 			title: 'Text',
 			font: {fontFamily: 'AvenirNext-DemiBold',
 					fontSize: 20},
@@ -159,6 +157,21 @@ function UserProfileWindow(userId)
 		
 		textButton.addEventListener('click', function(){
 				Ti.Platform.openURL('sms://' + userId);
+		});		
+		
+		var blockButton = Ti.UI.createButton({
+			width: Ti.UI.FILL,
+			top: '5%',
+			height: '20%',
+			title: 'Block',
+			font: {fontFamily: 'AvenirNext-DemiBold',
+					fontSize: 20},
+			color: config.red
+		});
+		buttons.add(blockButton);
+		
+		blockButton.addEventListener('click', function(){
+				
 		});		
 			
 	view.add(buttons);
