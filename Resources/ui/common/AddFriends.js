@@ -281,9 +281,12 @@ function isAuthorized()
         	var fullName = peopleArray[i].fullName;
         	var firstName = peopleArray[i].firstName;
         	var lastName = peopleArray[i].lastName;
-        	
-        		if (peopleArray[i].phone.iPhone > "")
-        		{
+        		
+        		if (peopleArray[i].phone.phone > ""){
+        			mobile = peopleArray[i].phone.phone;
+        			person = {fullName: fullName, firstName:firstName, lastName: lastName, mobile: mobile};
+        			people.push(person); 
+        		}else if (peopleArray[i].phone.iPhone > ""){
         			mobile = peopleArray[i].phone.iPhone;
         			person = {fullName: fullName, firstName:firstName, lastName: lastName, mobile: mobile};
         			people.push(person); 
