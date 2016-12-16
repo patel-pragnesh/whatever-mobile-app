@@ -10,6 +10,7 @@ function UserProfileWindow(userId)
 	var account = Ti.App.properties.getObject('account');
 	var httpClient = require('lib/HttpClient');
 	var account = Ti.App.Properties.getObject("account");
+	var NotificationView = require('ui/common/NotificationView');
 	
 	
 	var profileWindow = Ti.UI.createWindow({
@@ -17,6 +18,8 @@ function UserProfileWindow(userId)
 		width: '100%'
 	});
 	
+	// The notification view has a zIndex that blocks the UI and provides an indicator
+	var notificationView = require('ui/common/NotificationView').create();
 	
 	var shadeView = Ti.UI.createView({
 		height: Ti.UI.FILL,
@@ -75,7 +78,6 @@ function UserProfileWindow(userId)
 			});
 		
 	view.add(pictureView);
-	
 	
 		var nameLabel = Ti.UI.createLabel({
 			font: {fontFamily: 'AvenirNext-DemiBold',
@@ -170,9 +172,54 @@ function UserProfileWindow(userId)
 		});
 		buttons.add(blockButton);
 		
-		blockButton.addEventListener('click', function(){
-				
-		});		
+		function blockButtonClick(){
+			blockButton.removeEventListener('click', blockButtonClick);
+			
+			var dialog = Ti.UI.createAlertDialog({
+				title: 'Are you sure?',
+				message: "Are you sure you want to block this user?  This can't be undone.",
+				cancel: 0,
+				buttonNames: ['Cancel', 'Block'],
+				destructive: 1
+			});
+			
+			dialog.addEventListener('click', function(e){
+				if(e.index === e.source.cancel){
+					Ti.API.info('canceled');
+					blockButton.addEventListener('click', blockButtonClick);
+				}else if(e.index == 1){
+					
+					notificationView.showIndicator();
+					
+					var blockReq = {
+							blocker: account.id,
+							blockee: userId
+						};
+						
+						httpClient.doPost('/v1/blockUser', blockReq, function(success, response){
+								if(success){
+									Ti.API.info('blocked:   ' + JSON.stringify(response));
+									
+									account.blockList = response.blockList;
+									Ti.App.Properties.setObject('account', account);
+									
+									Ti.App.fireEvent('app:respondToBlock', {blockee: blockReq.blockee});
+									
+									profileWindow.close();
+								}else{
+									alert('error');
+								}
+								notificationView.hideIndicator();
+								
+					});
+				}
+			});
+			
+			dialog.show();
+			
+			
+		}
+		blockButton.addEventListener('click', blockButtonClick);		
 			
 	view.add(buttons);
 	
@@ -183,6 +230,8 @@ function UserProfileWindow(userId)
 			profileWindow.close();
 		});
 	}
+	
+	profileWindow.add(notificationView);
 	
 	return profileWindow;
 	

@@ -11,6 +11,7 @@ function CreateCard(parentView, cardArgs, mainContainerHeight)
 	var config = require('config');
 	var cardViewUtility = require('lib/CardViewUtility');
 	var moment = require('lib/Moment');
+	var userUtil = require('lib/UserUtil');
 	
 		
 	var purple = config.purple;
@@ -486,7 +487,8 @@ function cardPostLayoutCallback(e){
 			
 			commentsScrollView.addItem = function(theItem)
 			{
-				if (commentIdArray.indexOf(theItem.commentId) == -1)
+				
+				if (commentIdArray.indexOf(theItem.commentId) == -1 && !userUtil.checkIfBlockedUser(theItem.userId))
 				{
 					commentsScrollView.checkIfTimestampNeeded(theItem.created);
 				
