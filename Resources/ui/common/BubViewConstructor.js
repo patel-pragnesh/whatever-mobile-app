@@ -116,6 +116,14 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 		bubViewClick(e);
 	});
 	
+	//listener to hide this bubView upon the creator being successfully blocked.  (The blocker user is removed from the convo on the backend
+	//	, so that will remove it upon app:refresh, but this is a nice immediate effect)
+	bubView.addEventListener('app:reactToPush', function(e){
+		if(e.blockee == createdBy){
+			bubView.hide();
+		}
+	});
+	
 			
 	//position the bubView
 	if (bubPosition == 'left')

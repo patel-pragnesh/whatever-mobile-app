@@ -11,6 +11,7 @@ function UserProfileWindow(userId)
 	var httpClient = require('lib/HttpClient');
 	var account = Ti.App.Properties.getObject("account");
 	var NotificationView = require('ui/common/NotificationView');
+	var userUtil = require('lib/UserUtil');
 	
 	
 	var profileWindow = Ti.UI.createWindow({
@@ -203,14 +204,14 @@ function UserProfileWindow(userId)
 									account.blockList = response.blockList;
 									Ti.App.Properties.setObject('account', account);
 									
-									Ti.App.fireEvent('app:respondToBlock', {blockee: blockReq.blockee});
+									Ti.App.fireEvent('app:reactToBlock', {blockee: response.blockee});
+									Ti.App.fireEvent('app:refresh');
 									
 									profileWindow.close();
 								}else{
 									alert('error');
 								}
 								notificationView.hideIndicator();
-								
 					});
 				}
 			});
@@ -219,7 +220,14 @@ function UserProfileWindow(userId)
 			
 			
 		}
-		blockButton.addEventListener('click', blockButtonClick);		
+		
+		if(userUtil.checkIfBlockedUser(userId)){
+			blockButton.setColor('gray');
+			blockButton.setTitle('Blocked');
+		}else{
+			blockButton.addEventListener('click', blockButtonClick);
+		}
+				
 			
 	view.add(buttons);
 	

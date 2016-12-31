@@ -648,6 +648,13 @@ function cardPostLayoutCallback(e){
 		cardIsRaised = true;
 	});	
 
+//eventListener for when this conversation's creator is blocked'
+Ti.App.addEventListener('app:reactToBlock', function(e){
+	if(e.blockee == convoCreator){
+		closeButton.fireEvent('click');
+	}
+});
+
 //eventLestner to update the card UI
 Ti.App.addEventListener('app:UpdateCard' + cardArgs.conversationId, function(e)
 {

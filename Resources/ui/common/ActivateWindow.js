@@ -307,7 +307,7 @@ function ActivateWindow()
 			
 			httpClient.doPost('/v1/activate', request, function(success, response)
 				{
-				Ti.API.info(JSON.stringify(response));
+				//Ti.API.info(JSON.stringify(response));
 				
 				if(success)
 					{

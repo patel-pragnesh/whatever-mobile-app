@@ -169,7 +169,7 @@ function AccountWindow(verificationCode, phoneNumber)
 			
 			var account = Ti.App.Properties.getObject("account");
 			
-			Ti.API.info(JSON.stringify(account));
+			//Ti.API.info(JSON.stringify(account));
 			
 			var request = {};
 			request.language = Ti.Locale.getCurrentLanguage();

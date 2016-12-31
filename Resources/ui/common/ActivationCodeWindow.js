@@ -519,7 +519,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 			{
 			notificationView.showIndicator();
 
-			Ti.API.info(response);
+			//Ti.API.info(response);
 			
 			if(success)
 				{
@@ -568,6 +568,7 @@ function ActivationCodeWindow(phoneNumber, sessionId)
 					Ti.API.info('setting account');
 					account.first_name = response.user.first_name;
 					account.last_name = response.user.last_name;
+					account.blockList = response.user.blockedUsers;
 					
 					Ti.App.Properties.setObject("account", account);
 					Ti.API.info('opening mainWindow');
