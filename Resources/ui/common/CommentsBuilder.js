@@ -36,6 +36,24 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 			layout: 'horizontal'
 		});
 		
+		commentView.addEventListener('longpress', function(e){
+			
+			var hideDialog = Ti.UI.createOptionDialog({
+					cancel: 1,
+					options: ['Hide', 'Cancel'],
+					destructive: 0,
+					title: 'Hide Comment?'
+				});
+			
+				hideDialog.addEventListener('click', function(e){
+					if(e.index == 0){
+						commentView.hide();
+					}
+				});
+				
+			hideDialog.show();
+		});
+		
 			var commentImage = Ti.UI.createImageView({
 				backgroundColor: '#D3D3D3',
 				height: commentorImageSize,

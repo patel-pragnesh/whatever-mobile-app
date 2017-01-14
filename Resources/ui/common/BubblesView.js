@@ -69,7 +69,7 @@ function BubblesView(winHeight, winWidth)
 		}
 		else
 		{
-			alert(error);
+			alert('error');
 		}
 	});		
 	
