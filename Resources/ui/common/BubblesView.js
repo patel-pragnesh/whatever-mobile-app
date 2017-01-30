@@ -53,6 +53,13 @@ function BubblesView(winHeight, winWidth)
 		if (success)
 		{
 			
+			if(response.length == 0)
+			{
+				Ti.App.fireEvent('app:noconversations', {conversations: false});
+			}else{
+				Ti.App.fireEvent('app:noconversations', {conversations: true});
+			}
+			
 			var deletes = [];
 			
 			refreshUtility.checkDeletes(response, function(deletesExist, toDelete)
@@ -64,7 +71,6 @@ function BubblesView(winHeight, winWidth)
 			});
 			
 			refreshUtility.updateDB(response);
-		
 			refreshUtility.doDeletesFromDB(deletes);
 		}
 		else

@@ -42,8 +42,7 @@ function MainWindow() {
 			width: '100%',
 			top: 70,
 			bottom: 0,
-			layout: 'absolute',	
-			backgroundColor: 'green'
+			layout: 'absolute'
 	});	
 	
 		
@@ -127,7 +126,6 @@ function MainWindow() {
 				right: 0,
 				left: 10,
 				height: Ti.UI.FILL,
-				width: 100,
 				width: Titanium.UI.SIZE,
 				text: account.first_name + " " + account.last_name,
 				color: 'white',
@@ -153,7 +151,9 @@ function MainWindow() {
 			profileWin = new localUserProfileWindow();
 			profileWin.open();
 		});
-			
+	
+	
+		
 	//Add Whatever button and make it dissapear when scrolling
     var whateverButton = Ti.UI.createImageView
     ({
@@ -237,7 +237,6 @@ function MainWindow() {
 	var tableData = [];
 	
 	var row = Ti.UI.createTableViewRow({
-		backgroundColor: purple,
 		height: Ti.UI.SIZE,
 		selectionStyle: Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE, 
 	});
@@ -265,6 +264,9 @@ function MainWindow() {
 			}
 		});
 	
+	
+	
+	
 	var control = Ti.UI.createRefreshControl({
     tintColor:'white'
 	});
@@ -286,10 +288,52 @@ function MainWindow() {
 		showVerticalScrollIndicator: false
 	});
 		
-		
-
 mainContainerView.add(tableView);
+
+//Helper text if there are no conversations
+	
+	var noConversationsLabel = Ti.UI.createLabel({
+		top: '30%',
+		color: 'white',
+		font: {fontSize: 18,
+				fontFamily: 'AvenirNext-Regular'},
+		text: 'No conversations right now'
+	});
+	mainContainerView.add(noConversationsLabel);
+	
+	var boredLabel = Ti.UI.createLabel({
+		bottom: '24%',
+		color: 'white',
+		font: {fontSize: 18,
+				fontFamily: 'AvenirNext-Regular'},
+		text: 'Bored?'
+	});
+	mainContainerView.add(boredLabel);
+	
+	var makeSomethingLabel = Ti.UI.createLabel({
+		bottom: '20%',
+		color: 'white',
+		font: {fontSize: 18,
+				fontFamily: 'AvenirNext-Regular'},
+		text: 'Make something happen'
+	});
+	mainContainerView.add(makeSomethingLabel);
+	
+	Ti.App.addEventListener('app:noconversations', function(e){
+		if(e.conversations){
+			noConversationsLabel.hide();
+			boredLabel.hide();
+			makeSomethingLabel.hide();
+		}else if(!e.conversations){
+			noConversationsLabel.show();
+			boredLabel.show();
+			makeSomethingLabel.show();
+		}
+	});
+	
 mainContainerView.add(whateverButton);
+
+
 win.add(mainContainerView);
 
 		

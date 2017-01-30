@@ -1318,19 +1318,36 @@ function setConversationStatusNevermind(e)
 {
 	btn2.removeEventListener('click', setConversationStatusNevermind);
 	btn2.setImage('images/btnNevermindSelected');
-	var changeStatusRequest = {status: "CLOSED", conversationId: conversationId};
 	
-	httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
-	{
-		if(success)
-		{
-			Ti.App.fireEvent('app:refresh');
-		}else{
-			alert('error setting conversation status');
-			btn2.setImage('images/btnNevermind');
-			btn2.addEventListener('click', setConversationStatusNevermind);
-		}
+	var sureDialog = Ti.UI.createOptionDialog({
+		cancel: 1,
+		options: ["I'm Sure",'Cancel'],
+		destructive: 0,
+		title: 'Delete Conversation?'
 	});
+	
+		sureDialog.addEventListener('click', function(e){
+			if(e.index == 0){
+				var changeStatusRequest = {status: "CLOSED", conversationId: conversationId};
+	
+				httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
+				{
+					if(success)
+					{
+						Ti.App.fireEvent('app:refresh');
+					}else{
+						alert('error setting conversation status');
+						btn2.setImage('images/btnNevermind');
+						btn2.addEventListener('click', setConversationStatusNevermind);
+					}
+				});
+			}else{
+				btn2.addEventListener('click', setConversationStatusNevermind);
+				btn2.setImage('images/btnNevermind');
+			}
+		});
+
+	sureDialog.show();
 }
 	
 			

@@ -40,7 +40,7 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 			
 			var hideDialog = Ti.UI.createOptionDialog({
 					cancel: 1,
-					options: ['Hide', 'Cancel'],
+					options: ['Hide', 'Report', 'Cancel'],
 					destructive: 0,
 					title: 'Hide Comment?'
 				});
@@ -48,6 +48,8 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 				hideDialog.addEventListener('click', function(e){
 					if(e.index == 0){
 						commentView.hide();
+					}else if (e.index == 1){
+						//send report
 					}
 				});
 				
