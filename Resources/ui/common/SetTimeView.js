@@ -156,16 +156,12 @@ exports.createScroll = function(args, callback)
 			
 		view.setViews(views);
 		
-		view.addEventListener('singletap', function(e){
-			Ti.API.info("Source = " + e.source);
-			Ti.API.info("cp = " + e.source.getCurrentPage());
-			
+		view.addEventListener('singletap', function(e){	
 			if(e.source.getCurrentPage() == e.source.getViews().length - 1){
 				e.source.scrollToView(1);
 			}else{
 				e.source.scrollToView(e.source.getCurrentPage() + 1);
 			}
-			
 		});
 		
 		view.addEventListener('scrollend', function(e){

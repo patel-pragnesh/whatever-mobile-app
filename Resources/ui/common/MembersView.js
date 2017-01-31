@@ -98,21 +98,27 @@ function MembersView(args, callback)
 			extrasView.add(extrasCircle);
 		holder.add(extrasView);
 		
-		var currentMembers = args.users;
+		var currentMembers = [];
 		
-		createMembers(0);
+		 function checkForUser(user){
+				for(var u=0; u<currentMembers.length; u++){
+					if(currentMembers[u].userId == user.userId){
+						Ti.API.info("true");
+						return true;
+					}
+				}
+				Ti.API.info("false");
+				return false;
+			};
+		
+		createMembers(args.users);
 		
 		holder.addEventListener('updateMembers', function(e){
 			//e is an array of userConversations.  this event is fired from ConvoCard when it recieves update event from RefreshUtility
 			if(e.users != currentMembers)
 			{
-				var startIndex = e.users.length - currentMembers.length;
-				currentMembers = e.users;
+				createMembers(e.users);
 				
-				//if there are new members add them
-				if(startIndex != 0){
-					createMembers(startIndex);
-				}
 				//Listener for this is in each MemberView to update the icon.  Cant find a better way to do this without making a separate httpRequest
 				for (j = 0; j < currentMembers.length; j++)
 				{
@@ -123,16 +129,17 @@ function MembersView(args, callback)
 		});
 		
 		
-		function createMembers(startIndex)
+		function createMembers(members)
 		{
+				
 				//Are there more than 4 members besides the creator?  If so, we will need the extrasView
 				//check if the use context is creating a new conversation.  In which case there is no "CREATOR" in args.users
 				var extras;
-				if (args.creatingConvo && currentMembers.length > 4)
+				if (args.creatingConvo && members.length > 4)
 				{
 					extras = true;
 				}
-				else if (currentMembers.length > 5)
+				else if (members.length > 5)
 				{
 					extras = true;
 				}
@@ -142,24 +149,25 @@ function MembersView(args, callback)
 				}
 				
 				
-				var count = (currentMembers.length > 5) ? 4 : currentMembers.length;
+				var count = (members.length > 5) ? 4 : members.length;
 				
-				for (i = startIndex; i < count; i++)
+				for (i = 0; i < count; i++)
 				{
-					if (currentMembers[i].type != "CREATOR"){
-						var memberView = new MemberView(currentMembers[i]);
+					Ti.API.info("user = " + JSON.stringify(members[i]));
+					if (members[i].type != "CREATOR" && !checkForUser(members[i])){
+						var memberView = new MemberView(members[i]);
 						if(i == 3 && extras)
 						{
 							if(args.creatingConvo)  //Because there is no "CREATOR" in the currentMembers when creating
 							{
-								extrasLabel.setText("+ " + (currentMembers.length - 3));
+								extrasLabel.setText("+ " + (members.length - 3));
 							}else{
-								extrasLabel.setText("+ " + (currentMembers.length - 4));
+								extrasLabel.setText("+ " + (members.length - 4));
 							}
 							extrasView.show();
 						}
 						profiles.add(memberView);
-						Ti.API.info('addMember');
+						currentMembers.push(members[i]);
 					}
 				}
 		}
