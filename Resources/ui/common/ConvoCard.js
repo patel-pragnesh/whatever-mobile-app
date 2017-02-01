@@ -83,7 +83,7 @@ var card = Ti.UI.createView({
 		width: '100%',
 		bottom: '5%',
 		layout: 'absolute',
-		backgroundColor: '#F7F5FA'
+		backgroundColor: 'white'
 		});
 		card.add(mainViewContainer);
 		
@@ -120,14 +120,22 @@ var card = Ti.UI.createView({
 		var createCommentHolder = Ti.UI.createView({
 			height: Titanium.UI.SIZE,
 			width: '100%',
-			backgroundColor: '#c2c2c2',
+			backgroundColor: 'white',
 			bottom: 0 ,
 			zIndex: 1
 		});
 		
+			var lineView = Ti.UI.createView({
+				top: 0,
+				width: '100%',
+				height: 1,
+				backgroundColor: '#c2c2c2'
+			});
+			createCommentHolder.add(lineView);
 		
 		var createCommentView = Ti.UI.createView({
-			top: 1,
+			top: 3,
+			bottom: 1,
 			height: Titanium.UI.SIZE,
 			width: '100%',
 			backgroundColor: 'white',
@@ -190,6 +198,8 @@ var card = Ti.UI.createView({
 				}else{
 					chatHintLabel.show();
 				}
+				
+				e.source.setHeight(Ti.UI.SIZE);
 			});
 			
 			var rightTextAreaButton = Ti.UI.createButton({
@@ -599,6 +609,7 @@ function cardPostLayoutCallback(e){
 			textArea.setValue("");
 			rightTextAreaButton.setTouchEnabled(false);
 			sendLabel.hide();
+			textArea.setHeight(Ti.UI.SIZE);
 			
 			commentsScrollView.checkIfTimestampNeeded(moment());
 			
@@ -960,10 +971,10 @@ var unCollapseView = Ti.UI.createView({
 	var blurView = Ti.UI.iOS.createBlurView({
 		height: Ti.UI.FILL,
 		width: Ti.UI.FILL,
-		effect: Titanium.UI.iOS.BLUR_EFFECT_STYLE_LIGHT,
+		effect: Titanium.UI.iOS.BLUR_EFFECT_STYLE_EXTRA_LIGHT,
 		touchEnabled: false
 	});
-	unCollapseView.add(blurView);
+	//unCollapseView.add(blurView);
 	
 	var dropdownArrow = Ti.UI.createImageView({
 		image: 'images/Arrow',
