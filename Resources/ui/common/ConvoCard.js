@@ -952,10 +952,25 @@ var unCollapseView = Ti.UI.createView({
 	height: 45,
 	width: '100%',
 	top: 0,
-	backgroundColor: 'gray',
-	opacity: 0.6,
-	visible: false
+	visible: false,
+	//backgroundColor: 'gray',
+	//opacity: 0.6
 });
+
+	var blurView = Ti.UI.iOS.createBlurView({
+		height: Ti.UI.FILL,
+		width: Ti.UI.FILL,
+		effect: Titanium.UI.iOS.BLUR_EFFECT_STYLE_LIGHT,
+		touchEnabled: false
+	});
+	unCollapseView.add(blurView);
+	
+	var dropdownArrow = Ti.UI.createImageView({
+		image: 'images/Arrow',
+		height: '33%'
+	});
+	unCollapseView.add(dropdownArrow);
+	
 unCollapseView.addEventListener('click', showDisappearingView);				
 	
 mainViewContainer.add(unCollapseView);	
