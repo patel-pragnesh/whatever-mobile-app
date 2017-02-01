@@ -136,10 +136,9 @@ var card = Ti.UI.createView({
 			
 			var leftTextAreaButton = Ti.UI.createView({
 				left: '1%',
-				bottom: 0,
-				height: 53,
-				top: 2,
+				//top: 2,
 				bottom: 2,
+				height: 53,
 				width: '12%',
 			});
 				
@@ -150,7 +149,8 @@ var card = Ti.UI.createView({
 				font: {fontFamily: config.avenir_next_regular,
 						fontSize: 16},
 				color: 'black',
-				scrollable: false
+				scrollable: true,
+				backgroundColor: 'white'
 			});
 				
 				var chatHintLabel = Ti.UI.createLabel({
@@ -159,14 +159,11 @@ var card = Ti.UI.createView({
 					font: {fontFamily: config.avenir_next_regular,
 						fontSize: 16},
 					color: 'gray',
-					text: 'Chat about it...'
+					text: 'Chat about it...',
+					touchEnabled: false
 				});
 				textArea.add(chatHintLabel);
-				
-				chatHintLabel.addEventListener('click', function(){
-					textArea.focus();
-				});
-				
+			
 			textArea.addEventListener('change', function(e){
 				if(textArea.getValue() > "")
 				{
@@ -174,6 +171,16 @@ var card = Ti.UI.createView({
 				}else{
 					chatHintLabel.show();
 				}
+				
+				if(e.source.size.height > mainContainerHeight * .20 ){
+					e.source.setHeight(e.source.size.height);
+				}
+				
+				Ti.API.info(e.source.getValue().length);
+				if(e.source.getValue().length < 115){
+					e.source.setHeight(Ti.UI.SIZE);
+				}
+				
 			});
 			
 			textArea.addEventListener('blur', function(e){
@@ -189,7 +196,7 @@ var card = Ti.UI.createView({
 				left: 0,
 				height: 53,
 				width: Titanium.UI.FILL,
-				top: 2,
+				//top: 2,
 				bottom: 2,
 				touchEnabled: false
 			});
