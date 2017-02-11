@@ -27,6 +27,8 @@
 		
 	function resumed()
 		{
+		
+		//alert('resumed:  device_token = ' + Titanium.App.Properties.getString('device_token'));
 
 		Titanium.UI.iOS.setAppBadge(0);
 		
@@ -69,6 +71,7 @@
 		}
 	else
 		{
+			context.register();
 		var mainWindow = context.launch();
 		}
 		
@@ -76,7 +79,7 @@
 		{
 		Ti.App.addEventListener('paused', function()
 			{
-			
+				//Titanium.App.Properties.setString('device_token', null);
 			});
 			
 		Ti.App.addEventListener('resumed', function()

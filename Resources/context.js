@@ -18,8 +18,6 @@ exports.launch = function() {
 		
 	return mainWindow;
 	
-	notificationInForeground = true;
-	
 	};
 	
 exports.activate = function()
@@ -46,8 +44,6 @@ function registerDevice(deviceId, deviceType)
 	request.device_type = deviceType;
 	request.device_id = deviceId;
 	request.user_id = account.id;
-	
-	Ti.API.info(JSON.stringify(request));
 	
 	httpClient.doPost('/v1/registerDevice', request, function(success, response) {
 		Ti.API.info(JSON.stringify(response));
@@ -100,7 +96,6 @@ exports.register = function() {
 		function receivePush(e)
 			{	
 				Ti.API.info(e);
-				
 				if(e.inBackground){
 					Ti.App.fireEvent('app:reactToPush', {conversationId: e.data.conversationId});
 				}
@@ -113,7 +108,6 @@ exports.register = function() {
 			{
 			Ti.App.Properties.setString('device_token', e.deviceToken);
 			registerDevice(e.deviceToken, 'IOS');
-			Ti.API.info('device_token' + e.deviceToken);
 			}
 		
 		function deviceTokenError(e)
