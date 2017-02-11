@@ -1361,6 +1361,11 @@ function setConversationStatusNevermind(e)
 	
 		sureDialog.addEventListener('click', function(e){
 			if(e.index == 0){
+				
+				closeButton.fireEvent('click');
+				
+				
+				
 				var changeStatusRequest = {status: "CLOSED", conversationId: conversationId};
 	
 				httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
