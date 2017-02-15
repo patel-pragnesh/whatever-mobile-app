@@ -325,9 +325,12 @@ mainContainerView.add(tableView);
 			boredLabel.hide();
 			makeSomethingLabel.hide();
 		}else if(!e.conversations){
-			noConversationsLabel.show();
-			boredLabel.show();
-			makeSomethingLabel.show();
+			var helperTimer = setTimeout(function(){
+				noConversationsLabel.show();
+				boredLabel.show();
+				makeSomethingLabel.show();
+			}, 2500);
+			
 		}
 	});
 	

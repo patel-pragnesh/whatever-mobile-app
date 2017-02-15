@@ -48,7 +48,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 				bubConvoKey: convoKey,
 				opacity: 1.0,
 				clipMode: Titanium.UI.iOS.CLIP_MODE_DISABLED,
-				zIndex: 104 - conversation.row
+				//zIndex: 104 - conversation.row
 			});
 				
 				function bubViewClick(e){
@@ -70,6 +70,41 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 					});
 					bubView.animate(bubViewAnimation);
 				}
+				
+				
+				bubView.shrinkAway = function(neverminded){
+					
+					var scaleMatrix = Ti.UI.create2DMatrix();
+						scaleMatrix = scaleMatrix.scale(0,0);
+						
+					var shrinkAnimation = Ti.UI.createAnimation({
+						transform: scaleMatrix,
+						duration: 750
+					});
+					
+					if(neverminded){
+						shrinkAnimation.addEventListener('complete', function(){
+							var nevermindLabel = Ti.UI.createLabel({
+								color: 'white',
+								font: {fontFamily: 'AvenirNext-Regular',
+										fontSize: bubView.size.height * .1},
+								text: 'Nevermind'
+							});
+							
+							bubViewHolder.add(nevermindLabel);
+							
+							var timeOut = setTimeout(function(){
+								parentView.remove(bubViewHolder);
+							}, 1750);
+						});
+					}else{
+						shrinkAnimation.addEventListener('complete', function(){
+							parentView.remove(bubViewHolder);
+						});
+					}
+					
+					bubView.animate(shrinkAnimation);
+				};
 			bubViewHolder.add(bubView);
 			
 	
@@ -90,11 +125,18 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 	});
 	
 	//listener to tell the parent view to delete this
-	Ti.App.addEventListener('app:DeleteBubble:' + convoKey, function(e){
+	Ti.App.addEventListener('app:DeleteBubble:' + convoKey, deleteBubbleEventCallback);
+	
+	function deleteBubbleEventCallback(e){
 		Ti.App.removeEventListener('app:refresh', setTimeLabel);
-		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, arguments.callee);
-		parentView.remove(bubViewHolder);
-	});
+		Ti.App.removeEventListener('app:DeleteBubble:' + convoKey, deleteBubbleEventCallback);
+		
+		if(moment().isSameOrBefore(happeningTime)){
+			bubView.shrinkAway(true);
+		}else{
+			bubView.shrinkAway(false);
+		}
+	}
 	
 	//listener to hide the commentIndicator, for non-user 'clicks'
 	Ti.App.addEventListener('app:hideCommentIndicator' + convoKey,function(){
@@ -164,11 +206,6 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 						httpClient.doMediaGet('/v1/media/' + createdBy + '/PROFILE/profilepic.jpeg', function(success, response){
 							if(success){
 								picture.setImage(Ti.Utils.base64decode(response));
-							}else{
-								Ti.App.addEventListener('app:refresh', function(){
-									this.removeEventListener('app:refresh', arguments.callee);
-									getProfile();
-								});
 							}
 						});
 					}
@@ -195,7 +232,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			
 				var name = Ti.UI.createLabel({
 					color: 'white',
-					font: {fontSize: bubDiameter *  0.1,     //.094,
+					font: {fontSize: bubDiameter *  0.1, 
 						   fontFamily: 'AvenirNext-DemiBold'},
 					textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER,
 					bottom: '18%',
@@ -326,6 +363,7 @@ function BubViewConstructor(winHeight, winWidth, parentView, conversation)
 			
 			function itsHappening()
 			{
+				
 				bubView.setOpacity(1.0);
 				spinMask.hide();
 				spin = false;

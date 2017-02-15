@@ -87,8 +87,8 @@ function BubblesView(winHeight, winWidth)
 		var bubView = new constructBubble(winHeight, winWidth, bubblesView, e) ;
 			
 		bubblesView.add(bubView);
-		
 	});
+
 	
 	var bottomPadding = Ti.UI.createView({
 		top: 0,
