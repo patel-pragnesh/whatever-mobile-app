@@ -36,25 +36,40 @@ exports.buildComment = function(containerWidth, containerHeight, commentObject)
 			layout: 'horizontal'
 		});
 		
-		commentView.addEventListener('longpress', function(e){
+		if(account.id != theComment.userId){
 			
-			var hideDialog = Ti.UI.createOptionDialog({
-					cancel: 1,
-					options: ['Hide', 'Report', 'Cancel'],
-					destructive: 0,
-					title: 'Hide Comment?'
-				});
+			var reported = false;
 			
-				hideDialog.addEventListener('click', function(e){
-					if(e.index == 0){
-						commentView.hide();
-					}else if (e.index == 1){
-						//send report
-					}
-				});
+			commentView.addEventListener('longpress', function(e){
+			
+				var hideDialog = Ti.UI.createOptionDialog({
+						cancel: 2,
+						options: ['Hide', 'Report Inappropriate', 'Cancel'],
+						destructive: 0,
+						title: 'Hide Comment?'
+					});
 				
-			hideDialog.show();
-		});
+					hideDialog.addEventListener('click', function(e){
+						if(e.index == 0){
+							commentView.hide();
+						}else if (e.index == 1 && !reported){
+							var reportReq = {commentId: theComment.commentId, reporterUserId: account.id};
+							httpClient.doPost('/v1/createContentReport', reportReq, function(success, response){
+								if(success){
+									alert("Thank you for reporting.  We will review the content soon.");
+									reported = true;
+								}else{
+									alert("Error creating report");
+									Ti.API.info(response);
+								}
+							});
+						}
+					});
+					
+				hideDialog.show();
+				
+			});
+		}
 		
 			var commentImage = Ti.UI.createImageView({
 				backgroundColor: '#D3D3D3',

@@ -514,13 +514,14 @@ mainViewContainer.add(createCommentHolder);
 				}
 		
 	var animationSwitch = false;
+	var whateverAnimationSwitch = false;
 	
 	function checkIfGo()
 	{
 		if (createConversationRequest.invitedUsers.length > 0 && textArea.getValue() > "")
 		{
-			Ti.API.info('true');
-			Ti.API.info(textArea.getValue());
+			whateverAnimationSwitch = false;
+			
 			if (!animationSwitch)
 			{
 				rightTextAreaButton.setTouchEnabled(true);
@@ -553,14 +554,47 @@ mainViewContainer.add(createCommentHolder);
 				
 				goLabel.animate(goAnimation);
 			}
+		}else if(createConversationRequest.invitedUsers.length > 0 && textArea.getValue() == ""){
+			highlightWhateverButton();
+			rightTextAreaButton.setTouchEnabled(false);
+			animationSwitch = false;
+			goLabel.setColor('#D3D3D3');
+			goLabel.setOpacity(1.0);
 		}else{
-			Ti.API.info('false');
 			rightTextAreaButton.setTouchEnabled(false);
 			animationSwitch = false;
 			goLabel.setColor('#D3D3D3');
 			goLabel.setOpacity(1.0);
 		}	
 	}			
+	
+	function highlightWhateverButton(){
+		
+				whateverAnimationSwitch = true;
+				
+				var animation = Ti.UI.createAnimation({
+					opacity: 0.2,
+					duration: 800
+				});
+				
+				var animationReverse = Ti.UI.createAnimation({
+					opacity: 1.0,
+					duration: 800
+				});
+					animationReverse.addEventListener('complete', function(e){
+						if (whateverAnimationSwitch)
+						{
+							whateverIcon.animate(animation);
+						}
+					});
+				
+					animation.addEventListener('complete', function(e)
+					{
+						whateverIcon.animate(animationReverse);
+					});
+				
+				whateverIcon.animate(animation);
+	}	
 	
 		
 	function sendRequest(e)

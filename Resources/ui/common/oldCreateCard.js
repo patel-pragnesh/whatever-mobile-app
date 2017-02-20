@@ -256,23 +256,14 @@ var card = Ti.UI.createView({
 	});
 	card.add(closeButton);
 	
-
-//If context is creating a new conversation
-if (cardArgs.context == 'new' )
-{
-	
 	var createConversationRequest = {status: 'OPEN',
 										invitedUsers: []};
 	
-		
-	
 	createConversationRequest.userId = account.id;
-	
 	
 	var selectedNames;
 	
 	//set up closeButton
-	
 	var nevermindLabel = Ti.UI.createLabel({
 		text: "Nevermind",
 		font: {fontSize: 13,
@@ -498,9 +489,44 @@ if (cardArgs.context == 'new' )
 				animationSwitch = false;
 				goLabel.setColor('gray');
 				goLabel.setOpacity(1.0);
+				
+				highlightWhateverButton();
 		}
 		
-	}			
+	}		
+	
+	var whateverAnimationSwitch = false;
+	
+	function highlightWhateverButton(){
+				
+				whateverAnimationSwitch = true;
+				
+				var animation = Ti.UI.createAnimation({
+					opacity: 0.2,
+					duration: 800
+				});
+				
+					animation.addEventListener('complete', function(e)
+					{
+						if (whateverAnimationSwitch)
+						{
+							whateverIcon.animate(animationReverse);
+						}
+					});
+				
+				var animationReverse = Ti.UI.createAnimation({
+					opacity: 1.0,
+					duration: 800
+				});
+					animationReverse.addEventListener('complete', function(e){
+						if (animationSwitch)
+						{
+							whateverIcon.animate(animation);
+						}
+					});
+				
+				whateverIcon.animate(animation);
+	}	
 	
 	function sendRequest(e)
 	{
@@ -541,456 +567,6 @@ if (cardArgs.context == 'new' )
 			}
 		});
 	}
-	
-	
-	
-} else {      //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	var CommentView = require('ui/common/CommentsBuilder');
-	
-	Ti.API.info(JSON.stringify(cardArgs));
-	
-	//see if the local user created this conversation
-	var userIsCreator = false;
-		if (account.id == cardArgs.userId)
-		{
-			userIsCreator = true;
-		}
-	
-	var happening = false;
-		if (cardArgs.status == "IT_IS_ON")
-		{
-			happening = true;
-		}
-		
-	var conversationId = cardArgs.conversationId;
-	
-	var cardIsRaised = false;
-	
-	//this is checked when new views are added to the commentsScrollView.  It is set to true when the user creates a comments so it scrolls down when it is added.
-	var scrollToBottom = false;
-	
-	var imIn = false;
-	var imOut = false;
-	
-	//add spacer to top of commentsScrollView
-	var spacer = Ti.UI.createView({
-		height: 10,
-		width: '100%',
-		top: 0
-	});
-	commentsScrollView.add(spacer);
-	
-	//set up createCommentHolder
-	var chatProfilePic = Ti.UI.createImageView({
-		width: '80%',
-		height: '80%',
-		backgroundColor: 'black'
-	});
-	leftTextAreaButton.add(chatProfilePic);
-	
-	var sendLabel = Ti.UI.createLabel({
-		text: 'Send',
-		font: {fontFamily: 'AvenirNext-Regular',
-				fontSize: 12},
-		color: 'black',
-		visible: false
-	});
-	rightTextAreaButton.add(sendLabel);
-	rightTextAreaButton.setVisible(true);
-	
-	textArea.addEventListener('change', function(e)
-	{
-		if (textArea.getValue() > "")
-		{
-			sendLabel.setVisible(true);
-		}else{
-			sendLabel.setVisible(false);
-		}
-	});
-	
-	rightTextAreaButton.addEventListener('click', function(e)
-	{
-		notificationView.showIndicator();
-		
-		var addCommentRequest = {};
-			addCommentRequest.comment = encoder.encode_utf8(textArea.getValue());;
-			addCommentRequest.conversationId = conversationId;
-			addCommentRequest.userId = account.id;
-			
-			httpClient.doPost('/v1/addUserComment', addCommentRequest, function(success, response)
-				{
-					Ti.API.info(JSON.stringify(response));
-					if(success)
-					{
-						textArea.setValue("");
-						scrollToBottom = true;
-						Ti.App.fireEvent('app:refresh');
-						notificationView.hideIndicator();
-						
-					}else{
-						Ti.API.info('error adding comment - ' + JSON.stringify(response));
-						notificationView.hideIndicator();
-					}
-				});
-			
-	});
-	
-	//eventListener to tell parent to remove this
-	Ti.App.addEventListener('app:DeleteCard:' + cardArgs.conversationId, function(e)
-	{
-		Ti.API.info('delete card recieved for ' + cardArgs.conversationId);
-		parentView.remove(card);
-	});
-	
-	//eventListner to animate this up into view
-	Ti.App.addEventListener('app:raisecard:' + cardArgs.conversationId, function(e)
-	{	
-		Ti.API.info('card raise recieved by convo: ' + cardArgs.conversationId);
-		commentsScrollView.setBottom('10%');
-		var animation = Titanium.UI.createAnimation();
-				animation.top = '5%';
-				animation.duration = 250;	
-		card.animate(animation);	
-		cardIsRaised = true;
-	});	
-	
-	//eventListeners to update the comments
-	var localComments = [];
-		
-		//this creates the comments when the card is created
-		commentsScrollView.addEventListener('postlayout', function(e)
-		{
-			commentsScrollView.removeEventListener('postlayout', arguments.callee);
-			
-			for (i = 0; i < cardArgs.comments.length; i++)
-			{
-				var commentView = new CommentView(containerWidth, containerHeight, cardArgs.comments[i]);
-				localComments.push(1);
-				commentsScrollView.add(commentView);
-			}
-			
-		});
-		
-		//this listens for calls from the RefreshUtility to add additional comments 
-		Ti.App.addEventListener('app:UpdateComments:' + cardArgs.conversationId, function(e)
-		{
-			Ti.API.info('updatecomments e.comments[0].comment' + e.comments[0].comment);
-			Ti.API.info('e.comments.length = ' + e.comments.length);
-			if(localComments.length < e.comments.length)
-			{
-				//calculate number of new comments
-				var dif = e.comments.length - localComments.length;
-					
-				for(i = (e.comments.length - dif); i < e.comments.length; i++)
-				{
-						Ti.API.info('i = ' + i);
-						var commentView = new CommentView(containerWidth, containerHeight, e.comments[i]);
-						localComments.push(1);
-						commentsScrollView.add(commentView);
-						
-						if (scrollToBottom)
-						{
-							commentsScrollView.scrollToBottom();
-							scrollToBottom = false;
-						}	
-				}
-			}
-			});
-	
-	mainViewContainer.add(commentsScrollView);		
-	
-	//Set up close button.  The difference here from 'new' context is it moves the card down without actually removing if from the parent (mainwindow)
-	var closeImage = Ti.UI.createImageView({
-		image: 'images/closeIcon',
-		right: 2,
-		top: 2
-	});
-	
-	closeButton.setWidth('15%');
-	closeButton.add(closeImage);
-	
-	closeButton.addEventListener('click', function(e)
-	{
-		var closeAnimation = Titanium.UI.createAnimation({
-			top: '101%',
-			duration: 250
-		});
-			closeAnimation.addEventListener('complete', function(e){
-					unCollapseView.fireEvent('click');
-					commentsScrollView.setTop(disappearingView.size.height);
-					commentsScrollView.setBottom('10%');
-					spacer.setHeight(10);
-				});
-				
-		textArea.blur();
-		card.animate(closeAnimation);		
-		cardIsRaised = false;
-	});
-		
-		
-	var disappearingView = Ti.UI.createView({
-		top: 0,
-		width: '100%',
-		height: Ti.UI.SIZE,
-		layout: 'vertical',
-		zIndex: 3,
-		backgroundColor: 'white'
-		});	
-	
-	mainViewContainer.add(unCollapseView);
-	
-		
-		disappearingView.add(friendsViewRow);
-				//call PopulateFriendsRow Function	
-				//PopulateFriendsRow();
-					
-				//set up description text area
-				
-				var descriptionView = Ti.UI.createView({
-					top: 5,
-					left: '4%',
-					right: '4%',
-					backgroundColor: '#F3F0F7',
-					height: Titanium.UI.SIZE,
-					layout: 'vertical',
-					borderRadius: 4
-					
-				});
-					var happeningLabel = Ti.UI.createImageView({
-						width: '41%', 
-						height: Titanium.UI.SIZE,
-						top: 5,
-						bottom: 5,
-						image: 'images/itsHappening'
-					});
-					
-					if (happening)
-					{
-						descriptionView.add(happeningLabel);
-					}
-					
-					var descriptionText = Ti.UI.createTextArea({
-						height: 0,
-						left: '4%',
-						right: '4%',
-						top: 0,
-						color: 'black'	,
-						backgroundColor: 'white',
-						font: {fontFamily: 'AvenirNext-Regular',
-								fontSize: 19},
-						touchEnabled: false,
-						//value: "Hitting the Blue Mountain trail, then meeting up with Mike and Andie afterward."
-						});	
-					
-					if (cardArgs.descriptionText > "")
-					{
-						descriptionText.setHeight(Titanium.UI.SIZE);
-						descriptionText.setValue(cardArgs.descriptionText);
-					}
-					
-					disappearingView.add(descriptionView);		
-					disappearingView.add(descriptionText);
-					
-					
-				//set up buttonsViewRow	
-				var buttonRowView = Ti.UI.createView({
-					top: containerHeight * .015,
-					height: Ti.UI.SIZE,
-					width: '100%',
-					layout: 'horizontal'								
-					});
-					disappearingView.add(buttonRowView);
-					
-						btnWidth = containerWidth * .41;
-		
-						var btn1 = Ti.UI.createImageView({
-							width: '44%',
-							left: '4%'
-							});
-						buttonRowView.add(btn1);
-							
-							if(userIsCreator)
-							{
-								if(happening)
-								{
-									btn1.setImage('images/btnHappeningSelected');
-								}else{
-									btn1.setImage('images/btnHappening');
-								}
-								btn1.setImage('images/btnHappening');
-								btn1.addEventListener('click', function(e)
-								{
-									btn1.setImage('images/btnHappeningSelected');
-									setConversationStatus("IT_IS_ON");
-								});
-							}else{
-								btn1.setImage('images/btnIn');
-								btn1.addEventListener('click', function(e)
-								{
-									if (imIn)
-									{
-										btn1.setImage('images/btnIn');
-										imIn = false;
-										//TODO http request to backend to change user's in status
-									}else if (imOut){
-										btn2.setImage('images/btnOut');
-										imOut = false;
-									}else{
-										btn1.setImage('images/btnInSelected');
-										btn2.setImage('images/btnOut');
-										imIn = true;
-										imOut = false;
-										
-										//TODO http request to backend to change user's in status
-									}
-									
-								});
-							}
-								
-																
-						var btn2 = Ti.UI.createImageView({
-							width: '44%',
-							left: '4%',
-							});
-						buttonRowView.add(btn2);	
-							
-							if(userIsCreator)
-							{
-								btn2.setImage('images/btnNevermind');
-								btn2.addEventListener('click', function(e)
-								{
-									btn2.setImage('images/btnNevermindSelected');
-									setConversationStatus("CLOSED");
-								});
-								
-							}else{
-								btn2.setImage('images/btnOut');
-								btn2.addEventListener('click', function(e)
-								{
-									if (imOut)
-									{
-										btn2.setImage('images/btnOut');
-										imOut = false;
-										
-										//TODO http request to backend to change user's in status
-									}else if (imIn){
-										btn1.setImage('images/btnIn');
-										imIn = false;
-									}else{
-										btn2.setImage('images/btnOutSelected');
-										btn1.setImage('images/btnIn');
-										imOut = true;
-										imIn = false;
-										
-										//TODO http request to backend to change user's in status
-									}
-									
-								});
-							}
-							
-							function setConversationStatus(newStatus)
-							{
-								var changeStatusRequest = {};
-										changeStatusRequest.status = newStatus;
-										changeStatusRequest.conversationId = conversationId;
-									httpClient.doPost('/v1/changeConversationStatus', changeStatusRequest, function(success, response)
-									{
-										Ti.API.info(JSON.stringify(response));
-										if(success)
-										{
-											Ti.App.fireEvent('app:refresh');
-										}else{
-											alert('error setting conversation status');
-											btn2.setImage('images/btnNevermind');
-											btn1.setImage('images/btnHappening');
-										}
-									});
-							}
-				
-				var convoLabel = Ti.UI.createImageView({
-					width: '29%',
-					height: Titanium.UI.SIZE,
-					top: 30,  
-					left: '4%',
-					bottom: 15,
-					image: 'images/conversationLabel'
-				});
-				disappearingView.add(convoLabel);
-				
-				var line = Ti.UI.createView({
-					height: 1,
-					width:  '100%',
-					backgroundColor: 'gray'
-				});
-				disappearingView.add(line);
-				
-				//set up unCollapseView
-				var unCollapseView = Ti.UI.createView({
-					height: 45,
-					width: '100%',
-					top: 0,
-					backgroundColor: 'gray',
-					opacity: 0.6,
-					visible: false
-				});
-				
-	mainViewContainer.add(disappearingView);	
-	mainViewContainer.add(unCollapseView);	
-		
-		//sets the commentsScrollView top to bottom of disappearingView
-		disappearingView.addEventListener('postlayout', function(e)
-		{
-			disappearingView.removeEventListener('postlayout', arguments.callee);
-			commentsScrollView.setTop(disappearingView.size.height);
-		});
-				
-				
-				unCollapseView.addEventListener('click', showDisappearingView);
-				
-				commentsScrollView.addEventListener('touchstart', hideDisappearingView);
-				
-				commentsScrollView.addEventListener('touchmove', hideDisappearingView);
-				commentsScrollView.addEventListener('dragstart', hideDisappearingView);
-				
-				//Ti.App.addEventListener('keyboardframechanged', hideDisappearingView);
-				textArea.addEventListener('focus', hideDisappearingView);
-				
-				
-			function showDisappearingView(e)
-			{
-				var unCollapseAnimation = Ti.UI.createAnimation({
-						top: 0,
-						duration: 250
-					});
-					unCollapseView.visible = false;
-					textArea.blur();
-					
-					unCollapseAnimation.addEventListener('complete', function(e)
-					{
-						//commentsScrollView.setTop(disappearingView.size.height);
-						//spacer.setHeight(10);
-					});
-					disappearingView.animate(unCollapseAnimation);
-			}	
-				
-			function hideDisappearingView(e){
-				var collapseAnimation = Ti.UI.createAnimation({
-						top: disappearingView.size.height * -1,
-						duration: 251
-					});
-					
-					collapseAnimation.addEventListener('complete', function(e){
-						commentsScrollView.setTop(0);
-						spacer.setHeight(50);
-						unCollapseView.visible = true;	
-					});
-					
-					disappearingView.animate(collapseAnimation);		
-			}
-	}
-	
-
 				
 	function PopulateFriendsRow(invitedUsers){
 		
@@ -1043,16 +619,10 @@ if (cardArgs.context == 'new' )
 		mainViewContainer.add(membersView);
 	}				
 		
-	
-	
-	
-	
-		
 };  //end of populate function
 
 card.add(notificationView);
 
-	
 return card;
 };
 
